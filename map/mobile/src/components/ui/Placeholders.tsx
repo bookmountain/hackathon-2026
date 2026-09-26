@@ -1,12 +1,12 @@
-import { useId, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
-import Svg, { Defs, Pattern, Rect } from "react-native-svg";
+import Svg, { Path } from "react-native-svg";
 import { colors, font } from "@/theme";
 import Icon from "./Icon";
 
 type StripedProps = {
   tone: string;
-  /** Stripe width in px, like the design's repeating-linear-gradient(135deg, tone 0 Npx, …) */
+  /** Band width in px, like the design's repeating-linear-gradient(135deg, tone 0 Npx, base Npx N+gap px) */
   stripe?: number;
   gap?: number;
   base?: string;
@@ -15,21 +15,26 @@ type StripedProps = {
   children?: ReactNode;
 };
 
-// Diagonal-stripe stand-in for photos ("room photo", "product photo")
+// Diagonal-stripe stand-in for photos ("room photo", "product photo"): the tone
+// crossed by thin "/" lines of the base colour, drawn once the size is known.
 export function Striped({ tone, stripe = 12, gap = 2, base = colors.canvas, label, style, children }: StripedProps) {
-  const id = `stripes${useId().replace(/:/g, "")}`;
-  const size = stripe + gap;
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  // Lines run at 45°, so the horizontal distance between them is period × √2
+  const step = (stripe + gap) * Math.SQRT2;
+  const lines: string[] = [];
+  for (let x = 0; x < size.width + size.height; x += step) {
+    lines.push(`M${x} 0L${x - size.height} ${size.height}`);
+  }
   return (
-    <View style={[styles.striped, style]}>
-      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-        <Defs>
-          <Pattern id={id} width={size} height={size} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <Rect width={size} height={size} fill={base} />
-            <Rect width={stripe} height={size} fill={tone} />
-          </Pattern>
-        </Defs>
-        <Rect width="100%" height="100%" fill={`url(#${id})`} />
-      </Svg>
+    <View
+      style={[styles.striped, { backgroundColor: tone }, style]}
+      onLayout={(e) => setSize(e.nativeEvent.layout)}
+    >
+      {size.width > 0 && (
+        <Svg style={StyleSheet.absoluteFill} width={size.width} height={size.height}>
+          <Path d={lines.join("")} stroke={base} strokeWidth={gap * Math.SQRT2} />
+        </Svg>
+      )}
       {label ? <Text style={styles.stripedLabel}>{label}</Text> : null}
       {children}
     </View>

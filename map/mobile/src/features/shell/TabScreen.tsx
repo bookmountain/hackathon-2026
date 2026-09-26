@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/theme";
@@ -8,27 +8,19 @@ import ViewToolbar, { type TabView } from "./ViewToolbar";
 type Props = {
   title: string;
   action: { label: string; onPress: () => void };
-  /** Content for the current Map/List view */
-  children: (view: TabView) => ReactNode;
-  /** Called when switching views, e.g. to close an open map sheet */
-  onViewChange?: (view: TabView) => void;
+  /** Controlled by the tab so it can switch back to the map (e.g. after publishing) */
+  view: TabView;
+  onViewChange: (view: TabView) => void;
+  children: ReactNode;
 };
 
 // Frame shared by the Flats, Market and Meetups tabs
-export default function TabScreen({ title, action, children, onViewChange }: Props) {
-  const [view, setView] = useState<TabView>("map");
+export default function TabScreen({ title, action, view, onViewChange, children }: Props) {
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
       <AppHeader title={title} />
-      <ViewToolbar
-        view={view}
-        onViewChange={(v) => {
-          setView(v);
-          onViewChange?.(v);
-        }}
-        action={action}
-      />
-      <View style={styles.content}>{children(view)}</View>
+      <ViewToolbar view={view} onViewChange={onViewChange} action={action} />
+      <View style={styles.content}>{children}</View>
     </SafeAreaView>
   );
 }
