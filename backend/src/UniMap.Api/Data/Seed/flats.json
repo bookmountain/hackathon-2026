@@ -1,6 +1,6 @@
 [
  {
-  "id": "f01",
+  "id": "f6047039-555a-5623-b2b0-8fec42aa34b0",
   "owner": "p07",
   "title": "Sunny room, 6 min to North Tce",
   "suburb": "Adelaide",
@@ -33,14 +33,14 @@
    "Adelaide · Music"
   ],
   "photos": [
-   "seed/flats/f01/01-bedroom.jpg",
-   "seed/flats/f01/02-living.jpg",
-   "seed/flats/f01/03-kitchen.jpg",
-   "seed/flats/f01/04-bathroom.jpg"
+   "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/01-bedroom.jpg",
+   "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/02-living.jpg",
+   "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/03-kitchen.jpg",
+   "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/04-bathroom.jpg"
   ]
  },
  {
-  "id": "f02",
+  "id": "a55aec15-36b1-5174-a5cb-06b6587073fd",
   "owner": "p03",
   "title": "Studio-style room with kitchenette",
   "suburb": "North Adelaide",
@@ -74,15 +74,15 @@
    "Flinders · IT"
   ],
   "photos": [
-   "seed/flats/f02/01-bedroom.jpg",
-   "seed/flats/f02/02-living.jpg",
-   "seed/flats/f02/03-kitchen.jpg",
-   "seed/flats/f02/04-bathroom.jpg",
-   "seed/flats/f02/05-exterior.jpg"
+   "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/01-bedroom.jpg",
+   "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/02-living.jpg",
+   "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/03-kitchen.jpg",
+   "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/04-bathroom.jpg",
+   "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/05-exterior.jpg"
   ]
  },
  {
-  "id": "f03",
+  "id": "c8289b06-e144-5eac-8109-edcc423bd518",
   "owner": "p08",
   "title": "Budget room near Central Market",
   "suburb": "Adelaide",
@@ -115,15 +115,15 @@
    "Adelaide · Arts"
   ],
   "photos": [
-   "seed/flats/f03/01-bedroom.jpg",
-   "seed/flats/f03/02-living.jpg",
-   "seed/flats/f03/03-kitchen.jpg",
-   "seed/flats/f03/04-bathroom.jpg",
-   "seed/flats/f03/05-exterior.jpg"
+   "flats/c8289b06-e144-5eac-8109-edcc423bd518/01-bedroom.jpg",
+   "flats/c8289b06-e144-5eac-8109-edcc423bd518/02-living.jpg",
+   "flats/c8289b06-e144-5eac-8109-edcc423bd518/03-kitchen.jpg",
+   "flats/c8289b06-e144-5eac-8109-edcc423bd518/04-bathroom.jpg",
+   "flats/c8289b06-e144-5eac-8109-edcc423bd518/05-exterior.jpg"
   ]
  },
  {
-  "id": "f04",
+  "id": "9c38f282-9433-5241-bb17-baa9e4ae46b2",
   "owner": "p02",
   "title": "Ensuite in townhouse, Hutt St",
   "suburb": "Adelaide",
@@ -155,15 +155,15 @@
    "Flinders · Nursing"
   ],
   "photos": [
-   "seed/flats/f04/01-bedroom.jpg",
-   "seed/flats/f04/02-living.jpg",
-   "seed/flats/f04/03-kitchen.jpg",
-   "seed/flats/f04/04-bathroom.jpg",
-   "seed/flats/f04/05-exterior.jpg"
+   "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/01-bedroom.jpg",
+   "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/02-living.jpg",
+   "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/03-kitchen.jpg",
+   "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/04-bathroom.jpg",
+   "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/05-exterior.jpg"
   ]
  },
  {
-  "id": "f05",
+  "id": "5a36fca1-5e37-5552-8bab-dac7a5c9b797",
   "owner": "p12",
   "title": "Furnished room in CBD apartment",
   "suburb": "Adelaide",
@@ -196,14 +196,14 @@
    "Adelaide · Economics"
   ],
   "photos": [
-   "seed/flats/f05/01-bedroom.jpg",
-   "seed/flats/f05/02-living.jpg",
-   "seed/flats/f05/03-bathroom.jpg",
-   "seed/flats/f05/04-exterior.jpg"
+   "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/01-bedroom.jpg",
+   "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/02-living.jpg",
+   "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/03-bathroom.jpg",
+   "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/04-exterior.jpg"
   ]
  },
  {
-  "id": "f06",
+  "id": "6c5ace63-3681-56a3-8e2d-79d12e8a9db7",
   "owner": "p17",
   "title": "Quiet room in Kent Town villa",
   "suburb": "Kent Town",
@@ -235,14 +235,14 @@
    "Adelaide · Pharmacy"
   ],
   "photos": [
-   "seed/flats/f06/01-bedroom.jpg",
-   "seed/flats/f06/02-living.jpg",
-   "seed/flats/f06/03-bathroom.jpg",
-   "seed/flats/f06/04-exterior.jpg"
+   "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/01-bedroom.jpg",
+   "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/02-living.jpg",
+   "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/03-bathroom.jpg",
+   "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/04-exterior.jpg"
   ]
  },
  {
-  "id": "f07",
+  "id": "e368b447-68ed-5f61-8441-d2ec7c9e5be7",
   "owner": "p42",
   "title": "Social share house off The Parade",
   "suburb": "Norwood",
@@ -276,14 +276,14 @@
    "Flinders · Creative Writing"
   ],
   "photos": [
-   "seed/flats/f07/01-bedroom.jpg",
-   "seed/flats/f07/02-living.jpg",
-   "seed/flats/f07/03-bathroom.jpg",
-   "seed/flats/f07/04-exterior.jpg"
+   "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/01-bedroom.jpg",
+   "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/02-living.jpg",
+   "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/03-bathroom.jpg",
+   "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/04-exterior.jpg"
   ]
  },
  {
-  "id": "f08",
+  "id": "5704c8b8-dbbf-5501-9209-546ea8dd2679",
   "owner": "p14",
   "title": "Room near Thebarton oval",
   "suburb": "Torrensville",
@@ -315,15 +315,15 @@
    "Adelaide · Agricultural Sciences"
   ],
   "photos": [
-   "seed/flats/f08/01-bedroom.jpg",
-   "seed/flats/f08/02-living.jpg",
-   "seed/flats/f08/03-kitchen.jpg",
-   "seed/flats/f08/04-bathroom.jpg",
-   "seed/flats/f08/05-exterior.jpg"
+   "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/01-bedroom.jpg",
+   "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/02-living.jpg",
+   "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/03-kitchen.jpg",
+   "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/04-bathroom.jpg",
+   "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/05-exterior.jpg"
   ]
  },
  {
-  "id": "f09",
+  "id": "351db218-f869-53bc-bad0-1dd4322b8732",
   "owner": "p13",
   "title": "Calm room in Prospect bungalow",
   "suburb": "Prospect",
@@ -356,15 +356,15 @@
    "Flinders · Psychology"
   ],
   "photos": [
-   "seed/flats/f09/01-bedroom.jpg",
-   "seed/flats/f09/02-living.jpg",
-   "seed/flats/f09/03-kitchen.jpg",
-   "seed/flats/f09/04-bathroom.jpg",
-   "seed/flats/f09/05-exterior.jpg"
+   "flats/351db218-f869-53bc-bad0-1dd4322b8732/01-bedroom.jpg",
+   "flats/351db218-f869-53bc-bad0-1dd4322b8732/02-living.jpg",
+   "flats/351db218-f869-53bc-bad0-1dd4322b8732/03-kitchen.jpg",
+   "flats/351db218-f869-53bc-bad0-1dd4322b8732/04-bathroom.jpg",
+   "flats/351db218-f869-53bc-bad0-1dd4322b8732/05-exterior.jpg"
   ]
  },
  {
-  "id": "f10",
+  "id": "9a7c76e6-f15f-5781-a11d-cbe2bd882a3f",
   "owner": "p06",
   "title": "Ensuite room in Unley townhouse",
   "suburb": "Unley",
@@ -397,15 +397,15 @@
    "Adelaide · Architecture"
   ],
   "photos": [
-   "seed/flats/f10/01-bedroom.jpg",
-   "seed/flats/f10/02-living.jpg",
-   "seed/flats/f10/03-kitchen.jpg",
-   "seed/flats/f10/04-bathroom.jpg",
-   "seed/flats/f10/05-exterior.jpg"
+   "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/01-bedroom.jpg",
+   "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/02-living.jpg",
+   "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/03-kitchen.jpg",
+   "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/04-bathroom.jpg",
+   "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/05-exterior.jpg"
   ]
  },
  {
-  "id": "f11",
+  "id": "bebd471e-3a1b-593d-834f-d4bbf0bb9f4f",
   "owner": "p16",
   "title": "Tidy room close to the parklands",
   "suburb": "Parkside",
@@ -437,14 +437,14 @@
    "Adelaide · Data Science"
   ],
   "photos": [
-   "seed/flats/f11/01-bedroom.jpg",
-   "seed/flats/f11/02-living.jpg",
-   "seed/flats/f11/03-kitchen.jpg",
-   "seed/flats/f11/04-exterior.jpg"
+   "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/01-bedroom.jpg",
+   "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/02-living.jpg",
+   "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/03-kitchen.jpg",
+   "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/04-exterior.jpg"
   ]
  },
  {
-  "id": "f12",
+  "id": "2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4",
   "owner": "p45",
   "title": "New apartment room in Bowden",
   "suburb": "Bowden",
@@ -476,14 +476,14 @@
    "Adelaide · Media and Communication"
   ],
   "photos": [
-   "seed/flats/f12/01-bedroom.jpg",
-   "seed/flats/f12/02-living.jpg",
-   "seed/flats/f12/03-kitchen.jpg",
-   "seed/flats/f12/04-exterior.jpg"
+   "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/01-bedroom.jpg",
+   "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/02-living.jpg",
+   "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/03-kitchen.jpg",
+   "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/04-exterior.jpg"
   ]
  },
  {
-  "id": "f13",
+  "id": "850452bf-9825-55f6-9252-48b1a6ce3617",
   "owner": "p11",
   "title": "Room 15 min walk from Flinders Uni",
   "suburb": "Bedford Park",
@@ -516,14 +516,14 @@
    "Flinders · Nutrition"
   ],
   "photos": [
-   "seed/flats/f13/01-bedroom.jpg",
-   "seed/flats/f13/02-living.jpg",
-   "seed/flats/f13/03-kitchen.jpg",
-   "seed/flats/f13/04-exterior.jpg"
+   "flats/850452bf-9825-55f6-9252-48b1a6ce3617/01-bedroom.jpg",
+   "flats/850452bf-9825-55f6-9252-48b1a6ce3617/02-living.jpg",
+   "flats/850452bf-9825-55f6-9252-48b1a6ce3617/03-kitchen.jpg",
+   "flats/850452bf-9825-55f6-9252-48b1a6ce3617/04-exterior.jpg"
   ]
  },
  {
-  "id": "f14",
+  "id": "0f496ac1-f647-588d-988b-04e21c572b0d",
   "owner": "p30",
   "title": "Quiet room in St Marys, suits placements",
   "suburb": "St Marys",
@@ -555,14 +555,14 @@
    "Flinders · Medicine"
   ],
   "photos": [
-   "seed/flats/f14/01-bedroom.jpg",
-   "seed/flats/f14/02-living.jpg",
-   "seed/flats/f14/03-kitchen.jpg",
-   "seed/flats/f14/04-exterior.jpg"
+   "flats/0f496ac1-f647-588d-988b-04e21c572b0d/01-bedroom.jpg",
+   "flats/0f496ac1-f647-588d-988b-04e21c572b0d/02-living.jpg",
+   "flats/0f496ac1-f647-588d-988b-04e21c572b0d/03-kitchen.jpg",
+   "flats/0f496ac1-f647-588d-988b-04e21c572b0d/04-exterior.jpg"
   ]
  },
  {
-  "id": "f15",
+  "id": "260c3047-9ad8-50f2-8baa-fb7845036309",
   "owner": "p21",
   "title": "Room next to Tonsley campus",
   "suburb": "Mitchell Park",
@@ -594,14 +594,14 @@
    "Flinders · Cybersecurity"
   ],
   "photos": [
-   "seed/flats/f15/01-bedroom.jpg",
-   "seed/flats/f15/02-kitchen.jpg",
-   "seed/flats/f15/03-bathroom.jpg",
-   "seed/flats/f15/04-exterior.jpg"
+   "flats/260c3047-9ad8-50f2-8baa-fb7845036309/01-bedroom.jpg",
+   "flats/260c3047-9ad8-50f2-8baa-fb7845036309/02-kitchen.jpg",
+   "flats/260c3047-9ad8-50f2-8baa-fb7845036309/03-bathroom.jpg",
+   "flats/260c3047-9ad8-50f2-8baa-fb7845036309/04-exterior.jpg"
   ]
  },
  {
-  "id": "f16",
+  "id": "05e4e863-f39d-5964-9a24-6cf963e1de1e",
   "owner": "p34",
   "title": "Unfurnished room near Westfield Marion",
   "suburb": "Marion",
@@ -633,13 +633,13 @@
    "Flinders · Social Work"
   ],
   "photos": [
-   "seed/flats/f16/01-bedroom.jpg",
-   "seed/flats/f16/02-kitchen.jpg",
-   "seed/flats/f16/03-bathroom.jpg"
+   "flats/05e4e863-f39d-5964-9a24-6cf963e1de1e/01-bedroom.jpg",
+   "flats/05e4e863-f39d-5964-9a24-6cf963e1de1e/02-kitchen.jpg",
+   "flats/05e4e863-f39d-5964-9a24-6cf963e1de1e/03-bathroom.jpg"
   ]
  },
  {
-  "id": "f17",
+  "id": "316f3b11-c4fc-5e16-a052-6a38832b31f6",
   "owner": "p47",
   "title": "Beachside room, tram to the city",
   "suburb": "Glenelg",
@@ -671,13 +671,13 @@
    "Adelaide · Arts"
   ],
   "photos": [
-   "seed/flats/f17/01-bedroom.jpg",
-   "seed/flats/f17/02-kitchen.jpg",
-   "seed/flats/f17/03-bathroom.jpg"
+   "flats/316f3b11-c4fc-5e16-a052-6a38832b31f6/01-bedroom.jpg",
+   "flats/316f3b11-c4fc-5e16-a052-6a38832b31f6/02-kitchen.jpg",
+   "flats/316f3b11-c4fc-5e16-a052-6a38832b31f6/03-bathroom.jpg"
   ]
  },
  {
-  "id": "f18",
+  "id": "a28e23fa-e787-5189-bd1b-8d9d4f0a481b",
   "owner": "p23",
   "title": "Room by the lake, walk to campus",
   "suburb": "Mawson Lakes",
@@ -710,13 +710,13 @@
    "Adelaide · IT"
   ],
   "photos": [
-   "seed/flats/f18/01-bedroom.jpg",
-   "seed/flats/f18/02-kitchen.jpg",
-   "seed/flats/f18/03-bathroom.jpg"
+   "flats/a28e23fa-e787-5189-bd1b-8d9d4f0a481b/01-bedroom.jpg",
+   "flats/a28e23fa-e787-5189-bd1b-8d9d4f0a481b/02-kitchen.jpg",
+   "flats/a28e23fa-e787-5189-bd1b-8d9d4f0a481b/03-bathroom.jpg"
   ]
  },
  {
-  "id": "f19",
+  "id": "63f4ae66-305f-5475-b8ff-e107f7a09c5a",
   "owner": "p33",
   "title": "Garden room near Magill campus",
   "suburb": "Magill",
@@ -748,13 +748,13 @@
    "Adelaide · Psychology"
   ],
   "photos": [
-   "seed/flats/f19/01-bedroom.jpg",
-   "seed/flats/f19/02-kitchen.jpg",
-   "seed/flats/f19/03-bathroom.jpg"
+   "flats/63f4ae66-305f-5475-b8ff-e107f7a09c5a/01-bedroom.jpg",
+   "flats/63f4ae66-305f-5475-b8ff-e107f7a09c5a/02-kitchen.jpg",
+   "flats/63f4ae66-305f-5475-b8ff-e107f7a09c5a/03-bathroom.jpg"
   ]
  },
  {
-  "id": "f20",
+  "id": "15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4",
   "owner": "p19",
   "title": "Furnished room near Victoria Square",
   "suburb": "Adelaide",
@@ -787,9 +787,9 @@
    "Adelaide · Health Science"
   ],
   "photos": [
-   "seed/flats/f20/01-bedroom.jpg",
-   "seed/flats/f20/02-kitchen.jpg",
-   "seed/flats/f20/03-bathroom.jpg"
+   "flats/15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4/01-bedroom.jpg",
+   "flats/15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4/02-kitchen.jpg",
+   "flats/15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4/03-bathroom.jpg"
   ]
  }
 ]

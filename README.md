@@ -60,8 +60,9 @@ In Development, an empty database is seeded from `backend/src/UniMap.Api/Data/Se
   The password is `password123` for everyone.
 - `flats.json`: 20 room listings on real Adelaide streets near each campus. Pins were placed with
   OpenStreetMap, then moved slightly so they don't point at a specific house.
-- Images are already in R2 under `seed/`: CC0 avatars in `seed/avatars/`, and openly licensed room
-  photos in one folder per listing, `seed/flats/f01/01-bedroom.jpg` and so on. Credits are in
+- Images are already in R2. CC0 avatars are in `seed/avatars/`. Openly licensed room photos are in
+  `flats/{listingId}/01-bedroom.jpg` and so on, the same layout as real listings. Seeded listings have
+  fixed ids (in `flats.json`), so a listing's id in the database is its R2 folder name. Credits are in
   `avatars.json` and `flat-photos.json`.
 
 Run `docker compose down -v && docker compose up` to reseed.

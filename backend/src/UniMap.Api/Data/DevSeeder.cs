@@ -28,8 +28,9 @@ public static class DevSeeder
         string Id, string Email, string DisplayName, University University, string Degree, Gender Gender,
         string? Pronouns, int? YearOfStudy, string? Bio, List<string> Habits, List<string> Interests, string? AvatarKey);
 
+    /// <param name="Id">Fixed listing id; its photos live in R2 under flats/{Id}/, like real listings.</param>
     private record SeedFlat(
-        string Id, string Owner, string Title, string Suburb, string? Street, double Lat, double Lng,
+        Guid Id, string Owner, string Title, string Suburb, string? Street, double Lat, double Lng,
         int RentPerWeek, int BillsPerWeek, int Bedrooms, int Flatmates, ToiletType Toilet, BathroomType Bathroom,
         Furnishing Furnished, int? MinStayMonths, int AvailableInDays, List<string> Features, List<string> HouseRhythm,
         string? PreferredFlatmate, string? Description, List<string> Housemates, List<string> Photos);
@@ -107,6 +108,7 @@ public static class DevSeeder
 
             db.FlatListings.Add(new FlatListing
             {
+                Id = f.Id,
                 OwnerId = ownerId,
                 Title = f.Title,
                 Description = f.Description,
@@ -126,7 +128,7 @@ public static class DevSeeder
                 HouseRhythm = f.HouseRhythm,
                 PreferredFlatmate = f.PreferredFlatmate,
                 Housemates = f.Housemates,
-                // Already in R2, one folder per listing: seed/flats/{id}/01-bedroom.jpg, ...
+                // Already in R2, one folder per listing: flats/{id}/01-bedroom.jpg, ...
                 PhotoKeys = f.Photos,
                 // Stagger so "newest" ordering looks natural.
                 CreatedAt = DateTimeOffset.UtcNow.AddHours(-7 * i),
@@ -140,9 +142,9 @@ public static class DevSeeder
     }
 
     /// <summary>
-    /// Keeps already-seeded listings in step with flats.json photos (e.g. after the photos moved to
-    /// one R2 folder per listing), so nobody has to wipe their database. Photos a user uploaded
-    /// themselves (keys not under seed/) are never touched.
+    /// Keeps already-seeded listings in step with flats.json (fixed ids, photos in flats/{id}/), so
+    /// nobody has to wipe their database. Listings are matched by id, or by owner + title for ones
+    /// seeded before ids were fixed. Photos a user uploaded themselves are never touched.
     /// </summary>
     private static async Task SyncPhotosAsync(
         AppDbContext db, ILogger logger, List<SeedFlat> flats,
@@ -152,15 +154,31 @@ public static class DevSeeder
         foreach (var f in flats)
         {
             if (!emailById.TryGetValue(f.Owner, out var email) || !userIdByEmail.TryGetValue(email, out var ownerId)) continue;
-            var listing = await db.FlatListings.FirstOrDefaultAsync(x => x.OwnerId == ownerId && x.Title == f.Title);
-            if (listing is null || listing.PhotoKeys.SequenceEqual(f.Photos)) continue;
-            if (listing.PhotoKeys.Any(k => !k.StartsWith("seed/"))) continue;
-            listing.PhotoKeys = f.Photos;
-            updated++;
+            var listing = await db.FlatListings.FirstOrDefaultAsync(x => x.Id == f.Id)
+                ?? await db.FlatListings.FirstOrDefaultAsync(x => x.OwnerId == ownerId && x.Title == f.Title);
+            if (listing is null) continue;
+
+            var changed = false;
+            if (listing.Id != f.Id)
+            {
+                // Primary keys can't change through EF tracking; nothing references flat_listings.
+                await db.Database.ExecuteSqlAsync($"UPDATE flat_listings SET id = {f.Id} WHERE id = {listing.Id}");
+                db.Entry(listing).State = EntityState.Detached;
+                listing = await db.FlatListings.FirstAsync(x => x.Id == f.Id);
+                changed = true;
+            }
+
+            var ownPhotos = listing.PhotoKeys.Any(k => !k.StartsWith("seed/") && !f.Photos.Contains(k));
+            if (!ownPhotos && !listing.PhotoKeys.SequenceEqual(f.Photos))
+            {
+                listing.PhotoKeys = f.Photos;
+                changed = true;
+            }
+            if (changed) updated++;
         }
         if (updated == 0) return;
         await db.SaveChangesAsync();
-        logger.LogWarning("Updated photos on {Count} seeded flat listings", updated);
+        logger.LogWarning("Synced ids/photos on {Count} seeded flat listings", updated);
     }
 
     private static T? Read<T>(string file)
