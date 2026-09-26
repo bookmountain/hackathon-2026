@@ -32,7 +32,10 @@ public record ItemSummary(
     DateTimeOffset CreatedAt);
 
 /// <param name="AvatarPreset">Preset avatar colour, 0–7, or null. Shown when there's no photo.</param>
-public record ItemSeller(Guid UserId, string DisplayName, University University, string? Major, string? AvatarUrl, int? AvatarPreset);
+/// <param name="AvatarDesign">How to draw the preset avatar (initials or icon, shape, ring).</param>
+public record ItemSeller(
+    Guid UserId, string DisplayName, University University, string? Major, string? AvatarUrl, int? AvatarPreset,
+    AvatarDesign? AvatarDesign);
 
 /// <summary>Item detail page.</summary>
 /// <param name="PhotoKeys">Only for the seller, to send back unchanged on PUT.</param>

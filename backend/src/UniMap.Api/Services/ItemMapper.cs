@@ -23,7 +23,8 @@ public static class ItemMapper
         var p = i.Seller.Profile;
         var seller = new ItemSeller(
             i.SellerId, p?.DisplayName ?? "Student", i.Seller.University,
-            p?.Degree?.Name ?? p?.Department, storage.ReadUrl(p?.AvatarKey), p?.AvatarPreset);
+            p?.Degree?.Name ?? p?.Department, storage.ReadUrl(p?.AvatarKey), p?.AvatarPreset,
+            ProfileMapper.DesignOrNull(p));
         return new ItemDetail(
             ToSummary(i, viewerId, storage), i.Description,
             i.PhotoKeys.Select(k => storage.ReadUrl(k)!).ToList(),

@@ -39,6 +39,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(p => p.Pronouns).HasMaxLength(32);
             e.Property(p => p.AgeRange).HasConversion<string>().HasMaxLength(16);
             e.Property(p => p.Nationality).HasMaxLength(2).IsFixedLength();
+            e.Property(p => p.AvatarStyle).HasConversion<string>().HasMaxLength(16);
+            e.Property(p => p.AvatarInitials).HasMaxLength(2);
+            e.Property(p => p.AvatarIcon).HasConversion<string>().HasMaxLength(16);
+            e.Property(p => p.AvatarShape).HasConversion<string>().HasMaxLength(16);
+            e.Property(p => p.AvatarRing).HasConversion<string>().HasMaxLength(16);
             // GIN indexes make tag-overlap queries (&&) fast.
             e.HasIndex(p => p.Habits).HasMethod("gin");
             e.HasIndex(p => p.Interests).HasMethod("gin");

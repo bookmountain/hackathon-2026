@@ -73,6 +73,12 @@ public class MeController(
         p.Interests = Catalog.Normalize(req.Interests);
         p.AvatarKey = req.AvatarKey;
         p.AvatarPreset = req.AvatarPreset;
+        var design = req.AvatarDesign ?? new AvatarDesign(default, null, default, default, default);
+        p.AvatarStyle = design.Style;
+        p.AvatarInitials = string.IsNullOrWhiteSpace(design.Initials) ? null : design.Initials.Trim().ToUpperInvariant();
+        p.AvatarIcon = design.Icon;
+        p.AvatarShape = design.Shape;
+        p.AvatarRing = design.Ring;
         p.UpdatedAt = DateTimeOffset.UtcNow;
 
         await db.SaveChangesAsync();

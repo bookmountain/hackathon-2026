@@ -5,7 +5,10 @@ namespace UniMap.Api.Contracts;
 
 /// <summary>What another student sees of you in chat: nickname, major, uni, avatar. Never email.</summary>
 /// <param name="AvatarPreset">Preset avatar colour, 0–7, or null. Shown when there's no photo.</param>
-public record ChatPerson(Guid UserId, string DisplayName, string? Major, University University, string? AvatarUrl, int? AvatarPreset);
+/// <param name="AvatarDesign">How to draw the preset avatar (initials or icon, shape, ring).</param>
+public record ChatPerson(
+    Guid UserId, string DisplayName, string? Major, University University, string? AvatarUrl, int? AvatarPreset,
+    AvatarDesign? AvatarDesign);
 
 public record ChatAbout(ChatAboutType Type, Guid Id);
 

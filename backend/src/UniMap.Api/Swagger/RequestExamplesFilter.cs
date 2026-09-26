@@ -52,7 +52,8 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
             Habits: ["night-owl", "gym", "coffee", "studies-in-library"],
             Interests: ["coding", "hackathons", "hiking", "board-games"],
             AvatarKey: null,
-            AvatarPreset: 2),
+            AvatarPreset: 2,
+            AvatarDesign: new AvatarDesign(AvatarStyle.Icon, null, AvatarIcon.Coffee, AvatarShape.Squircle, AvatarRing.Gold)),
         _ when type == typeof(UploadUrlRequest) => new UploadUrlRequest("image/jpeg"),
         _ when type == typeof(UpsertFlatRequest) => new UpsertFlatRequest(
             Id: null,
