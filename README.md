@@ -39,6 +39,9 @@ docker compose up --build   # first run restores NuGet packages, ~1 min
 Code in `backend/` is bind-mounted, and `dotnet watch` hot-reloads on save. It restarts
 automatically when an edit can't be hot-applied.
 
+Differences between the UCompass prototype and this API, for the app to handle, are listed in
+[FRONTEND-GAPS.md](FRONTEND-GAPS.md).
+
 ### Auth flow
 
 1. `POST /api/auth/register` `{ email, password }`: the email must be `@adelaide.edu.au`,

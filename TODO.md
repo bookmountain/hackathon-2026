@@ -1,6 +1,7 @@
 # TODO: fix after the hackathon
 
-Things we chose not to fix yet. Newest first within each section.
+Things we chose not to fix yet. Newest first within each section. What the app needs to do differently
+from the prototype is in [FRONTEND-GAPS.md](FRONTEND-GAPS.md).
 
 ## Degree data
 
@@ -37,6 +38,9 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **Walk times are estimates:** straight-line distance × 1.25 at 4.8 km/h. A routing service
       (OSRM, or Mapbox/Google) would give real walking times, plus public transport, which matters more
       for suburbs like Glenelg or Prospect.
+- [ ] **A missing gender is saved as `Male`.** `UpsertProfileRequest.Gender` is `[Required]` but not
+      nullable, so leaving it out binds the default value instead of failing. The prototype never asks for
+      gender. Make it `Gender?` (like the item and event enums) once the PM decides whether to keep it.
 - [ ] **Profile mismatch with the prototype.** UCompass shows only nickname, major, uni and an optional
       preset avatar. Our profile still has gender, pronouns, bio, habits and interests. The PM or designer
       should pick one.
@@ -51,8 +55,6 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **"Available from" uses the UTC date**, so it can flip to "Now" up to 9.5 hours before midnight in
       Adelaide. The same goes for the check that a new date is in the future.
 - [ ] **No report or block** for scam listings. The consent screen promises "Report & block in one tap".
-- [ ] **The prototype's Sell form has no category or condition inputs** (it hardcodes "Study gear" and
-      "Good"). The API requires both, so the frontend needs to add them.
 
 ## Meetups
 
@@ -66,8 +68,6 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
       (they only drop out of search). Archive or delete old ones eventually.
 - [ ] **`eventGoing` goes to every connected client.** Fine at hackathon scale; with many users, send it
       only to people viewing the Meetups tab (a SignalR group).
-- [ ] **The prototype's Host form has an optional time** (it defaults to 2 days ahead). The API requires
-      `startsAt`, so the form needs to make it required.
 
 ## Privacy
 

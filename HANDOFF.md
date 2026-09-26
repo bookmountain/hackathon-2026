@@ -1,7 +1,7 @@
 # Handoff: UCompass backend, next features
 
-For the next Claude Code session. Read this first, then `README.md` (API and setup) and `TODO.md`
-(known gaps). Written 2026-09-26; updated the same day after the marketplace and meetups were built.
+For the next Claude Code session. Read this first, then `README.md` (API and setup), `TODO.md`
+(known gaps) and `FRONTEND-GAPS.md` (where the app must differ from the prototype). Written 2026-09-26; updated the same day after the marketplace and meetups were built.
 
 **Your job, in order:** 1. ~~Marketplace~~ (done on the `marketplace` branch) → 2. ~~Meetups~~ (done on the
 `meetups` branch) → 3. People on the map. One feature branch each.
