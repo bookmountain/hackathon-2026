@@ -69,9 +69,9 @@ public class ItemsController(AppDbContext db, StorageService storage) : Controll
         if (maxPrice is not null) q = q.Where(i => i.Price <= maxPrice);
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var pattern = $"%{EscapeLike(search.Trim())}%";
-            q = q.Where(i => EF.Functions.ILike(i.Title, pattern, @"\")
-                || (i.Description != null && EF.Functions.ILike(i.Description, pattern, @"\")));
+            var pattern = SqlLike.Contains(search);
+            q = q.Where(i => EF.Functions.ILike(i.Title, pattern, SqlLike.Escape)
+                || (i.Description != null && EF.Functions.ILike(i.Description, pattern, SqlLike.Escape)));
         }
 
         q = sort switch
@@ -276,8 +276,4 @@ public class ItemsController(AppDbContext db, StorageService storage) : Controll
         i.PhotoKeys = (req.PhotoKeys ?? []).Distinct().ToList();
         i.UpdatedAt = DateTimeOffset.UtcNow;
     }
-
-    /// <summary>So "%" and "_" in a search are matched literally.</summary>
-    private static string EscapeLike(string s) =>
-        s.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_");
 }
