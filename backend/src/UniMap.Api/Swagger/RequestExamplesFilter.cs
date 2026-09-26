@@ -115,7 +115,7 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
             WalkInsWelcome: true),
         // Koala_Kai (the login example) messaging TomTheTutor about his seeded Calculus textbook.
         _ when type == typeof(StartChatRequest) => new StartChatRequest(
-            UserId: null, FlatId: null, ItemId: SeedCalculusTextbookId,
+            UserId: null, FlatId: null, ItemId: SeedCalculusTextbookId, DrawId: null,
             Text: "Hi! Is the calculus textbook still available?"),
         _ when type == typeof(SendMessageRequest) => new SendMessageRequest("Great — see you at Barr Smith after 4pm!"),
         _ => null,

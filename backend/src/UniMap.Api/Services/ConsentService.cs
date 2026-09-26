@@ -26,6 +26,20 @@ public class ConsentService(AppDbContext db)
             .ToListAsync();
         return ConsentPolicy.Required.All(granted.Contains);
     }
+
+    /// <summary>Which of these users have granted every required consent.</summary>
+    public async Task<HashSet<Guid>> CompleteAmongAsync(IReadOnlyCollection<Guid> userIds)
+    {
+        var records = await db.ConsentRecords.AsNoTracking()
+            .Where(c => userIds.Contains(c.UserId) && c.PolicyVersion == ConsentPolicy.Version)
+            .Select(c => new { c.UserId, c.Type, c.Granted, c.CreatedAt })
+            .ToListAsync();
+        return records.GroupBy(c => c.UserId)
+            .Where(u => ConsentPolicy.Required.All(t =>
+                u.Where(c => c.Type == t).MaxBy(c => c.CreatedAt)?.Granted == true))
+            .Select(u => u.Key)
+            .ToHashSet();
+    }
 }
 
 /// <summary>Part of the default [Authorize] policy: signed in AND the required consents are granted.</summary>

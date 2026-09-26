@@ -15,6 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Conversation> Conversations => Set<Conversation>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
     public DbSet<ConsentRecord> ConsentRecords => Set<ConsentRecord>();
+    public DbSet<DailyDraw> DailyDraws => Set<DailyDraw>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -127,6 +128,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(c => c.PolicyVersion).HasMaxLength(32);
             e.HasIndex(c => new { c.UserId, c.PolicyVersion, c.Type, c.CreatedAt });
             e.HasOne(c => c.User).WithMany().HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<DailyDraw>(e =>
+        {
+            e.HasIndex(d => new { d.UserId, d.Day }).IsUnique();
+            e.HasIndex(d => new { d.Day, d.DrawnAt });
+            e.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId).OnDelete(DeleteBehavior.Cascade);
+            // Keep the other student's card (and their streak) when you delete your account
+            e.HasOne(d => d.MatchedUser).WithMany().HasForeignKey(d => d.MatchedUserId).OnDelete(DeleteBehavior.SetNull);
         });
 
         b.Entity<ChatMessage>(e =>

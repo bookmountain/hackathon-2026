@@ -3,10 +3,11 @@ namespace UniMap.Api.Domain;
 public enum ChatMessageKind { Text, About }
 
 /// <summary>
-/// What an "About" message refers to. Meetups have none on purpose: their hosts are anonymous, so there's
+/// What an "About" message refers to. DailyCard is a Dcard match ("Daily card match · 27 Sep"); its id is a
+/// DailyDraw, with nothing to open. Meetups have none on purpose: their hosts are anonymous, so there's
 /// nobody to message.
 /// </summary>
-public enum ChatAboutType { Flat, Item }
+public enum ChatAboutType { Flat, Item, DailyCard }
 
 /// <summary>
 /// One chat per pair of students (like the UCompass prototype). UserAId is always the smaller id,
