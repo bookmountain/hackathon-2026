@@ -64,10 +64,11 @@ the API requires.
       (a backend bug, see TODO). If the PM drops the question, send `PreferNotToSay`.
       *App:* Sends `PreferNotToSay` for new profiles, and keeps a saved gender on edits.
 - [x] **Habits and interests** must be sent as arrays, even empty: `habits: []`, `interests: []`.
-- [ ] **Avatar.** The prototype offers 9 preset colour avatars (letter on a colour). The API stores an
+- [x] **Avatar.** The prototype offers 9 preset colour avatars (letter on a colour). The API stores an
       uploaded photo (`POST /api/uploads/avatar`, then `avatarKey`). There's nowhere to save a preset
       choice yet; draw it client-side or ask for an `avatarPreset` field.
-      *App:* Photo avatars from the API are shown. Preset colours are kept on the device only (see TODO.md "Profile"). No photo upload yet.
+      *App:* Photo avatars from the API are shown. Preset colours are saved as `avatarPreset` (0–7) and
+      everyone sees them. No photo upload in the app yet.
 - [x] **Nickname length.** The prototype cuts nicknames at 20 characters; the API allows 64. Keep 20 in
       the app if that's the design.
       *App:* 20.

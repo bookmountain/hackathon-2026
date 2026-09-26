@@ -1,5 +1,5 @@
 UNIMAP: PROFILE FIELDS FOR PM REVIEW
-Last updated: 2026-09-26
+Last updated: 2026-09-27
 
 HOW TO USE
 - Each card below is one Trello card.
@@ -17,6 +17,7 @@ CARD 1: IDENTITY
 CHECKLIST:
 [BUILT] MVP · Display name (required, text, max 64)
 [BUILT] MVP · Avatar photo (optional, JPEG/PNG/WebP upload)
+[BUILT] MVP · Avatar colour (optional, one of 8 preset colours from the design)
 [BUILT] MVP · Gender (required: Male / Female / Non-binary / Other / Prefer not to say)
 [BUILT] Nice · Pronouns (optional, suggestions + custom text)
 [BUILT] MVP · Bio (optional, max 500 characters)
@@ -24,6 +25,7 @@ CHECKLIST:
 DESCRIPTION:
 - Display name: required, text, max 64 characters. Example: Olivia
 - Avatar: optional, image upload (JPEG, PNG, WebP)
+- Avatar colour: optional, one of the design's 8 preset colours, shown with the nickname's first letter. Everyone sees it. A photo is shown instead when there is one.
 - Gender: required, pick one of Male, Female, Non-binary, Other, Prefer not to say
 - Pronouns: optional, pick a suggestion (she/her, he/him, they/them, she/they, he/they) or type your own. Example: she/her
 - Bio: optional, max 500 characters

@@ -71,8 +71,9 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 
 ## Privacy
 
-- [ ] **Account deletion.** The consent screen promises "Delete your account and data anytime". There's no
-      endpoint yet. It should also delete the user's R2 folders (`avatars/{userId}/`, their `flats/{id}/`).
+- [ ] **Account deletion asks no password.** `DELETE /api/me` (Profile → "Delete account", after a confirm
+      dialog) needs only the token. Consider asking for the password again. It also deletes chats for the
+      other person, and the JWT stays valid until it expires (the account is gone, so calls fail).
 - [ ] **Terms of Use and Privacy Policy text.** Consent points to documents that don't exist yet.
       `ConsentPolicy.Version` should change whenever they do, which asks everyone to consent again.
 - [ ] **Usage-stats consent** is recorded but nothing collects stats yet. Check it before adding analytics.
@@ -85,16 +86,6 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **Push notifications** (Expo, FCM or APNs) for when the app is closed. SignalR only reaches open apps.
 - [ ] **Scaling out:** with more than one API instance, SignalR needs a Redis backplane
       (`AddStackExchangeRedis`). Redis is already running.
-
-## Profile
-
-- [ ] **Saving the profile can remove the avatar.** `PUT /api/me/profile` sets the avatar to whatever
-      `avatarKey` is sent (null removes it), but `GET /api/me` only returns a presigned `avatarUrl`, not the
-      key. The app recovers the key from the URL (`mobile/src/features/profile/profileRequest.ts`) so an
-      edit keeps the photo. Return `avatarKey` from `/api/me`, like `photoKeys` on flats and items, or treat
-      a missing key as "keep"; then drop the workaround.
-- [ ] **Preset avatar colours aren't stored.** The app keeps the chosen colour on the device only, so other
-      students see "?" for anyone without a photo. Add an `avatarPreset` field (0–7) if the PM keeps presets.
 
 ## Removed profile fields
 
