@@ -6,5 +6,5 @@ import { router } from "expo-router";
  */
 export function goToApp() {
   if (router.canDismiss()) router.dismissAll();
-  router.replace("/flats");
+  router.replace("/meetups");
 }
