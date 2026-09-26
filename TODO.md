@@ -41,8 +41,14 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **Profile mismatch with the prototype.** UCompass shows only nickname, major, uni and an optional
       preset avatar. Our profile still has gender, pronouns, bio, habits and interests. The PM or designer
       should pick one.
-- [ ] **Consent screen.** The prototype's 4 consents (3 required) aren't stored anywhere yet. We should
-      record them with timestamps, as the Australian Privacy Principles expect.
+
+## Privacy
+
+- [ ] **Account deletion.** The consent screen promises "Delete your account and data anytime". There's no
+      endpoint yet. It should also delete the user's R2 folders (`avatars/{userId}/`, their `flats/{id}/`).
+- [ ] **Terms of Use and Privacy Policy text.** Consent points to documents that don't exist yet.
+      `ConsentPolicy.Version` should change whenever they do, which asks everyone to consent again.
+- [ ] **Usage-stats consent** is recorded but nothing collects stats yet. Check it before adding analytics.
 
 ## Chats
 

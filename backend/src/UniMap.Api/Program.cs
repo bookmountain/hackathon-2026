@@ -2,12 +2,15 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.SignalR;
 using UniMap.Api.Data;
+using UniMap.Api.Domain;
 using UniMap.Api.Hubs;
 using UniMap.Api.Options;
 using UniMap.Api.Services;
@@ -63,7 +66,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             },
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddScoped<ConsentService>();
+builder.Services.AddScoped<IAuthorizationHandler, ConsentHandler>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, ConsentResultHandler>();
+builder.Services.AddAuthorization(o =>
+{
+    // Plain [Authorize] = signed in AND required consents granted (the prototype's "consent first").
+    o.DefaultPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .AddRequirements(new ConsentRequirement())
+        .Build();
+    o.AddPolicy(ConsentPolicy.SignedInOnly, p => p.RequireAuthenticatedUser());
+});
 
 // --- Web ---
 builder.Services.AddControllers()

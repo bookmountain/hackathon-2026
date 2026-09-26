@@ -11,6 +11,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<FlatListing> FlatListings => Set<FlatListing>();
     public DbSet<Conversation> Conversations => Set<Conversation>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+    public DbSet<ConsentRecord> ConsentRecords => Set<ConsentRecord>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -76,6 +77,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(c => c.UserBId);
             e.HasOne(c => c.UserA).WithMany().HasForeignKey(c => c.UserAId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(c => c.UserB).WithMany().HasForeignKey(c => c.UserBId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<ConsentRecord>(e =>
+        {
+            e.Property(c => c.Type).HasConversion<string>().HasMaxLength(32);
+            e.Property(c => c.PolicyVersion).HasMaxLength(32);
+            e.HasIndex(c => new { c.UserId, c.PolicyVersion, c.Type, c.CreatedAt });
+            e.HasOne(c => c.User).WithMany().HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         b.Entity<ChatMessage>(e =>

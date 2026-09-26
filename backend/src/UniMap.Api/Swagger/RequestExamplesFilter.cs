@@ -76,6 +76,8 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
             Housemates: ["Adelaide · Computer Science", "Flinders · Law"],
             PhotoKeys: []),
         _ when type == typeof(FlatPhotoUploadRequest) => new FlatPhotoUploadRequest("image/jpeg", null),
+        _ when type == typeof(UpdateConsentsRequest) => new UpdateConsentsRequest(
+            Terms: true, Location: true, AgeAndEnrolment: true, UsageStats: false),
         _ when type == typeof(FlatStatusRequest) => new FlatStatusRequest(ListingStatus.Taken),
         _ => null,
     };

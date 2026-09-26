@@ -27,11 +27,17 @@ automatically when an edit can't be hot-applied.
 1. `POST /api/auth/register` `{ email, password }`: the email must be `@adelaide.edu.au`,
    `@flinders.edu.au`, or a subdomain of either. In Development the response includes `devCode`,
    and the code is also printed in the `api` logs.
-2. `POST /api/auth/verify` `{ email, code }` returns `accessToken`.
+2. `POST /api/auth/verify` `{ email, code }` returns `accessToken`, `consentComplete` and
+   `onboardingComplete`. These tell the app which screen comes next.
 3. In Swagger, click **Authorize** and paste the token.
-4. Pick a degree with the three dropdown endpoints: `GET /api/degrees/levels` → `/api/degrees/colleges`
+4. **Consent first.** `GET /api/consents` returns the 4 consents and their wording. `PUT /api/consents`
+   with `{ terms, location, ageAndEnrolment, usageStats }`; the first three are required. Until they're
+   granted, everything except `/api/me`, `/api/consents` and the auth endpoints returns
+   `403 { code: "consent_required" }`. Every answer is kept with a timestamp, and withdrawing a required
+   consent locks the app again.
+5. Pick a degree with the three dropdown endpoints: `GET /api/degrees/levels` → `/api/degrees/colleges`
    → `/api/degrees`. There's also a `search` parameter for a type-ahead box.
-5. `PUT /api/me/profile` with the onboarding answers, including `degreeId`. The department is filled in
+6. `PUT /api/me/profile` with the onboarding answers, including `degreeId`. The department is filled in
    from the degree. `GET /api/meta/options` lists the suggested tags.
 
 ### Flats (flatmate finder)

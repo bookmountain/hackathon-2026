@@ -41,6 +41,7 @@ public static class DevSeeder
     {
         var students = Read<List<SeedStudent>>("students.json") ?? [];
         await SeedStudentsAsync(db, logger, students);
+        await SeedConsentsAsync(db, logger, students);
         await SeedFlatsAsync(db, logger, students);
         await SeedChatsAsync(db, logger, students);
     }
@@ -117,6 +118,32 @@ public static class DevSeeder
         if (updated == 0) return;
         await db.SaveChangesAsync();
         logger.LogWarning("Updated avatars on {Count} seeded students", updated);
+    }
+
+    /// <summary>
+    /// Seeded students have already been through the consent screen, so demo logins go straight into
+    /// the app. Also covers databases seeded before consents existed, and new policy versions.
+    /// </summary>
+    private static async Task SeedConsentsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
+    {
+        var emails = students.Select(s => s.Email).ToList();
+        var missing = await db.Users
+            .Where(u => emails.Contains(u.Email))
+            .Where(u => !db.ConsentRecords.Any(c => c.UserId == u.Id && c.PolicyVersion == ConsentPolicy.Version))
+            .Select(u => u.Id)
+            .ToListAsync();
+        if (missing.Count == 0) return;
+
+        var at = DateTimeOffset.UtcNow;
+        foreach (var (userId, i) in missing.Select((id, i) => (id, i)))
+            foreach (var c in ConsentPolicy.All)
+                db.ConsentRecords.Add(new ConsentRecord
+                {
+                    UserId = userId, Type = c.Type, PolicyVersion = ConsentPolicy.Version, CreatedAt = at,
+                    Granted = c.Required || i % 2 == 0, // about half opt in to usage stats
+                });
+        await db.SaveChangesAsync();
+        logger.LogWarning("Recorded consents for {Count} seeded students", missing.Count);
     }
 
     private static async Task SeedFlatsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)

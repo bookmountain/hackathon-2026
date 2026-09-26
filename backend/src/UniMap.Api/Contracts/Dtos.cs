@@ -7,7 +7,7 @@ public record RegisterRequest(
     [Required, EmailAddress] string Email,
     [Required, MinLength(8)] string Password);
 
-/// <param name="DevCode">Only populated in Development so the frontend can skip real email.</param>
+/// <param name="DevCode">Only populated in Development (or when Auth:ReturnDevCode=true) so the frontend can skip real email.</param>
 public record RegisterResponse(Guid UserId, University University, string Message, string? DevCode);
 
 public record VerifyEmailRequest([Required, EmailAddress] string Email, [Required] string Code);
@@ -16,7 +16,9 @@ public record ResendCodeRequest([Required, EmailAddress] string Email);
 
 public record LoginRequest([Required, EmailAddress] string Email, [Required] string Password);
 
-public record AuthResponse(string AccessToken, DateTimeOffset ExpiresAt, bool OnboardingComplete);
+/// <param name="ConsentComplete">False: show the consent screen next (most endpoints return 403 until then).</param>
+/// <param name="OnboardingComplete">False: show the profile screen next.</param>
+public record AuthResponse(string AccessToken, DateTimeOffset ExpiresAt, bool ConsentComplete, bool OnboardingComplete);
 
 /// <param name="DegreeId">From GET /api/degrees. When set, Department is filled in from the degree's college.</param>
 /// <param name="Department">Only used when DegreeId is not set.</param>
@@ -50,7 +52,7 @@ public record ProfileDto(
     List<string> Interests,
     string? AvatarUrl);
 
-public record MeResponse(Guid UserId, string Email, University University, ProfileDto? Profile);
+public record MeResponse(Guid UserId, string Email, University University, bool ConsentComplete, ProfileDto? Profile);
 
 public record UploadUrlRequest([Required] string ContentType);
 

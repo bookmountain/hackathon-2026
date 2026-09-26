@@ -9,10 +9,11 @@ using UniMap.Api.Services;
 namespace UniMap.Api.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Policy = ConsentPolicy.SignedInOnly)] // GET works before consent; editing needs it (below)
 [Route("api/me")]
-public class MeController(AppDbContext db, StorageService storage) : ControllerBase
+public class MeController(AppDbContext db, StorageService storage, ConsentService consents) : ControllerBase
 {
+    /// <summary>Works before consent, so the app can decide which onboarding screen to show.</summary>
     [HttpGet]
     public async Task<ActionResult<MeResponse>> Get()
     {
@@ -21,7 +22,7 @@ public class MeController(AppDbContext db, StorageService storage) : ControllerB
         if (user is null) return NotFound();
 
         var profile = user.Profile is null ? null : ProfileMapper.ToDto(user.Profile, storage);
-        return new MeResponse(user.Id, user.Email, user.University, profile);
+        return new MeResponse(user.Id, user.Email, user.University, await consents.IsCompleteAsync(user.Id), profile);
     }
 
     /// <summary>
@@ -29,6 +30,7 @@ public class MeController(AppDbContext db, StorageService storage) : ControllerB
     /// send its id; department is then filled in from the degree's college.
     /// </summary>
     [HttpPut("profile")]
+    [Authorize] // default policy: signed in + required consents
     public async Task<ActionResult<ProfileDto>> UpsertProfile(UpsertProfileRequest req)
     {
         var userId = User.UserId();

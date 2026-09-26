@@ -17,7 +17,9 @@ public class AuthController(
     VerificationCodeStore codes,
     IEmailSender email,
     TokenService tokens,
-    IWebHostEnvironment env) : ControllerBase
+    ConsentService consents,
+    IWebHostEnvironment env,
+    IConfiguration config) : ControllerBase
 {
     /// <summary>Register with a University of Adelaide or Flinders email. Sends a 6-digit verification code.</summary>
     [HttpPost("register")]
@@ -47,7 +49,9 @@ public class AuthController(
         var code = await codes.CreateAsync(addr);
         await email.SendVerificationCodeAsync(addr, code);
 
-        return Ok(new RegisterResponse(user.Id, uni, "Verification code sent.", env.IsDevelopment() ? code : null));
+        // Auth:ReturnDevCode lets the hosted demo API (no real email) hand the code to the mobile app too.
+        var showCode = env.IsDevelopment() || config.GetValue<bool>("Auth:ReturnDevCode");
+        return Ok(new RegisterResponse(user.Id, uni, "Verification code sent.", showCode ? code : null));
     }
 
     [HttpPost("verify")]
@@ -62,7 +66,7 @@ public class AuthController(
         await db.SaveChangesAsync();
 
         var (token, exp) = tokens.Issue(user);
-        return new AuthResponse(token, exp, user.Profile is not null);
+        return new AuthResponse(token, exp, await consents.IsCompleteAsync(user.Id), user.Profile is not null);
     }
 
     [HttpPost("resend-code")]
@@ -90,6 +94,6 @@ public class AuthController(
             return Problem("Email not verified yet.", statusCode: StatusCodes.Status403Forbidden);
 
         var (token, exp) = tokens.Issue(user);
-        return new AuthResponse(token, exp, user.Profile is not null);
+        return new AuthResponse(token, exp, await consents.IsCompleteAsync(user.Id), user.Profile is not null);
     }
 }
