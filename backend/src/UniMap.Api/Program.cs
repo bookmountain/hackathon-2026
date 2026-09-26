@@ -38,6 +38,8 @@ builder.Services.AddSingleton<TokenService>();
 builder.Services.AddSingleton<VerificationCodeStore>();
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddScoped<ChatService>();
+if (builder.Environment.IsDevelopment() || config.GetValue<bool>("Seed:Enabled"))
+    builder.Services.AddHostedService<DemoEventsRefresher>();
 if (config.GetSection("Email").Get<EmailOptions>()?.IsConfigured == true)
     builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 else
@@ -80,7 +82,7 @@ builder.Services.AddAuthorization(o =>
 });
 
 // --- Web ---
-builder.Services.AddControllers()
+builder.Services.AddControllers(o => o.ModelBinderProviders.Insert(0, new StringEnumModelBinderProvider()))
     // allowIntegerValues: false, otherwise "22" or 22 is accepted as an (undefined) enum value.
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
 builder.Services.AddProblemDetails();

@@ -42,7 +42,25 @@ public class UploadsController(StorageService storage, AppDbContext db) : Contro
         return new FlatPhotoUploadResponse(listingId, up.UploadUrl, up.Key, up.ReadUrl, up.ExpiresAt);
     }
 
-    /// <param name="folder">Full folder, e.g. "avatars/{userId}" or "flats/{listingId}".</param>
+    /// <summary>
+    /// Market item photos, stored one folder per item: items/{itemId}/. For a new item, leave itemId null
+    /// on the first photo; reuse the returned itemId for the other photos and as "id" on POST /api/items.
+    /// Then send all the keys in photoKeys.
+    /// </summary>
+    [HttpPost("item-photo")]
+    public async Task<ActionResult<ItemPhotoUploadResponse>> ItemPhoto(ItemPhotoUploadRequest req)
+    {
+        var itemId = req.ItemId ?? Guid.NewGuid();
+        // An existing item must be yours; an unknown id is an item that's still being written.
+        var sellerId = await db.MarketItems.Where(i => i.Id == itemId).Select(i => (Guid?)i.SellerId).FirstOrDefaultAsync();
+        if (sellerId is not null && sellerId != User.UserId()) return NotFound();
+
+        var result = Presign(new UploadUrlRequest(req.ContentType), $"items/{itemId}");
+        if (result.Value is not { } up) return result.Result!;
+        return new ItemPhotoUploadResponse(itemId, up.UploadUrl, up.Key, up.ReadUrl, up.ExpiresAt);
+    }
+
+    /// <param name="folder">Full folder, e.g. "avatars/{userId}", "flats/{listingId}" or "items/{itemId}".</param>
     private ActionResult<UploadUrlResponse> Presign(UploadUrlRequest req, string folder)
     {
         if (!storage.IsConfigured)

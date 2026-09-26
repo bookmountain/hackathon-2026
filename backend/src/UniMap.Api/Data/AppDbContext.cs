@@ -9,6 +9,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<Degree> Degrees => Set<Degree>();
     public DbSet<FlatListing> FlatListings => Set<FlatListing>();
+    public DbSet<MarketItem> MarketItems => Set<MarketItem>();
+    public DbSet<MeetupEvent> MeetupEvents => Set<MeetupEvent>();
+    public DbSet<EventAttendee> EventAttendees => Set<EventAttendee>();
     public DbSet<Conversation> Conversations => Set<Conversation>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
     public DbSet<ConsentRecord> ConsentRecords => Set<ConsentRecord>();
@@ -69,6 +72,45 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(f => new { f.Status, f.RentPerWeek });
             e.HasIndex(f => f.Features).HasMethod("gin");
             e.HasOne(f => f.Owner).WithMany().HasForeignKey(f => f.OwnerId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<MarketItem>(e =>
+        {
+            e.Property(i => i.Title).HasMaxLength(80);
+            e.Property(i => i.Description).HasMaxLength(1000);
+            e.Property(i => i.Category).HasConversion<string>().HasMaxLength(16);
+            e.Property(i => i.Condition).HasConversion<string>().HasMaxLength(16);
+            e.Property(i => i.ConditionNote).HasMaxLength(60);
+            e.Property(i => i.Availability).HasConversion<string>().HasMaxLength(16);
+            e.Property(i => i.PickupPointId).HasMaxLength(32);
+            e.Property(i => i.PlaceName).HasMaxLength(64);
+            e.Property(i => i.Location).HasColumnType("geography (point, 4326)");
+            e.HasIndex(i => i.Location).HasMethod("gist");
+            e.HasIndex(i => new { i.Availability, i.Category, i.CreatedAt });
+            e.HasIndex(i => i.PickupPointId);
+            e.HasOne(i => i.Seller).WithMany().HasForeignKey(i => i.SellerId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<MeetupEvent>(e =>
+        {
+            e.Property(m => m.Title).HasMaxLength(80);
+            e.Property(m => m.Description).HasMaxLength(1000);
+            e.Property(m => m.Type).HasConversion<string>().HasMaxLength(16);
+            e.Property(m => m.PlaceId).HasMaxLength(32);
+            e.Property(m => m.PlaceName).HasMaxLength(64);
+            e.Property(m => m.Location).HasColumnType("geography (point, 4326)");
+            e.HasIndex(m => m.Location).HasMethod("gist");
+            e.HasIndex(m => m.StartsAt);
+            e.HasIndex(m => m.HostId);
+            e.HasOne(m => m.Host).WithMany().HasForeignKey(m => m.HostId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<EventAttendee>(e =>
+        {
+            e.HasKey(a => new { a.EventId, a.UserId });
+            e.HasIndex(a => a.UserId);
+            e.HasOne(a => a.Event).WithMany(m => m.Attendees).HasForeignKey(a => a.EventId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(a => a.User).WithMany().HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         b.Entity<Conversation>(e =>

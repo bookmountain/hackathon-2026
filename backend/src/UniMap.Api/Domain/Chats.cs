@@ -2,8 +2,11 @@ namespace UniMap.Api.Domain;
 
 public enum ChatMessageKind { Text, About }
 
-/// <summary>What an "About" message refers to. Market items and meetups can be added later.</summary>
-public enum ChatAboutType { Flat }
+/// <summary>
+/// What an "About" message refers to. Meetups have none on purpose: their hosts are anonymous, so there's
+/// nobody to message.
+/// </summary>
+public enum ChatAboutType { Flat, Item }
 
 /// <summary>
 /// One chat per pair of students (like the UCompass prototype). UserAId is always the smaller id,
@@ -42,7 +45,8 @@ public class ChatMessage
     /// <summary>Null for "About" messages, which the app adds itself.</summary>
     public Guid? SenderId { get; set; }
     public ChatMessageKind Kind { get; set; }
-    /// <summary>Text, or for "About" messages the label shown, e.g. "About: Sunny room · $245/wk".</summary>
+    /// <summary>Text, or for "About" messages the label shown, e.g. "About: Sunny room · $245/wk" or
+    /// "About: LED desk lamp (USB) · $12".</summary>
     public required string Body { get; set; }
     public ChatAboutType? AboutType { get; set; }
     public Guid? AboutId { get; set; }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -13,9 +14,11 @@ using UniMap.Api.Data;
 namespace UniMap.Api.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260926094619_AddMarketItems")]
+    partial class AddMarketItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -223,29 +226,6 @@ namespace UniMap.Api.Data.Migrations
                         .HasDatabaseName("ix_degrees_university_level_name");
 
                     b.ToTable("degrees", (string)null);
-                });
-
-            modelBuilder.Entity("UniMap.Api.Domain.EventAttendee", b =>
-                {
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("event_id");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.Property<DateTimeOffset>("JoinedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("joined_at");
-
-                    b.HasKey("EventId", "UserId")
-                        .HasName("pk_event_attendees");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_event_attendees_user_id");
-
-                    b.ToTable("event_attendees", (string)null);
                 });
 
             modelBuilder.Entity("UniMap.Api.Domain.FlatListing", b =>
@@ -490,90 +470,6 @@ namespace UniMap.Api.Data.Migrations
                     b.ToTable("market_items", (string)null);
                 });
 
-            modelBuilder.Entity("UniMap.Api.Domain.MeetupEvent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<int>("Capacity")
-                        .HasColumnType("integer")
-                        .HasColumnName("capacity");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("description");
-
-                    b.Property<DateTimeOffset?>("EndsAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("ends_at");
-
-                    b.Property<Guid>("HostId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("host_id");
-
-                    b.Property<Point>("Location")
-                        .IsRequired()
-                        .HasColumnType("geography (point, 4326)")
-                        .HasColumnName("location");
-
-                    b.Property<string>("PlaceId")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("place_id");
-
-                    b.Property<string>("PlaceName")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("place_name");
-
-                    b.Property<DateTimeOffset>("StartsAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("starts_at");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("title");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("type");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<bool>("WalkInsWelcome")
-                        .HasColumnType("boolean")
-                        .HasColumnName("walk_ins_welcome");
-
-                    b.HasKey("Id")
-                        .HasName("pk_meetup_events");
-
-                    b.HasIndex("HostId")
-                        .HasDatabaseName("ix_meetup_events_host_id");
-
-                    b.HasIndex("Location")
-                        .HasDatabaseName("ix_meetup_events_location");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Location"), "gist");
-
-                    b.HasIndex("StartsAt")
-                        .HasDatabaseName("ix_meetup_events_starts_at");
-
-                    b.ToTable("meetup_events", (string)null);
-                });
-
             modelBuilder.Entity("UniMap.Api.Domain.Profile", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -751,27 +647,6 @@ namespace UniMap.Api.Data.Migrations
                     b.Navigation("UserB");
                 });
 
-            modelBuilder.Entity("UniMap.Api.Domain.EventAttendee", b =>
-                {
-                    b.HasOne("UniMap.Api.Domain.MeetupEvent", "Event")
-                        .WithMany("Attendees")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_event_attendees_meetup_events_event_id");
-
-                    b.HasOne("UniMap.Api.Domain.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_event_attendees_users_user_id");
-
-                    b.Navigation("Event");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("UniMap.Api.Domain.FlatListing", b =>
                 {
                     b.HasOne("UniMap.Api.Domain.User", "Owner")
@@ -796,18 +671,6 @@ namespace UniMap.Api.Data.Migrations
                     b.Navigation("Seller");
                 });
 
-            modelBuilder.Entity("UniMap.Api.Domain.MeetupEvent", b =>
-                {
-                    b.HasOne("UniMap.Api.Domain.User", "Host")
-                        .WithMany()
-                        .HasForeignKey("HostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_meetup_events_users_host_id");
-
-                    b.Navigation("Host");
-                });
-
             modelBuilder.Entity("UniMap.Api.Domain.Profile", b =>
                 {
                     b.HasOne("UniMap.Api.Domain.Degree", "Degree")
@@ -826,11 +689,6 @@ namespace UniMap.Api.Data.Migrations
                     b.Navigation("Degree");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("UniMap.Api.Domain.MeetupEvent", b =>
-                {
-                    b.Navigation("Attendees");
                 });
 
             modelBuilder.Entity("UniMap.Api.Domain.User", b =>

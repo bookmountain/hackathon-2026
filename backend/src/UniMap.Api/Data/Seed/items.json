@@ -1,0 +1,443 @@
+[
+ {
+  "id": "f0de4bd7-d359-54b6-9baf-225c93f7be2e",
+  "label": "m01",
+  "seller": "p05",
+  "title": "Calculus textbook (Stewart, 8th ed.)",
+  "price": 35,
+  "category": "Textbooks",
+  "condition": "Good",
+  "conditionNote": "some highlighting",
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "barr-smith-library",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 2,
+  "description": "Used for MATHS 1011/1012. A few highlighted pages, no torn pages. Happy to meet at Barr Smith between classes.",
+  "photos": [
+   "items/f0de4bd7-d359-54b6-9baf-225c93f7be2e/01.jpg"
+  ]
+ },
+ {
+  "id": "4abe032d-0d87-57af-a4d2-61ae33331458",
+  "label": "m02",
+  "seller": "p08",
+  "title": "LED desk lamp (USB)",
+  "price": 12,
+  "category": "Furniture",
+  "condition": "LikeNew",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "adelaide-railway-station",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 5,
+  "description": "Three brightness levels, USB powered. Moving out, need it gone this week.",
+  "photos": [
+   "items/4abe032d-0d87-57af-a4d2-61ae33331458/01.jpg"
+  ]
+ },
+ {
+  "id": "00f6d3f9-d29a-5c9b-8beb-44cbf623aaf0",
+  "label": "m03",
+  "seller": "p01",
+  "title": "iPad 9th gen + Apple Pencil",
+  "price": 320,
+  "category": "Tech",
+  "condition": "Excellent",
+  "conditionNote": null,
+  "availability": "Pending",
+  "availableInDays": 0,
+  "pickupPointId": "flinders-city-campus",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 24,
+  "description": "64GB, always in a case. Comes with charger and 1st-gen Pencil. Pending pickup, message to be next in line.",
+  "photos": [
+   "items/00f6d3f9-d29a-5c9b-8beb-44cbf623aaf0/01.jpg"
+  ]
+ },
+ {
+  "id": "a84676c9-87fb-5061-ac58-bd22feed7e82",
+  "label": "m04",
+  "seller": "p06",
+  "title": "Rice cooker, 5-cup",
+  "price": 25,
+  "category": "Kitchen",
+  "condition": "Good",
+  "conditionNote": null,
+  "availability": "From",
+  "availableInDays": 5,
+  "pickupPointId": null,
+  "placeName": "Rundle St East",
+  "lat": -34.922492,
+  "lng": 138.609368,
+  "postedHoursAgo": 26,
+  "description": "Works perfectly, includes measuring cup and paddle. Available once I move out.",
+  "photos": [
+   "items/a84676c9-87fb-5061-ac58-bd22feed7e82/01.jpg"
+  ]
+ },
+ {
+  "id": "c9b2babc-f508-50ea-82cf-391178e62e62",
+  "label": "m05",
+  "seller": "p02",
+  "title": "Mesh office chair",
+  "price": 40,
+  "category": "Furniture",
+  "condition": "Good",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": null,
+  "placeName": "Pulteney St",
+  "lat": -34.931859,
+  "lng": 138.606306,
+  "postedHoursAgo": 72,
+  "description": "Adjustable height, lumbar support. A bit squeaky but comfy for long study nights.",
+  "photos": [
+   "items/c9b2babc-f508-50ea-82cf-391178e62e62/01.jpg"
+  ]
+ },
+ {
+  "id": "6c705ded-5d94-57e3-b46c-868879954f04",
+  "label": "m06",
+  "seller": "p04",
+  "title": "Lab coat + safety glasses",
+  "price": 15,
+  "category": "StudyGear",
+  "condition": "LikeNew",
+  "conditionNote": "worn once",
+  "availability": "Sold",
+  "availableInDays": 0,
+  "pickupPointId": "flinders-city-campus",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 96,
+  "description": "Size M lab coat and glasses for first-year chem labs.",
+  "photos": [
+   "items/6c705ded-5d94-57e3-b46c-868879954f04/01.jpg"
+  ]
+ },
+ {
+  "id": "5ef60e9a-10a0-5575-9998-fe2bf874e701",
+  "label": "m07",
+  "seller": "p38",
+  "title": "Campbell Biology (12th ed.)",
+  "price": 45,
+  "category": "Textbooks",
+  "condition": "Good",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "barr-smith-library",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 8,
+  "description": "Used for first-year biology. Clean pages, just a few sticky tabs. Cheaper than buying it second-hand in store.",
+  "photos": [
+   "items/5ef60e9a-10a0-5575-9998-fe2bf874e701/01.jpg"
+  ]
+ },
+ {
+  "id": "abae761a-a881-57e5-8a89-69002a511949",
+  "label": "m08",
+  "seller": "p32",
+  "title": "Principles of Economics (Mankiw)",
+  "price": 30,
+  "category": "Textbooks",
+  "condition": "Fair",
+  "conditionNote": "pencil notes",
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "barr-smith-library",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 30,
+  "description": "Asia-Pacific edition. Pencil notes in the first few chapters, easy to rub out.",
+  "photos": [
+   "items/abae761a-a881-57e5-8a89-69002a511949/01.jpg"
+  ]
+ },
+ {
+  "id": "300ee608-422b-5d37-8476-4c755b85c69a",
+  "label": "m09",
+  "seller": "p30",
+  "title": "Human Anatomy & Physiology (Marieb)",
+  "price": 50,
+  "category": "Textbooks",
+  "condition": "Excellent",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "flinders-city-campus",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 50,
+  "description": "Barely opened, I ended up using the ebook. It's heavy, so pickup at the city campus only.",
+  "photos": [
+   "items/300ee608-422b-5d37-8476-4c755b85c69a/01.jpg"
+  ]
+ },
+ {
+  "id": "5ca52d1f-831e-5e91-82c8-a737f0a1fd55",
+  "label": "m10",
+  "seller": "p14",
+  "title": "Criminology textbook bundle",
+  "price": 40,
+  "category": "Textbooks",
+  "condition": "Good",
+  "conditionNote": null,
+  "availability": "Sold",
+  "availableInDays": 0,
+  "pickupPointId": "flinders-city-campus",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 120,
+  "description": "First-year intro to criminology, criminal justice and research methods texts, plus a few novels I'm clearing out. Selling as a set.",
+  "photos": [
+   "items/5ca52d1f-831e-5e91-82c8-a737f0a1fd55/01.jpg"
+  ]
+ },
+ {
+  "id": "7c5c98f2-613d-5b72-b5d4-323013534f33",
+  "label": "m11",
+  "seller": "p10",
+  "title": "Casio fx-82AU Plus II calculator",
+  "price": 15,
+  "category": "StudyGear",
+  "condition": "LikeNew",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "flinders-city-campus",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 10,
+  "description": "The standard scientific calculator for first-year maths and engineering. Comes with its hard cover.",
+  "photos": [
+   "items/7c5c98f2-613d-5b72-b5d4-323013534f33/01.jpg"
+  ]
+ },
+ {
+  "id": "c12e56e4-e0df-50ac-9ba7-a95acd41042b",
+  "label": "m12",
+  "seller": "p21",
+  "title": "Wireless keyboard + mouse",
+  "price": 25,
+  "category": "Tech",
+  "condition": "Good",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "flinders-city-campus",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 34,
+  "description": "Full-size keyboard and mouse sharing one USB receiver. Batteries included.",
+  "photos": [
+   "items/c12e56e4-e0df-50ac-9ba7-a95acd41042b/01.jpg"
+  ]
+ },
+ {
+  "id": "fedf294b-7821-5ab8-8ed6-3f44cea68c8f",
+  "label": "m13",
+  "seller": "p23",
+  "title": "24-inch monitor (1080p, HDMI)",
+  "price": 70,
+  "category": "Tech",
+  "condition": "Good",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "adelaide-railway-station",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 44,
+  "description": "No dead pixels, comes with stand and HDMI cable. I catch the train from Mawson Lakes, so the station is easiest.",
+  "photos": [
+   "items/fedf294b-7821-5ab8-8ed6-3f44cea68c8f/01.jpg"
+  ]
+ },
+ {
+  "id": "66e50317-f454-54e8-9b5a-093491315726",
+  "label": "m14",
+  "seller": "p31",
+  "title": "Noise-cancelling headphones",
+  "price": 90,
+  "category": "Tech",
+  "condition": "Excellent",
+  "conditionNote": null,
+  "availability": "Pending",
+  "availableInDays": 0,
+  "pickupPointId": "adelaide-railway-station",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 20,
+  "description": "Over-ear, Bluetooth, about 30 hours of battery. Case and cable included. Someone's picking up Friday, message to be next in line.",
+  "photos": [
+   "items/66e50317-f454-54e8-9b5a-093491315726/01.jpg"
+  ]
+ },
+ {
+  "id": "2627deed-6e35-51e4-85d6-1b10f50f358a",
+  "label": "m15",
+  "seller": "p25",
+  "title": "White cube shelf (2 × 2)",
+  "price": 30,
+  "category": "Furniture",
+  "condition": "Good",
+  "conditionNote": null,
+  "availability": "From",
+  "availableInDays": 7,
+  "pickupPointId": null,
+  "placeName": "Carrington St",
+  "lat": -34.931301,
+  "lng": 138.604382,
+  "postedHoursAgo": 60,
+  "description": "Four cubes, already assembled. Great for books or storage boxes. You'll need a car or a friend, but I can help carry it down.",
+  "photos": [
+   "items/2627deed-6e35-51e4-85d6-1b10f50f358a/01.jpg"
+  ]
+ },
+ {
+  "id": "4025f706-1240-545d-9862-7a2c72227f4c",
+  "label": "m16",
+  "seller": "p45",
+  "title": "Small study desk (100 cm)",
+  "price": 35,
+  "category": "Furniture",
+  "condition": "Good",
+  "conditionNote": "a few scuffs",
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": null,
+  "placeName": "Park Tce, Bowden",
+  "lat": -34.905263,
+  "lng": 138.580843,
+  "postedHoursAgo": 80,
+  "description": "Fits in a small bedroom. A couple of scuffs on the legs. Comes apart with an Allen key.",
+  "photos": [
+   "items/4025f706-1240-545d-9862-7a2c72227f4c/01.jpg"
+  ]
+ },
+ {
+  "id": "8836f361-cd05-5f59-89bd-c5d4b765974f",
+  "label": "m17",
+  "seller": "p12",
+  "title": "Electric kettle (1.7 L)",
+  "price": 10,
+  "category": "Kitchen",
+  "condition": "Good",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": null,
+  "placeName": "Grote St",
+  "lat": -34.929115,
+  "lng": 138.591878,
+  "postedHoursAgo": 15,
+  "description": "Boils fast, auto switch-off. Just upgraded to a gooseneck one for pour-over coffee.",
+  "photos": [
+   "items/8836f361-cd05-5f59-89bd-c5d4b765974f/01.jpg"
+  ]
+ },
+ {
+  "id": "d78c755a-8064-5a06-a2d7-e12511e98865",
+  "label": "m18",
+  "seller": "p24",
+  "title": "Cast-iron frying pan",
+  "price": 15,
+  "category": "Kitchen",
+  "condition": "Excellent",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "flinders-city-campus",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 56,
+  "description": "Well seasoned. Works on gas, electric and induction.",
+  "photos": [
+   "items/d78c755a-8064-5a06-a2d7-e12511e98865/01.jpg"
+  ]
+ },
+ {
+  "id": "d67f0047-bd10-5702-a4d7-aa78ce28a552",
+  "label": "m19",
+  "seller": "p16",
+  "title": "Microwave (20 L)",
+  "price": 30,
+  "category": "Kitchen",
+  "condition": "Good",
+  "conditionNote": null,
+  "availability": "From",
+  "availableInDays": 10,
+  "pickupPointId": null,
+  "placeName": "Glen Osmond Rd, Parkside",
+  "lat": -34.942465,
+  "lng": 138.61877,
+  "postedHoursAgo": 90,
+  "description": "Works well, clean inside. Available when my lease ends.",
+  "photos": [
+   "items/d67f0047-bd10-5702-a4d7-aa78ce28a552/01.jpg"
+  ]
+ },
+ {
+  "id": "4392d29d-086d-5790-acf2-ba6fdccc0bfb",
+  "label": "m20",
+  "seller": "p34",
+  "title": "Stethoscope (Littmann Classic III)",
+  "price": 80,
+  "category": "StudyGear",
+  "condition": "Excellent",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "flinders-city-campus",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 28,
+  "description": "Graduating, so passing it on. Recently cleaned, with new ear tips.",
+  "photos": [
+   "items/4392d29d-086d-5790-acf2-ba6fdccc0bfb/01.jpg"
+  ]
+ },
+ {
+  "id": "40c5e84c-c007-5702-9fbf-4be3ba2ad720",
+  "label": "m21",
+  "seller": "p20",
+  "title": "Drawing tablet (Wacom Intuos S)",
+  "price": 45,
+  "category": "Tech",
+  "condition": "Good",
+  "conditionNote": null,
+  "availability": "Now",
+  "availableInDays": 0,
+  "pickupPointId": "flinders-city-campus",
+  "placeName": null,
+  "lat": null,
+  "lng": null,
+  "postedHoursAgo": 66,
+  "description": "Pen and USB cable included. Works on Mac and Windows. Great for first-year design subjects.",
+  "photos": [
+   "items/40c5e84c-c007-5702-9fbf-4be3ba2ad720/01.jpg"
+  ]
+ }
+]

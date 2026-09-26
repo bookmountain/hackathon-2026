@@ -19,21 +19,30 @@ public class ChatService(AppDbContext db, StorageService storage, IHubContext<Ch
         return (conv, true);
     }
 
-    /// <summary>Adds the "About: …" line unless the chat is already about this listing.</summary>
-    public async Task<ChatMessage?> AddAboutFlatAsync(Conversation conv, FlatListing flat)
+    /// <summary>Adds the "About: {listing} · $rent/wk" line unless the chat is already about this listing.</summary>
+    public Task<ChatMessage?> AddAboutFlatAsync(Conversation conv, FlatListing flat) =>
+        AddAboutAsync(conv, ChatAboutType.Flat, flat.Id, $"About: {flat.Title} · ${flat.RentPerWeek}/wk");
+
+    /// <summary>Adds the "About: {title} · $price" line unless the chat is already about this item.</summary>
+    public Task<ChatMessage?> AddAboutItemAsync(Conversation conv, MarketItem item) =>
+        AddAboutAsync(conv, ChatAboutType.Item, item.Id, AboutItem(item.Title, item.Price));
+
+    public static string AboutItem(string title, int price) => $"About: {title} · ${price}";
+
+    private async Task<ChatMessage?> AddAboutAsync(Conversation conv, ChatAboutType type, Guid id, string body)
     {
         var lastAbout = await db.ChatMessages.AsNoTracking()
             .Where(m => m.ConversationId == conv.Id && m.Kind == ChatMessageKind.About)
             .OrderByDescending(m => m.CreatedAt).FirstOrDefaultAsync();
-        if (lastAbout is { AboutType: ChatAboutType.Flat } && lastAbout.AboutId == flat.Id) return null;
+        if (lastAbout is not null && lastAbout.AboutType == type && lastAbout.AboutId == id) return null;
 
         return Add(conv, new ChatMessage
         {
             ConversationId = conv.Id,
             Kind = ChatMessageKind.About,
-            Body = $"About: {flat.Title} · ${flat.RentPerWeek}/wk",
-            AboutType = ChatAboutType.Flat,
-            AboutId = flat.Id,
+            Body = body,
+            AboutType = type,
+            AboutId = id,
         });
     }
 

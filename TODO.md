@@ -1,6 +1,7 @@
 # TODO: fix after the hackathon
 
-Things we chose not to fix yet. Newest first within each section.
+Things we chose not to fix yet. Newest first within each section. What the app needs to do differently
+from the prototype is in [FRONTEND-GAPS.md](FRONTEND-GAPS.md).
 
 ## Degree data
 
@@ -37,10 +38,36 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **Walk times are estimates:** straight-line distance × 1.25 at 4.8 km/h. A routing service
       (OSRM, or Mapbox/Google) would give real walking times, plus public transport, which matters more
       for suburbs like Glenelg or Prospect.
-- [ ] **Messaging.** The prototype's "Message tenant" needs a chat API. Market and meetups need it too.
+- [ ] **A missing gender is saved as `Male`.** `UpsertProfileRequest.Gender` is `[Required]` but not
+      nullable, so leaving it out binds the default value instead of failing. The prototype never asks for
+      gender. Make it `Gender?` (like the item and event enums) once the PM decides whether to keep it.
 - [ ] **Profile mismatch with the prototype.** UCompass shows only nickname, major, uni and an optional
       preset avatar. Our profile still has gender, pronouns, bio, habits and interests. The PM or designer
       should pick one.
+
+## Market
+
+- [ ] **Deleted items leave their photos in R2**, like flats. Delete `items/{id}/` when an item is deleted,
+      and clean up uploads that never get attached to an item.
+- [ ] **Flats don't check that photos were uploaded.** Items do (`StorageService.ExistsAsync`), because a
+      photo is required. Flats could use the same check.
+- [ ] **Uploads aren't size-checked.** The presigned URL fixes the content type, not the file size.
+- [ ] **"Available from" uses the UTC date**, so it can flip to "Now" up to 9.5 hours before midnight in
+      Adelaide. The same goes for the check that a new date is in the future.
+- [ ] **No report or block** for scam listings. The consent screen promises "Report & block in one tap".
+
+## Meetups
+
+- [ ] **No report or block** for events, like the market. An anonymous host makes this matter more: the
+      server knows the host (`host_id`), so a report could still reach them.
+- [ ] **No reminders.** Nothing tells people going that an event starts soon. Push notifications (see Chats)
+      would cover it.
+- [ ] **Capacity is also enforced for walk-in events.** The API refuses Join at capacity, but the prototype
+      says walk-ins need no RSVP. The PM should say whether a full walk-in event should still accept Join.
+- [ ] **Cancelled and old events.** Cancelling deletes the event, and finished events are kept forever
+      (they only drop out of search). Archive or delete old ones eventually.
+- [ ] **`eventGoing` goes to every connected client.** Fine at hackathon scale; with many users, send it
+      only to people viewing the Meetups tab (a SignalR group).
 
 ## Privacy
 
@@ -58,7 +85,6 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **Push notifications** (Expo, FCM or APNs) for when the app is closed. SignalR only reaches open apps.
 - [ ] **Scaling out:** with more than one API instance, SignalR needs a Redis backplane
       (`AddStackExchangeRedis`). Redis is already running.
-- [ ] Chats about market items and meetups. `ChatAboutType` only has `Flat` so far.
 
 ## Removed profile fields
 
@@ -82,7 +108,8 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] Set a real `JWT_KEY`. The default is a dev value.
 - [ ] Rotate the R2 API token. It was shared in a screenshot during setup.
 - [ ] Rate-limit `register`, `resend-code`, `verify` and `login`.
-- [ ] Escape `%` and `_` in degree search, which currently act as wildcards.
+- [ ] Escape `%` and `_` in degree search, which currently act as wildcards. Item search already does
+      (`ItemsController.EscapeLike`).
 
 ## Dev setup
 

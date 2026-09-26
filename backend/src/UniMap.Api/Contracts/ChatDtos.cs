@@ -25,10 +25,11 @@ public record ChatSummary(
     int UnreadCount,
     DateTimeOffset LastMessageAt);
 
-/// <summary>Open (or reuse) the chat with another student.</summary>
+/// <summary>Open (or reuse) the chat with another student. Send exactly one of userId, flatId or itemId.</summary>
 /// <param name="UserId">Chat with this student (e.g. from a person pin on the map).</param>
 /// <param name="FlatId">Or: chat with this listing's owner ("Message tenant"). Adds an "About" line.</param>
+/// <param name="ItemId">Or: chat with this item's seller ("Message seller"). Adds an "About" line.</param>
 /// <param name="Text">Optional first message, e.g. "Is it still available?".</param>
-public record StartChatRequest(Guid? UserId, Guid? FlatId, [MaxLength(2000)] string? Text);
+public record StartChatRequest(Guid? UserId, Guid? FlatId, Guid? ItemId, [MaxLength(2000)] string? Text);
 
 public record SendMessageRequest([Required, MaxLength(2000)] string Text);
