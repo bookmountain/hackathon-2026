@@ -4,7 +4,8 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
-import { pickPhotos, uploadPhotos } from "@/api/photos";
+import { downloadPhoto, pickPhotos, uploadPhotos, type LocalPhoto } from "@/api/photos";
+import type { ItemPhotoAnalysis } from "@/api/types";
 import { useToast } from "@/components/feedback/Toast";
 import {
   Button,
@@ -17,9 +18,16 @@ import {
   Segmented,
   TextField,
 } from "@/components/ui";
+import type { MapPoint } from "@/data/types";
+import AddressSearch from "@/features/forms/AddressSearch";
+import AiPhotoPanel from "@/features/forms/AiPhotoPanel";
+import { categoryLabel, conditionLabel, itemAutofill, toCategory, toCondition } from "@/features/forms/aiAutofill";
+import { parseAuDate } from "@/lib/auDate";
+import { useAddressSearch } from "@/features/forms/useAddressSearch";
+import { usePhotoAnalysis } from "@/features/forms/usePhotoAnalysis";
 import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
 import { useAppStore } from "@/store";
-import { colors, font } from "@/theme";
+import { colors, divider, font } from "@/theme";
 import {
   CATEGORY_OPTIONS,
   CONDITION_OPTIONS,
@@ -31,29 +39,57 @@ import {
   type ItemDraft,
 } from "./logic";
 
+const DEMO_PHOTO = "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=640&h=640&q=70&auto=format&fit=crop";
+const SELL_REGION = { ...CBD_REGION, latitude: -34.9205, longitude: 138.6005 };
+
 export default function SellScreen() {
   const { state, actions } = useAppStore();
   const toast = useToast();
   const { busy, submit } = useSubmit();
   const [draft, setDraft] = useState<ItemDraft>(EMPTY_ITEM);
+  const [fromText, setFromText] = useState("");
+  const [focus, setFocus] = useState<MapPoint | null>(null);
   const update = (patch: Partial<ItemDraft>) => setDraft((d) => ({ ...d, ...patch }));
-  const problem = itemProblem(draft);
 
-  const addPhotos = () =>
-    submit(async () => {
-      const picked = await pickPhotos(MAX_ITEM_PHOTOS - draft.photos.length);
-      setDraft((d) => ({ ...d, photos: [...d.photos, ...picked].slice(0, MAX_ITEM_PHOTOS) }));
-    });
+  const analysis = usePhotoAnalysis(api.ai.analyseItemPhoto, (a: ItemPhotoAnalysis) =>
+    setDraft((d) => ({ ...d, ...itemAutofill(d, a) })),
+  );
+  const address = useAddressSearch((r) => {
+    update({ pickup: "custom", pin: { latitude: r.latitude, longitude: r.longitude } });
+    setFocus({ latitude: r.latitude, longitude: r.longitude });
+  });
+
+  const fromInvalid = fromText.length === 10 && !parseAuDate(fromText);
+  const problem =
+    draft.avail === "From" && fromText && !parseAuDate(fromText) ? "Enter the date as DD/MM/YYYY" : itemProblem(draft);
+
+  const addPhotos = (picked: LocalPhoto[]) => {
+    if (!picked.length) return;
+    // The first photo is the one the AI looks at
+    if (!draft.photos.length) void analysis.run(picked[0].uri);
+    setDraft((d) => ({ ...d, photos: [...d.photos, ...picked].slice(0, MAX_ITEM_PHOTOS) }));
+  };
+
+  const removePhoto = (i: number) => {
+    const photos = draft.photos.filter((_, j) => j !== i);
+    update({ photos });
+    if (i === 0) {
+      if (photos[0]) void analysis.run(photos[0].uri);
+      else analysis.reset();
+    }
+  };
 
   const post = () => {
     if (problem) {
       toast(problem);
       return;
     }
+    // An unnamed pin placed from a typed address is called by that address
+    const placeName = (draft.placeName.trim() || (focus ? address.text.trim() : "")).slice(0, 64);
     void submit(async () => {
       const { id, keys } = await uploadPhotos(draft.photos, api.uploads.itemPhoto, (res) => res.itemId);
       if (!id) throw new Error("Add a photo first");
-      const created = await api.items.create(itemRequest(draft, id, keys));
+      const created = await api.items.create(itemRequest({ ...draft, placeName }, id, keys));
       await actions.loadItems();
       toast("Listed! Buyers can see it on the map.");
       router.dismissTo({ pathname: "/market", params: { posted: created.summary.id } });
@@ -68,9 +104,23 @@ export default function SellScreen() {
           <PhotoDropzone
             photos={draft.photos.map((p) => p.uri)}
             max={MAX_ITEM_PHOTOS}
-            onAdd={addPhotos}
-            onRemove={(i) => update({ photos: draft.photos.filter((_, j) => j !== i) })}
-            emptyText="Add product photo"
+            onAdd={() => submit(async () => addPhotos(await pickPhotos(MAX_ITEM_PHOTOS - draft.photos.length)))}
+            onRemove={removePhoto}
+            onDemo={() => submit(async () => addPhotos([await downloadPhoto(DEMO_PHOTO)]))}
+            emptyText="Upload product photo"
+          />
+          <AiPhotoPanel<ItemPhotoAnalysis>
+            state={analysis.state}
+            onRetry={analysis.retry}
+            facts={(a) => [
+              ["Category", categoryLabel(toCategory(a.category)) || a.category],
+              ["Condition", conditionLabel(toCondition(a.condition)) || a.condition],
+              ["Colour", a.colour],
+              ["Texture", a.texture],
+            ]}
+            benefits={(a) => a.benefits}
+            price={(a) => a.suggestedPrice}
+            onUsePrice={(price) => update({ price: String(price) })}
           />
           <TextField
             label="Title"
@@ -89,6 +139,7 @@ export default function SellScreen() {
           <TextField
             label="Description"
             multiline
+            rows={6}
             value={draft.desc}
             onChangeText={(desc) => update({ desc })}
             placeholder="Condition, what's included, when you're free to meet"
@@ -128,7 +179,14 @@ export default function SellScreen() {
               ]}
             />
             {draft.avail === "From" && (
-              <DateField label="Available from" value={draft.from} onChange={(from) => update({ from })} />
+              <DateField
+                value={fromText}
+                onChange={(text) => {
+                  setFromText(text);
+                  update({ from: parseAuDate(text) });
+                }}
+                error={fromInvalid ? "That date doesn't exist" : null}
+              />
             )}
           </View>
 
@@ -154,24 +212,31 @@ export default function SellScreen() {
                 </Pressable>
               );
             })}
+            <FieldLabel>Or type a pickup address</FieldLabel>
+            <AddressSearch search={address} placeholder="e.g. 25 Frome St" />
             <MiniMap
-              region={CBD_REGION}
-              aspectRatio={1.7}
-              label="Or tap the map to drop your own pin"
-              onPressPoint={(pin) => update({ pickup: "custom", pin })}
+              region={SELL_REGION}
+              height={220}
+              focus={focus}
+              label="Unknown address? Tap the map to pin it"
+              onPressPoint={(pin) => {
+                update({ pickup: "custom", pin });
+                setFocus(null);
+                address.mapTapped();
+              }}
             >
               {state.pickups.map((p) => (
                 <MapDot
                   key={p.id}
+                  kind="dot"
                   latitude={p.latitude}
                   longitude={p.longitude}
-                  halo={0}
-                  size={draft.pickup === p.id ? 16 : 10}
-                  color={draft.pickup === p.id ? colors.ink : colors.brandMid}
-                  strokeWidth={2}
+                  selected={draft.pickup === p.id}
+                  label={p.name}
+                  onPress={() => update({ pickup: p.id, pin: null })}
                 />
               ))}
-              {draft.pin && <MapDot {...draft.pin} halo={28} size={12} strokeWidth={2.5} />}
+              {draft.pickup === "custom" && draft.pin && <MapDot {...draft.pin} />}
             </MiniMap>
             {draft.pickup === "custom" && (
               <TextField
@@ -206,15 +271,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     borderWidth: 2,
-    borderColor: colors.lineSoft,
+    borderColor: colors.lineNeutral,
     backgroundColor: colors.surface,
     borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 11,
   },
-  optionActive: { borderColor: colors.brand, backgroundColor: colors.brandSelected },
+  optionActive: { borderColor: colors.brand, backgroundColor: colors.brandSoft },
   optionIcon: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
   optionName: { color: colors.ink, ...font(800, 14) },
   optionSub: { color: colors.muted, ...font(500, 12) },
-  footer: { paddingHorizontal: 20, paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.lineSoft },
+  footer: { paddingHorizontal: 20, paddingVertical: 12, ...divider.top },
 });

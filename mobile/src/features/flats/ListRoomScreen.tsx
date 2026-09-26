@@ -4,7 +4,8 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "re
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
-import { pickPhotos, uploadPhotos } from "@/api/photos";
+import { downloadPhoto, pickPhotos, uploadPhotos, type LocalPhoto } from "@/api/photos";
+import type { RoomPhotoAnalysis } from "@/api/types";
 import { useToast } from "@/components/feedback/Toast";
 import {
   Button,
@@ -14,23 +15,35 @@ import {
   PhotoDropzone,
   ScreenHeader,
   Segmented,
-  SelectField,
   Stepper,
   TextField,
 } from "@/components/ui";
-import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
+import type { MapPoint } from "@/data/types";
+import AddressSearch from "@/features/forms/AddressSearch";
+import AiPhotoPanel from "@/features/forms/AiPhotoPanel";
+import { roomAutofill, toFurnishing } from "@/features/forms/aiAutofill";
+import { parseAuDate } from "@/lib/auDate";
+import { useAddressSearch } from "@/features/forms/useAddressSearch";
+import { usePhotoAnalysis } from "@/features/forms/usePhotoAnalysis";
+import { MapDot, MiniMap } from "@/features/map";
 import { selectMe, useAppStore } from "@/store";
-import { colors } from "@/theme";
+import { colors, divider } from "@/theme";
 import {
   EMPTY_ROOM,
   FEATURE_OPTIONS,
   flatRequest,
   MAX_ROOM_PHOTOS,
-  MIN_STAY_OPTIONS,
   RHYTHM_OPTIONS,
   roomProblem,
   type RoomDraft,
 } from "./logic";
+
+const DEMO_PHOTO = "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&h=600&q=70&auto=format&fit=crop";
+/** A little wider than the other forms (zoom 14): flats can be anywhere near the city */
+const ROOM_REGION = { latitude: -34.9225, longitude: 138.602, latitudeDelta: 0.035, longitudeDelta: 0.032 };
+const FURNISHED_LABEL = { Fully: "Fully furnished", Partly: "Partly furnished", Unfurnished: "Unfurnished" } as const;
+/** The API takes 1–24 months, or nothing for flexible */
+const MAX_STAY = 24;
 
 const digits = (t: string) => t.replace(/\D/g, "");
 const toggle = (list: string[], value: string) =>
@@ -41,14 +54,49 @@ export default function ListRoomScreen() {
   const toast = useToast();
   const { busy, submit } = useSubmit();
   const [room, setRoom] = useState<RoomDraft>(EMPTY_ROOM);
+  const [fromText, setFromText] = useState("");
+  const [stayText, setStayText] = useState("");
+  const [focus, setFocus] = useState<MapPoint | null>(null);
   const update = (patch: Partial<RoomDraft>) => setRoom((r) => ({ ...r, ...patch }));
-  const problem = roomProblem(room);
 
-  const addPhotos = () =>
-    submit(async () => {
-      const picked = await pickPhotos(MAX_ROOM_PHOTOS - room.photos.length);
-      setRoom((r) => ({ ...r, photos: [...r.photos, ...picked].slice(0, MAX_ROOM_PHOTOS) }));
-    });
+  const analysis = usePhotoAnalysis(api.ai.analyseRoomPhoto, (a: RoomPhotoAnalysis) =>
+    setRoom((r) => ({ ...r, ...roomAutofill(r, a) })),
+  );
+  // A typed address pins the flat and fills in the street and suburb it found
+  const address = useAddressSearch((r) => {
+    setRoom((room) => ({
+      ...room,
+      pin: { latitude: r.latitude, longitude: r.longitude },
+      street: r.street ?? room.street,
+      suburb: r.suburb ?? room.suburb,
+    }));
+    setFocus({ latitude: r.latitude, longitude: r.longitude });
+  });
+
+  const stay = stayText ? Number(stayText) : null;
+  const fromInvalid = fromText.length === 10 && !parseAuDate(fromText);
+  const problem =
+    stay !== null && (stay < 1 || stay > MAX_STAY)
+      ? `Minimum stay is 1–${MAX_STAY} months`
+      : fromText && !parseAuDate(fromText)
+        ? "Enter the date as DD/MM/YYYY"
+        : roomProblem(room);
+
+  const addPhotos = (picked: LocalPhoto[]) => {
+    if (!picked.length) return;
+    // The first photo is the one the AI looks at
+    if (!room.photos.length) void analysis.run(picked[0].uri);
+    setRoom((r) => ({ ...r, photos: [...r.photos, ...picked].slice(0, MAX_ROOM_PHOTOS) }));
+  };
+
+  const removePhoto = (i: number) => {
+    const photos = room.photos.filter((_, j) => j !== i);
+    update({ photos });
+    if (i === 0) {
+      if (photos[0]) void analysis.run(photos[0].uri);
+      else analysis.reset();
+    }
+  };
 
   const publish = () => {
     const pin = room.pin;
@@ -74,9 +122,24 @@ export default function ListRoomScreen() {
           <PhotoDropzone
             photos={room.photos.map((p) => p.uri)}
             max={MAX_ROOM_PHOTOS}
-            onAdd={addPhotos}
-            onRemove={(i) => update({ photos: room.photos.filter((_, j) => j !== i) })}
-            emptyText="Add room photos"
+            onAdd={() => submit(async () => addPhotos(await pickPhotos(MAX_ROOM_PHOTOS - room.photos.length)))}
+            onRemove={removePhoto}
+            onDemo={() => submit(async () => addPhotos([await downloadPhoto(DEMO_PHOTO)]))}
+            emptyText="Upload room photo"
+          />
+          <AiPhotoPanel<RoomPhotoAnalysis>
+            state={analysis.state}
+            onRetry={analysis.retry}
+            facts={(a) => {
+              const furnished = toFurnishing(a.furnished);
+              return [
+                ["Style", a.style],
+                ["Colours", a.colours],
+                ["Furnished", furnished ? FURNISHED_LABEL[furnished] : a.furnished],
+                ["Features spotted", String(a.features.length)],
+              ];
+            }}
+            benefits={(a) => a.benefits}
           />
           <TextField
             label="Listing title"
@@ -87,11 +150,17 @@ export default function ListRoomScreen() {
 
           <View style={styles.group}>
             <FieldLabel>Location — pin the flat on the map</FieldLabel>
+            <AddressSearch search={address} placeholder="Type the flat address, e.g. 25 Frome St" />
             <MiniMap
-              region={CBD_REGION}
-              aspectRatio={1}
-              label="Tap to pin your flat · shown to students only"
-              onPressPoint={(pin) => update({ pin })}
+              region={ROOM_REGION}
+              height={220}
+              focus={focus}
+              label="Unknown address? Tap the map to pin it"
+              onPressPoint={(pin) => {
+                update({ pin });
+                setFocus(null);
+                address.mapTapped();
+              }}
             >
               {room.pin && <MapDot {...room.pin} />}
             </MiniMap>
@@ -169,11 +238,18 @@ export default function ListRoomScreen() {
               ]}
             />
           </View>
-          <SelectField
+          <TextField
             label="Minimum stay"
-            value={MIN_STAY_OPTIONS.find((o) => o.months === room.minStay)?.label ?? "Flexible"}
-            options={MIN_STAY_OPTIONS.map((o) => o.label)}
-            onChange={(label) => update({ minStay: MIN_STAY_OPTIONS.find((o) => o.label === label)?.months ?? null })}
+            value={stayText}
+            onChangeText={(t) => {
+              const text = digits(t).slice(0, 2);
+              setStayText(text);
+              update({ minStay: text ? Number(text) : null });
+            }}
+            placeholder="e.g. 6 (blank = flexible)"
+            keyboardType="number-pad"
+            maxLength={2}
+            suffix={stayText === "1" ? "month" : "months"}
           />
           <View style={styles.group}>
             <FieldLabel>Furnished</FieldLabel>
@@ -214,14 +290,23 @@ export default function ListRoomScreen() {
             placeholder="e.g. Quiet, non-smoker, any uni"
           />
           <TextField
-            label="About the room (optional)"
+            label="Description"
             multiline
+            rows={4}
             value={room.desc}
             onChangeText={(desc) => update({ desc })}
-            placeholder="Light, noise, what's nearby, who you're looking for"
+            placeholder="What's the room like? Upload a photo and AI will draft this."
             maxLength={1000}
           />
-          <DateField label="Available from" value={room.from} onChange={(from) => update({ from })} placeholder="Available now" />
+          <DateField
+            label="Available from (blank = now)"
+            value={fromText}
+            onChange={(text) => {
+              setFromText(text);
+              update({ from: parseAuDate(text) });
+            }}
+            error={fromInvalid ? "That date doesn't exist" : null}
+          />
         </ScrollView>
         <View style={styles.footer}>
           <Button
@@ -243,5 +328,5 @@ const styles = StyleSheet.create({
   group: { gap: 8 },
   row: { flexDirection: "row", gap: 10 },
   grow: { flex: 1 },
-  footer: { paddingHorizontal: 20, paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.lineSoft },
+  footer: { paddingHorizontal: 20, paddingVertical: 12, ...divider.top },
 });

@@ -25,15 +25,6 @@ export const RHYTHM_OPTIONS = ["Quiet weeknights", "Social house", "Early birds"
 export const MAX_ROOM_PHOTOS = 5;
 export const RENT = { min: 50, max: 2000 };
 
-/** "Minimum stay" picker: months, or null for flexible */
-export const MIN_STAY_OPTIONS: { label: string; months: number | null }[] = [
-  { label: "Flexible", months: null },
-  { label: "1 month", months: 1 },
-  { label: "3 months", months: 3 },
-  { label: "6 months", months: 6 },
-  { label: "12 months", months: 12 },
-];
-
 /** Values collected by the "List a room" form */
 export type RoomDraft = {
   photos: LocalPhoto[];

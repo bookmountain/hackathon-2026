@@ -7,17 +7,21 @@ type Props = Omit<TextInputProps, "style"> & {
   label?: string;
   /** Fixed text shown inside the field before the value, e.g. "$" */
   prefix?: string;
+  /** Fixed text after the value, e.g. "months" */
+  suffix?: string;
   height?: number;
+  /** Multiline only: visible lines before it scrolls */
+  rows?: number;
 };
 
 // Bordered input from the design: 2px ink, radius 14, brand border on focus
-export default function TextField({ label, prefix, height = 50, multiline, ...input }: Props) {
+export default function TextField({ label, prefix, suffix, height = 50, multiline, rows = 3, ...input }: Props) {
   const [focused, setFocused] = useState(false);
   const field = (
     <View>
       {prefix && (
         <View style={styles.prefixBox} pointerEvents="none">
-          <Text style={styles.prefix}>{prefix}</Text>
+          <Text style={styles.affix}>{prefix}</Text>
         </View>
       )}
       <TextInput
@@ -34,11 +38,17 @@ export default function TextField({ label, prefix, height = 50, multiline, ...in
         }}
         style={[
           styles.input,
-          multiline ? styles.multiline : { height },
+          multiline ? [styles.multiline, { minHeight: Math.round(rows * 14.5 * 1.45) + 24 }] : { height },
           prefix ? styles.withPrefix : null,
+          suffix ? styles.withSuffix : null,
           focused && styles.focused,
         ]}
       />
+      {suffix && (
+        <View style={styles.suffixBox} pointerEvents="none">
+          <Text style={styles.affix}>{suffix}</Text>
+        </View>
+      )}
     </View>
   );
   if (!label) return field;
@@ -62,13 +72,14 @@ const styles = StyleSheet.create({
     ...font(500, 15),
   },
   multiline: {
-    minHeight: 92,
     paddingTop: 12,
     paddingBottom: 12,
     textAlignVertical: "top",
     ...font(500, 14.5, 1.45),
   },
   withPrefix: { paddingLeft: 30 },
+  withSuffix: { paddingRight: 80 },
+  suffixBox: { position: "absolute", right: 16, top: 0, bottom: 0, justifyContent: "center" },
   prefixBox: {
     position: "absolute",
     left: 16,
@@ -77,6 +88,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
     justifyContent: "center",
   },
-  prefix: { color: colors.muted, ...font(700, 15) },
+  affix: { color: colors.muted, ...font(700, 15) },
   focused: { borderColor: colors.brand },
 });
