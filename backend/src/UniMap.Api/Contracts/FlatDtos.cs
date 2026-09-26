@@ -7,6 +7,10 @@ public record CampusWalk(string CampusId, string Name, University University, in
 
 /// <summary>Map pin / list card.</summary>
 /// <param name="Lat">Rounded to ~100 m for everyone except the owner.</param>
+/// <param name="WalkToAdelaideUni">Minutes to Adelaide Uni, North Tce (shown on every card in the design).</param>
+/// <param name="WalkToFlindersCity">Minutes to Flinders City Campus (shown on every card in the design).</param>
+/// <param name="NearestCampuses">The two closest campuses. For suburban rooms (e.g. Bedford Park) the city
+/// walks are 2+ hours, so show these instead when a city walk is over ~45 minutes.</param>
 public record FlatSummary(
     Guid Id,
     string Title,
@@ -24,6 +28,8 @@ public record FlatSummary(
     Furnishing Furnished,
     DateOnly? AvailableFrom,
     string? CoverPhotoUrl,
+    int WalkToAdelaideUni,
+    int WalkToFlindersCity,
     List<CampusWalk> NearestCampuses,
     ListingStatus Status,
     bool IsMine,
