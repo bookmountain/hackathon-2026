@@ -75,20 +75,50 @@ All of these need a login token, except `options`.
 
 Other students see each pin rounded to about 100 m; only the owner sees the exact spot.
 
+### Market (second-hand items)
+
+All of these need a login token, except `options`.
+
+- `GET /api/items/options`: categories and conditions (value + label to show), the three safe pickup
+  points, and the photo limit.
+- `GET /api/items`: search, for both the map and the grid. Filters are `category` (the chips; leave it
+  out for "All"), `search` (title or description), `pickupPoint`, `maxPrice` and a map viewport
+  (`minLat`…`maxLng`). `sort` is `newest` or `cheapest`. Sold items are left out unless `includeSold=true`:
+  the prototype's grid shows them greyed out, its map doesn't.
+- `GET /api/items/pickup-points`: the ★ pins, with how many items are waiting at each (pass `category`
+  to match the selected chip). Tapping one lists its items: `GET /api/items?pickupPoint={id}`.
+- `GET /api/items/{id}`: item detail, with the seller's nickname, major, uni and avatar. `isMine` means
+  show "Your listing"; availability `Sold` means show a disabled "Sold" button.
+- `POST /api/uploads/item-photo`, then `POST /api/items`: upload 1 to 5 photos, then post the item.
+  Photos are stored one R2 folder per item, `items/{itemId}/`. The first upload returns a new `itemId`.
+  Send it with the remaining photos, and as `id` when creating the item. A photo is required, and the
+  server checks it was actually uploaded.
+- `PUT /api/items/{id}`, `PUT /api/items/{id}/availability` (`Now`, `From` + `availableFrom`, `Pending`
+  or `Sold`), `DELETE /api/items/{id}`, `GET /api/items/mine`.
+- Pickup is either a safe pickup point (`pickupPointId`) or the seller's own pin (`lat`, `lng` and an
+  optional `placeName`). Other students see a seller's own pin rounded to about 100 m; pickup points
+  are exact.
+- Condition is `New`, `LikeNew`, `Excellent`, `Good` or `Fair`, plus an optional note. `conditionLabel`
+  is ready to show, e.g. "Good — some highlighting".
+- "Message seller" is `POST /api/chats` with `{ itemId, text }` (see below).
+
 ### Chats (messaging)
 
 One chat per pair of students. Other people only see your nickname, major, uni and avatar.
 
 - `POST /api/chats` with `{ flatId, text }`: the "Message tenant" button. Opens or reuses the chat with
-  the listing's owner and adds an "About: {listing} · $rent/wk" line. Use `{ userId, text }` to message a
-  student directly.
+  the listing's owner and adds an "About: {listing} · $rent/wk" line.
+- `POST /api/chats` with `{ itemId, text }`: the "Message seller" button. Adds an "About: {title} · $price"
+  line. The prototype pre-fills the text as "Hi! Is the {title} still available?". Sold items return 409.
+- Use `{ userId, text }` to message a student directly.
 - `GET /api/chats`: your chats, with the last message and unread count.
 - `GET /api/chats/{id}/messages` (page back with `before`), `POST /api/chats/{id}/messages`,
   `POST /api/chats/{id}/read`.
 - Real time: connect SignalR to `/hubs/chat?access_token={jwt}`. The server sends `message`, `read` and
   `typing` events. Call the hub method `Typing(conversationId)` to show "•••" to the other person.
 
-Koala_Kai (`a1900000@adelaide.edu.au`) has 3 seeded chats, 2 with unread replies.
+Koala_Kai (`a1900000@adelaide.edu.au`) has 3 seeded chats, 2 with unread replies. One of them is the
+prototype's: TomTheTutor messaging about his Calculus textbook.
 
 ### Demo data
 
@@ -98,12 +128,16 @@ In Development, an empty database is seeded from `backend/src/UniMap.Api/Data/Se
   The password is `password123` for everyone.
 - `flats.json`: 20 room listings on real Adelaide streets near each campus. Pins were placed with
   OpenStreetMap, then moved slightly so they don't point at a specific house.
+- `items.json`: 21 market items: the prototype's 6 plus 15 more, at the three pickup points or on real
+  streets. "Available from" dates and posted times are relative to when the database is seeded.
 - Images are already in R2, in the same layout as real data. Every folder is named after a database id:
   - `avatars/{userId}/avatar.png`: CC0 avatars
   - `flats/{listingId}/01-bedroom.jpg` and so on: openly licensed room photos
+  - `items/{itemId}/01.jpg` and so on: openly licensed item photos
 
-  Seeded students and listings have fixed ids (in `students.json` and `flats.json`), so a row's id in
-  DBeaver is its R2 folder name. Credits are in `avatars.json` and `flat-photos.json`.
+  Seeded students, listings and items have fixed ids (in `students.json`, `flats.json` and
+  `items.json`), so a row's id in DBeaver is its R2 folder name. Credits are in `avatars.json`,
+  `flat-photos.json` and `item-photos.json`.
 
 Run `docker compose down -v && docker compose up` to reseed.
 
@@ -140,7 +174,8 @@ profile. If the bucket isn't public, avatar URLs are presigned GET links that la
 
 ```
 backend/src/UniMap.Api/
-  Controllers/   Auth, Me (profile), Degrees (dropdowns), Flats (listings), Uploads, Meta
+  Controllers/   Auth, Me (profile), Degrees (dropdowns), Flats (listings), Items (market), Chats,
+                 Consents, Uploads, Meta
   Domain/        Entities + tag catalog
   Data/          DbContext + migrations
   Services/      JWT, Redis verification codes, R2 storage, email (SMTP, or Mailpit in dev)

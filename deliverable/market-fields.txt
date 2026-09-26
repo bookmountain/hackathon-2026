@@ -1,0 +1,104 @@
+UCOMPASS: MARKET ITEM FIELDS FOR PM REVIEW
+Last updated: 2026-09-26
+
+HOW TO USE
+- Each card below is one Trello card.
+- CHECKLIST: in the card, add a checklist, click "Add an item", and paste all the lines under CHECKLIST. Trello creates one checkbox per line.
+- DESCRIPTION: paste the bullets under DESCRIPTION into the card description.
+- The PM ticks the fields to keep. Unticked fields get dropped.
+- [BUILT] = already in the API and tested. [IDEA] = suggestion, not built yet.
+- MVP = build for the demo. Nice = only if there's time.
+
+
+========================================
+CARD 1: SELL FORM
+========================================
+
+CHECKLIST:
+[BUILT] MVP · Photos (required, 1 to 5, JPEG/PNG/WebP; the first is the cover)
+[BUILT] MVP · Title (required, text, max 80)
+[BUILT] MVP · Price (required, whole dollars, 0 to 10000; 0 = free)
+[BUILT] MVP · Description (optional, max 1000 characters)
+[BUILT] MVP · Category (required: Textbooks / Tech / Furniture / Kitchen / Study gear)
+[BUILT] MVP · Condition (required: New / Like new / Excellent / Good / Fair)
+[BUILT] Nice · Condition note (optional, max 60, e.g. "some highlighting")
+[BUILT] MVP · Availability (required: Now / From date / Pending)
+[BUILT] MVP · Pickup (required: one of 3 safe pickup points, or drop your own pin)
+[BUILT] Nice · Name for your own pin (optional, max 64, e.g. "Rundle St East")
+
+DESCRIPTION:
+- Filled in automatically, not asked: seller (nickname, major, uni and avatar from their profile) and posted time.
+- Photo is required, as in the prototype. The server checks the photo was actually uploaded.
+- The prototype's Sell form has no Category or Condition input: it saves every new item as "Study gear" and "Good". The API needs both, so the form needs two more inputs.
+- Condition shows as one line, e.g. "Good — some highlighting" or "Like new — worn once".
+- Free items: price 0 is allowed. The app could show "Free" instead of $0.
+
+
+========================================
+CARD 2: AVAILABILITY
+========================================
+
+CHECKLIST:
+[BUILT] MVP · Now
+[BUILT] MVP · From a date (the date must be in the future; it turns into Now on that day)
+[BUILT] MVP · Pending (someone's picking it up; others can still message to be next in line)
+[BUILT] MVP · Sold (seller marks it; the item stays visible, greyed out, with a disabled "Sold" button)
+
+DESCRIPTION:
+- Sold items can't be messaged about.
+- The map hides sold items. The grid shows them greyed out, as in the prototype.
+- The seller sees "Your listing" instead of "Message seller" on their own items.
+
+
+========================================
+CARD 3: PICKUP & MAP
+========================================
+
+CHECKLIST:
+[BUILT] MVP · Adelaide Railway Station (North Tce concourse · staffed, CCTV)
+[BUILT] MVP · Flinders City Campus (Festival Plaza entrance)
+[BUILT] MVP · Barr Smith Library (Main entrance, Adelaide Uni)
+[BUILT] MVP · Drop your own pin
+[BUILT] MVP · Map: ★ pickup points with how many items are there; tapping one lists them
+[BUILT] MVP · Filter chips (All / Textbooks / Tech / Furniture / Kitchen / Study gear)
+[BUILT] MVP · Search ("Search textbooks, desks, tech…" matches title and description)
+[BUILT] Nice · Sort by newest or cheapest
+[BUILT] Nice · Max price filter
+
+DESCRIPTION:
+- The three pickup points are real places, located with OpenStreetMap. Meetups can use the same three.
+- An own pin is shown to other students rounded to about 100 m, the same as flats. Pickup points are exact.
+
+
+========================================
+CARD 4: MESSAGE SELLER
+========================================
+
+CHECKLIST:
+[BUILT] MVP · "Message seller" opens a chat with an "About: {title} · ${price}" line
+[BUILT] MVP · Pre-filled first message: "Hi! Is the {title} still available?"
+[IDEA] Nice · Report a listing
+[IDEA] Nice · Block a seller
+
+DESCRIPTION:
+- Uses the same one-to-one chat as flats. If the two students already have a chat, the item is added to it.
+- Report and block are promised on the consent screen but not built yet (in TODO.md).
+
+
+========================================
+DEMO DATA
+========================================
+
+- 21 items: the prototype's 6 (Calculus textbook, LED desk lamp, iPad + Pencil, rice cooker, mesh office chair, lab coat + glasses) and 15 more, spread across the 5 categories.
+- Sellers are the fictional demo students. Koala_Kai (the demo login) is selling the iPad.
+- Photos are openly licensed (CC0 or public domain), with credits in item-photos.json.
+- The prototype's chat is seeded: TomTheTutor messaging Koala_Kai about the Calculus textbook.
+
+
+========================================
+PM DECISIONS
+========================================
+
+STILL OPEN:
+- Category and condition on the Sell form: keep both as required inputs? See Card 1.
+- Show "Free" for $0 items?

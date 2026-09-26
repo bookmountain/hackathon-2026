@@ -42,6 +42,19 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
       preset avatar. Our profile still has gender, pronouns, bio, habits and interests. The PM or designer
       should pick one.
 
+## Market
+
+- [ ] **Deleted items leave their photos in R2**, like flats. Delete `items/{id}/` when an item is deleted,
+      and clean up uploads that never get attached to an item.
+- [ ] **Flats don't check that photos were uploaded.** Items do (`StorageService.ExistsAsync`), because a
+      photo is required. Flats could use the same check.
+- [ ] **Uploads aren't size-checked.** The presigned URL fixes the content type, not the file size.
+- [ ] **"Available from" uses the UTC date**, so it can flip to "Now" up to 9.5 hours before midnight in
+      Adelaide. The same goes for the check that a new date is in the future.
+- [ ] **No report or block** for scam listings. The consent screen promises "Report & block in one tap".
+- [ ] **The prototype's Sell form has no category or condition inputs** (it hardcodes "Study gear" and
+      "Good"). The API requires both, so the frontend needs to add them.
+
 ## Privacy
 
 - [ ] **Account deletion.** The consent screen promises "Delete your account and data anytime". There's no
@@ -58,7 +71,7 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **Push notifications** (Expo, FCM or APNs) for when the app is closed. SignalR only reaches open apps.
 - [ ] **Scaling out:** with more than one API instance, SignalR needs a Redis backplane
       (`AddStackExchangeRedis`). Redis is already running.
-- [ ] Chats about market items and meetups. `ChatAboutType` only has `Flat` so far.
+- [ ] Chats about meetups. `ChatAboutType` has `Flat` and `Item` so far.
 
 ## Removed profile fields
 
@@ -82,7 +95,8 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] Set a real `JWT_KEY`. The default is a dev value.
 - [ ] Rotate the R2 API token. It was shared in a screenshot during setup.
 - [ ] Rate-limit `register`, `resend-code`, `verify` and `login`.
-- [ ] Escape `%` and `_` in degree search, which currently act as wildcards.
+- [ ] Escape `%` and `_` in degree search, which currently act as wildcards. Item search already does
+      (`ItemsController.EscapeLike`).
 
 ## Dev setup
 
