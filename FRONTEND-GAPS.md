@@ -157,3 +157,36 @@ the API requires.
 - [ ] **Connect and Wave** on person pins have no API yet. Connect can already use
       `POST /api/chats { userId, text }`; the prototype's "Connected from the map" line and Wave need the
       people-on-map feature (HANDOFF section 5.3).
+
+## Endpoints the v4 design needs (not built yet)
+
+The v4 prototype (`UCompass Demo v4.dc.html`, 2026-09-27) adds four features the API can't serve yet.
+The app already calls the endpoints below. Until they exist it gets a 404 and falls back, as noted.
+The shapes are in `mobile/src/api/types.ts`; `image` is always a base64 JPEG, longest side 640px, quality 0.82.
+
+- [ ] **AI photo analysis** on "Sell" and "List a room". `POST /api/ai/photo-analysis { kind, image }`, where
+      `kind` is `Item` or `Room`. The prototype asks a vision model for JSON; its prompts are in the HTML
+      (search for "You help a university student"). Responses:
+      - Item: `{ title, category, condition, colour, texture, suggestedPrice, description, benefits[] }`.
+        `category` and `condition` use the API's enum names (`StudyGear`, `LikeNew`).
+      - Room: `{ title, style, colours, furnished, features[], description, benefits[] }`.
+        `furnished` is `Fully` / `Partly` / `Unfurnished`; `features` are drawn from the flat options.
+      *App until then:* the panel shows "Couldn't analyse this photo. Fill in the details yourself."
+- [ ] **Search by image** in Market. `POST /api/items/image-search { image }` →
+      `{ category: ItemCategory | null, items: ItemSummary[] }`: the guessed category and the closest unsold
+      items (the prototype shows 4 with a category, 5 without).
+      *App until then:* guesses the category from the photo's file name and ranks items locally, like the prototype.
+- [ ] **Daily card** ("Dcard"). `GET /api/daily-card` and `POST /api/daily-card/draw` →
+      `{ status: Ready | Matched | Missed, match: Person | null, drawnToday, nextChangeAt }`. One draw per
+      Adelaide day. You're matched with another student who drew today. A missed day locks the deck for 48
+      hours. `nextChangeAt` is the next midnight, or when the lock ends.
+      *App until then:* a demo on the device that picks from students you already know, with
+      "Reset today" / "Simulate missed day" buttons.
+- [ ] **Avatar style.** Profiles can pick a shape (`circle` / `soft` / `square`), a ring (`none` / `gold` /
+      `blue` / `navy` / `sky`), and initials (1–2 letters) or one of 10 icons, on top of the preset colour. The
+      app sends `avatarStyle: { mode, text, icon, shape, ring }` on `PUT /api/me/profile` and reads it back
+      from `profile.avatarStyle`. Other people's avatars should use it too, so it also belongs on `Person`.
+      *App until then:* saved on the device per account, so only you see it.
+
+Also new in v4, but handled in the app alone: the address search on the forms uses OpenStreetMap
+Nominatim directly, and "Add to calendar" builds Google Calendar links and `.ics` files.
