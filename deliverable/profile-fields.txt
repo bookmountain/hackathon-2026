@@ -1,0 +1,154 @@
+UNIMAP: PROFILE FIELDS FOR PM REVIEW
+Last updated: 2026-09-26
+
+HOW TO USE
+- Each card below is one Trello card.
+- CHECKLIST: in the card, add a checklist, click "Add an item", and paste all the lines under CHECKLIST. Trello creates one checkbox per line.
+- DESCRIPTION: paste the bullets under DESCRIPTION into the card description.
+- The PM ticks the fields to keep. Unticked fields get dropped.
+- [BUILT] = already in the API and tested. [IDEA] = suggestion, not built yet.
+- MVP = build for the demo. Nice = only if there's time.
+
+
+========================================
+CARD 1: IDENTITY
+========================================
+
+CHECKLIST:
+[BUILT] MVP · Display name (required, text, max 64)
+[BUILT] MVP · Avatar photo (optional, JPEG/PNG/WebP upload)
+[BUILT] MVP · Gender (required: Male / Female / Non-binary / Other / Prefer not to say)
+[BUILT] Nice · Pronouns (optional, suggestions + custom text)
+[BUILT] Nice · Age range (optional: Under 18 / 18–20 / 21–24 / 25–29 / 30+)
+[BUILT] Nice · Nationality (optional, country dropdown with flags)
+[BUILT] MVP · Bio (optional, max 500 characters)
+
+DESCRIPTION:
+- Display name: required, text, max 64 characters. Example: Olivia
+- Avatar: optional, image upload (JPEG, PNG, WebP)
+- Gender: required, pick one of Male, Female, Non-binary, Other, Prefer not to say
+- Pronouns: optional, pick a suggestion (she/her, he/him, they/them, she/they, he/they) or type your own. Example: she/her
+- Age range: optional, pick one of Under 18, 18–20, 21–24, 25–29, 30+. A range instead of a birth date, so we store less personal data.
+- Nationality: optional, dropdown of all 249 countries with flags. Example: 🇦🇺 Australia
+- Bio: optional, max 500 characters
+- Filled in automatically, not asked: University (from the sign-up email) and Email (verified with a 6-digit code, never shown to other users)
+
+
+========================================
+CARD 2: ACADEMIC
+========================================
+
+CHECKLIST:
+[BUILT] MVP · University (automatic, from sign-up email)
+[BUILT] MVP · Department (required, free text; see decision 1)
+[IDEA] MVP · Degree (required, dropdown of real degrees filtered by uni)
+[IDEA] MVP · College / faculty (automatic, from degree)
+[IDEA] MVP · Study level (Undergraduate / Honours / Postgraduate / Research; automatic from degree)
+[BUILT] MVP · Year of study (optional, 1–10)
+[IDEA] MVP · Domestic or international student (optional)
+[IDEA] Nice · Major / specialisation (optional)
+[IDEA] Nice · Current course codes (optional tags, e.g. COMP1010; for study buddies)
+
+DESCRIPTION:
+- University: automatic from the email. @adelaide.edu.au gives Adelaide University, @flinders.edu.au gives Flinders.
+- Department: currently typed by hand
+- Degree: searchable dropdown of real courses, taken from each uni's official course pages (checked 2026-09-26): 305 for Adelaide University and 368 for Flinders. The lists are in the degrees folder, and each course has its level, college, campuses and a link to its official page.
+- College / faculty: filled in from the degree, so it's spelled the same for everyone and matching works
+- Study level: filled in from the degree
+- Year of study: number from 1 to 10
+- Domestic / international: pick one. Helps international students find each other.
+- Major: text or dropdown
+- Course codes: tags. "Who else is in COMP1010?" makes a strong study-buddy feature.
+
+
+========================================
+CARD 3: WHAT THEY'RE LOOKING FOR
+========================================
+
+CHECKLIST:
+[IDEA] MVP · Looking for (pick several: study buddy / gym buddy / friends / flatmate / language exchange / commute buddy / event buddy)
+[IDEA] Nice · Buddy gender preference (any / same gender)
+[IDEA] Nice · Same uni only (yes / no)
+
+DESCRIPTION:
+- Without "Looking for", the matching can only guess why someone joined. It's the most useful field we haven't built.
+- Gender preference mainly matters for safety, e.g. for flatmates.
+
+
+========================================
+CARD 4: LIFESTYLE
+========================================
+
+CHECKLIST:
+[BUILT] MVP · Habits (optional tags, up to 20, e.g. night-owl, gym, coffee)
+[IDEA] Nice · Sleep schedule (early bird / flexible / night owl)
+[IDEA] Nice · Study style (quiet solo / quiet together / group discussion)
+[IDEA] Nice · Social energy (1 = introvert … 5 = extrovert)
+[IDEA] Nice · Exercise (never / sometimes / often)
+[IDEA] Nice · Smoking (no / sometimes / yes)
+[IDEA] Nice · Drinking (no / socially / often)
+[IDEA] Nice · Diet (none / vegetarian / vegan / halal / kosher / other)
+[IDEA] Nice · Tidiness (1–5, only asked if looking for a flatmate)
+
+DESCRIPTION:
+- Habits are currently free tags.
+- The [IDEA] rows would replace them with fixed questions, which are easier to answer and give fairer matching scores.
+- Pick one approach: tags or questions (decision 3).
+
+
+========================================
+CARD 5: BACKGROUND & INTERESTS
+========================================
+
+CHECKLIST:
+[BUILT] MVP · Interests (optional tags, up to 20, e.g. hiking, coding, music)
+[IDEA] Nice · Languages spoken (pick several)
+[IDEA] Nice · Clubs / societies (optional tags)
+
+DESCRIPTION:
+- Interests are already used in matching.
+- Languages spoken would enable language-exchange matching.
+
+
+========================================
+CARD 6: MAP & LOCATION
+========================================
+
+CHECKLIST:
+[IDEA] MVP · Main campus (pick one; each campus has map coordinates)
+[IDEA] MVP · Show me on the map (on/off, default OFF)
+[IDEA] Nice · Suburb / area (pick one; never an exact address)
+[IDEA] Nice · How they get to uni (car / bus / train / tram / bike / walk)
+[IDEA] Nice · Favourite campus spots (map pins: library, café, gym…)
+[IDEA] Nice · Weekly availability (grid: mornings / afternoons / evenings)
+
+DESCRIPTION:
+- This is the hackathon theme.
+- The easiest demo is "buddies at your campus" on a map, which needs only Main campus and Show me on the map.
+- Location is sensitive: show campus or suburb only, never live GPS or a home address.
+
+
+========================================
+CARD 7: PRIVACY & SAFETY
+========================================
+
+CHECKLIST:
+[IDEA] Nice · Profile visibility (everyone / same uni only / connections only)
+[IDEA] Nice · Block a user
+[IDEA] Nice · Report a user
+
+DESCRIPTION:
+- Needed before real students use it. Optional for the demo.
+
+
+========================================
+DECISIONS NEEDED FROM THE PM
+========================================
+
+- 1. Department vs degree: keep department as free text, or fill it in from the degree? Suggestion: fill it in from the degree, so it's spelled the same for everyone and "same department" matching works.
+- 2. Nationality in matching: currently only shown on the profile. Options: ignore it, give same-country matches a small boost, or add a "show me people from my country" filter the user turns on.
+- 3. Habits: free tags or fixed questions? See Card 4.
+- 4. Age range vs date of birth: we store a range to hold less personal data. Is that enough?
+- 5. Naming: Adelaide and UniSA are now Adelaide University, whose site is adelaide.edu.au. Should the app show "Adelaide University"?
+- 6. Which courses go in the degree dropdown: all levels (bachelors, honours, masters, graduate certificates, PhDs), or just undergraduate and postgraduate coursework? The full lists have 673 courses; undergraduate only is 228.
+- 7. Flinders college names: Flinders recently changed from 6 colleges to 5, and its course pages mostly still show the old names. Suggestion: use the old names for the demo, since that's what the course pages show.
