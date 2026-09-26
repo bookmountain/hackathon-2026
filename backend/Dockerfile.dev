@@ -1,0 +1,9 @@
+# Dev image: SDK + `dotnet watch` for hot reload. Source is bind-mounted by docker-compose.
+FROM mcr.microsoft.com/dotnet/sdk:10.0
+WORKDIR /src
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 \
+    DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true \
+    DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER=true \
+    PATH="$PATH:/root/.dotnet/tools"
+EXPOSE 8080
+CMD ["sh", "-c", "dotnet tool restore && dotnet watch --project src/UniMap.Api --non-interactive run --no-launch-profile"]
