@@ -63,12 +63,14 @@ function useNow() {
 
 function CardFront() {
   return (
-    <LinearGradient
-      colors={[colors.brand, colors.ink]}
-      start={{ x: 0.25, y: 0 }}
-      end={{ x: 0.75, y: 1 }}
-      style={[styles.face, styles.front]}
-    >
+    // The gradient sits inside the bordered face: on its own it doesn't clip to the rounded corners
+    <View style={[styles.face, styles.front]}>
+      <LinearGradient
+        colors={[colors.brand, colors.ink]}
+        start={{ x: 0.25, y: 0 }}
+        end={{ x: 0.75, y: 1 }}
+        style={styles.frontFill}
+      />
       <View style={styles.frontFrame} />
       <Svg width={88} height={88} viewBox="0 0 40 40">
         <Circle cx="20" cy="20" r="18" fill="none" stroke={colors.yellow} strokeWidth={1.5} />
@@ -79,7 +81,7 @@ function CardFront() {
         <Circle cx="20" cy="20" r="2.4" fill={colors.ink} stroke={colors.surface} strokeWidth={1.4} />
       </Svg>
       <Text style={styles.frontMark}>UCOMPASS</Text>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -318,6 +320,7 @@ const styles = StyleSheet.create({
   faceWrap: { ...StyleSheet.absoluteFill, backfaceVisibility: "hidden" },
   face: { flex: 1, borderRadius: 22, borderWidth: 3, overflow: "hidden", boxShadow: CARD_SHADOW },
   front: { borderColor: colors.surface, alignItems: "center", justifyContent: "center" },
+  frontFill: { ...StyleSheet.absoluteFill, borderRadius: 19 },
   frontFrame: {
     position: "absolute",
     top: 10,

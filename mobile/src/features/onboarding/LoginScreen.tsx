@@ -1,6 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { router, useFocusEffect } from "expo-router";
+import { setStatusBarStyle } from "expo-status-bar";
+import { useCallback } from "react";
 import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Icon, Logo } from "@/components/ui";
@@ -30,10 +31,16 @@ const photoUrl = (id: string, w: number, h: number) =>
 export default function LoginScreen() {
   const { width } = useWindowDimensions();
   const s = Math.min(width / DESIGN_WIDTH, 1.2);
+  // White status bar over the photo only while this screen shows; it stays mounted under the email screen
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("light");
+      return () => setStatusBarStyle("dark");
+    }, []),
+  );
 
   return (
     <View style={styles.screen}>
-      <StatusBar style="light" />
       <Image source={{ uri: BACKGROUND }} style={styles.background} resizeMode="cover" accessibilityIgnoresInvertColors />
       <LinearGradient
         colors={["rgba(20,20,43,0.35)", "rgba(20,20,43,0.1)", "rgba(46,90,168,0.85)", colors.brand]}
