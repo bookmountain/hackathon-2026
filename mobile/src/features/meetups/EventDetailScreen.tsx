@@ -6,11 +6,12 @@ import { useLoad } from "@/api/hooks";
 import { Button, ScreenHeader } from "@/components/ui";
 import { toEventDetail } from "@/data/adapters";
 import type { EventDetail as EventDetailData } from "@/data/types";
+import CalendarButtons from "@/features/detail/CalendarButtons";
 import { MapDot, MiniMap, regionAround } from "@/features/map";
 import { LoadingScreen } from "@/features/shell/LoadingScreen";
 import { useAppStore } from "@/store";
-import { colors, font } from "@/theme";
-import { fillPercent } from "./logic";
+import { brutal, colors, divider, font } from "@/theme";
+import { calendarEntry, fillPercent } from "./logic";
 import { useJoin } from "./useJoin";
 
 export default function EventDetailScreen() {
@@ -48,15 +49,16 @@ function EventDetail({ event }: { event: EventDetailData }) {
           </View>
         </View>
 
+        <CalendarButtons
+          label="Add to calendar"
+          event={calendarEntry(event, event.desc)}
+        />
+
         <MiniMap region={regionAround(event.where)}>
           <MapDot
             latitude={event.where.latitude}
             longitude={event.where.longitude}
-            color={colors.yellow}
-            haloOpacity={0.35}
-            size={12}
-            stroke={colors.ink}
-            strokeWidth={2}
+            kind="evpin"
           />
         </MiniMap>
 
@@ -95,6 +97,7 @@ function EventDetail({ event }: { event: EventDetailData }) {
                   : "Join — walk in anytime"
           }
           variant={joined ? "soft" : "primary"}
+          style={joined ? brutal(3) : undefined}
           inactive={event.host || (event.full && !joined)}
           disabled={busy}
           onPress={toggle}
@@ -110,9 +113,9 @@ const styles = StyleSheet.create({
   headline: { gap: 8 },
   kicker: { color: colors.brand, textTransform: "uppercase", ...font(800, 12, undefined, 0.08) },
   title: { color: colors.ink, ...font(800, 26, 1.15, -0.02) },
-  table: { borderWidth: 1.5, borderColor: colors.lineSoft, borderRadius: 16 },
+  table: { borderWidth: 2, borderColor: colors.ink, borderRadius: 16 },
   row: { flexDirection: "row", gap: 12, paddingHorizontal: 14, paddingVertical: 13 },
-  rowDivider: { borderBottomWidth: 1, borderBottomColor: colors.lineSoft },
+  rowDivider: divider.bottom,
   rowKey: { width: 52, color: colors.muted, ...font(700, 14) },
   rowValue: { flex: 1, color: colors.ink, ...font(700, 14) },
   desc: { color: colors.body, ...font(500, 14.5, 1.55) },
@@ -125,7 +128,7 @@ const styles = StyleSheet.create({
   capacity: { gap: 6 },
   capacityRow: { flexDirection: "row", justifyContent: "space-between" },
   capacityText: { color: colors.ink, ...font(700, 13) },
-  bar: { height: 8, borderRadius: 4, backgroundColor: colors.line, overflow: "hidden" },
+  bar: { height: 8, borderRadius: 4, backgroundColor: colors.ink, overflow: "hidden" },
   barFill: { height: "100%", backgroundColor: colors.brand },
-  footer: { paddingHorizontal: 20, paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.lineSoft },
+  footer: { paddingHorizontal: 20, paddingVertical: 12, ...divider.top },
 });

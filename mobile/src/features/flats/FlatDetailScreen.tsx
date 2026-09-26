@@ -8,10 +8,12 @@ import { useToast } from "@/components/feedback/Toast";
 import { BackButton, Button, Pill, TextField } from "@/components/ui";
 import { toFlatDetail } from "@/data/adapters";
 import type { FlatDetail } from "@/data/types";
+import CalendarButtons from "@/features/detail/CalendarButtons";
 import { LoadingScreen } from "@/features/shell/LoadingScreen";
 import PhotoPager from "@/features/shell/PhotoPager";
 import { useAppStore } from "@/store";
-import { colors, font } from "@/theme";
+import { parseDateOnly } from "@/lib/dates";
+import { brutal, colors, divider, font } from "@/theme";
 import { messageTenant } from "./messageTenant";
 
 const QUICK_QUESTIONS = ["Is it still available?", "Can I inspect this week?", "How are bills split?"];
@@ -31,10 +33,16 @@ export default function FlatDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data, error, reload } = useLoad(() => api.flats.get(id), id);
   if (!data) return <LoadingScreen error={error} onRetry={reload} />;
-  return <FlatDetailView flat={toFlatDetail(data)} />;
+  return <FlatDetailView flat={toFlatDetail(data)} availableFrom={data.summary.availableFrom} />;
 }
 
-function FlatDetailView({ flat }: { flat: FlatDetail }) {
+/** "Wed 14 Oct 2026" */
+function longDate(d: Date): string {
+  return d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+}
+
+/** `availableFrom` is the API's date-only move-in date; null = available now (no reminder) */
+function FlatDetailView({ flat, availableFrom }: { flat: FlatDetail; availableFrom: string | null }) {
   const { actions } = useAppStore();
   const toast = useToast();
   const { busy, submit } = useSubmit();
@@ -56,6 +64,7 @@ function FlatDetailView({ flat }: { flat: FlatDetail }) {
     { k: "Furnished", v: flat.furnished },
     { k: "Preferred flatmate", v: flat.pref },
   ];
+  const moveIn = availableFrom ? parseDateOnly(availableFrom) : null;
   const walks = [
     { k: "Adelaide Uni", v: flat.walkA },
     { k: "Flinders City", v: flat.walkF },
@@ -65,7 +74,7 @@ function FlatDetailView({ flat }: { flat: FlatDetail }) {
     <View style={styles.screen}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled">
-          <PhotoPager photos={flat.photos} tone={flat.tone} label="room photos" height={230}>
+          <PhotoPager photos={flat.photos} tone={flat.tone} label="room photos" height={250}>
             <SafeAreaView edges={["top"]} style={styles.back}>
               <BackButton variant="white" onPress={() => router.back()} />
             </SafeAreaView>
@@ -84,6 +93,8 @@ function FlatDetailView({ flat }: { flat: FlatDetail }) {
               <Text style={styles.area}>{flat.area}</Text>
             </View>
 
+            {flat.desc ? <Text style={styles.desc}>{flat.desc}</Text> : null}
+
             <View style={styles.cost}>
               <View style={styles.costMain}>
                 <Text style={styles.costLabel}>Real weekly cost</Text>
@@ -94,7 +105,19 @@ function FlatDetailView({ flat }: { flat: FlatDetail }) {
               </Text>
             </View>
 
-            {flat.desc ? <Text style={styles.desc}>{flat.desc}</Text> : null}
+            {moveIn && (
+              <CalendarButtons
+                label={`Remind me on move-in date · ${longDate(moveIn)}`}
+                event={{
+                  id: `flat-${flat.id}`,
+                  title: `Move-in: ${flat.title}`,
+                  location: flat.area,
+                  details: `Room available from this date · $${flat.price}/wk + $${flat.bills} bills. Listed on UCompass.`,
+                  start: moveIn,
+                  allDay: true,
+                }}
+              />
+            )}
 
             <Section title="The room">
               <View style={styles.grid}>
@@ -217,9 +240,9 @@ const styles = StyleSheet.create({
   gridCell: { width: "48.5%", backgroundColor: colors.canvas, borderRadius: 14, padding: 12, gap: 3 },
   factKey: { color: colors.muted, ...font(600, 11.5) },
   factValue: { color: colors.ink, ...font(800, 14) },
-  table: { borderWidth: 1.5, borderColor: colors.lineSoft, borderRadius: 16 },
+  table: { borderWidth: 2, borderColor: colors.ink, borderRadius: 16 },
   row: { flexDirection: "row", justifyContent: "space-between", gap: 16, paddingHorizontal: 14, paddingVertical: 12 },
-  rowDivider: { borderBottomWidth: 1, borderBottomColor: colors.lineSoft },
+  rowDivider: divider.bottom,
   rowKey: { color: colors.muted, ...font(600, 13.5) },
   rowValue: { flex: 1, textAlign: "right", color: colors.ink, ...font(600, 13.5) },
   wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
@@ -243,8 +266,7 @@ const styles = StyleSheet.create({
   walkValue: { width: 48, textAlign: "right", color: colors.ink, ...font(800, 13) },
   messageBox: { backgroundColor: colors.canvas, borderRadius: 20, padding: 16, gap: 10 },
   quick: {
-    borderWidth: 1.5,
-    borderColor: colors.line,
+    ...brutal(0),
     backgroundColor: colors.surface,
     borderRadius: 999,
     paddingHorizontal: 11,
@@ -255,8 +277,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.lineSoft,
+    ...divider.top,
     backgroundColor: colors.surface,
   },
 });
