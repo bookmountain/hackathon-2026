@@ -33,8 +33,6 @@ automatically when an edit can't be hot-applied.
    → `/api/degrees`. There's also a `search` parameter for a type-ahead box.
 5. `PUT /api/me/profile` with the onboarding answers, including `degreeId`. The department is filled in
    from the degree. `GET /api/meta/options` lists the suggested tags.
-6. `GET /api/buddies/suggestions` returns ranked matches. `POST /api/buddies/{userId}/request`,
-   then the other user accepts via `/api/buddies/connections/{id}/accept`.
 
 In Development, an empty database is seeded with 40 verified fake students, split between the
 two unis (e.g. `a1900000@adelaide.edu.au`, `seed001@flinders.edu.au`, password `password123`).
@@ -73,8 +71,8 @@ profile. If the bucket isn't public, avatar URLs are presigned GET links that la
 
 ```
 backend/src/UniMap.Api/
-  Controllers/   Auth, Me (profile), Buddies (matching + requests), Uploads, Meta
+  Controllers/   Auth, Me (profile), Degrees (dropdowns), Uploads, Meta
   Domain/        Entities + tag catalog
   Data/          DbContext + migrations
-  Services/      JWT, Redis verification codes, matching, R2 storage, email (logs only for now)
+  Services/      JWT, Redis verification codes, R2 storage, email (SMTP, or Mailpit in dev)
 ```

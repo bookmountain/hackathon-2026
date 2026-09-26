@@ -7,7 +7,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<Profile> Profiles => Set<Profile>();
-    public DbSet<BuddyConnection> BuddyConnections => Set<BuddyConnection>();
     public DbSet<Degree> Degrees => Set<Degree>();
 
     protected override void OnModelCreating(ModelBuilder b)
@@ -46,14 +45,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(d => d.Url).HasMaxLength(300);
             e.HasIndex(d => new { d.University, d.Level, d.Name }).IsUnique();
             e.HasIndex(d => new { d.University, d.Level, d.College });
-        });
-
-        b.Entity<BuddyConnection>(e =>
-        {
-            e.Property(c => c.Status).HasConversion<string>().HasMaxLength(16);
-            e.HasIndex(c => new { c.RequesterId, c.AddresseeId }).IsUnique();
-            e.HasOne(c => c.Requester).WithMany().HasForeignKey(c => c.RequesterId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(c => c.Addressee).WithMany().HasForeignKey(c => c.AddresseeId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

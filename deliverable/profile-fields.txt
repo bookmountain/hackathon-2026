@@ -53,7 +53,6 @@ DESCRIPTION:
   - Degree: only the degrees in that college, e.g. 11 for Adelaide undergraduate in the College of Science. There's also a type-to-search box.
 - The department is filled in from the chosen degree's college, so it's spelled the same for everyone and matching works.
 - The degree lists come from each uni's official course pages (checked 2026-09-26): 296 degrees for Adelaide University and 365 for Flinders, after merging duplicates. The raw lists are in the degrees folder.
-- Matching: same degree +10 points, same college +10.
 - Year of study: number from 1 to 10
 - Domestic / international: pick one. Helps international students find each other.
 - Major: text or dropdown
@@ -105,7 +104,7 @@ CHECKLIST:
 [IDEA] Nice · Clubs / societies (optional tags)
 
 DESCRIPTION:
-- Interests are already used in matching.
+- Interests are already built.
 - Languages spoken would enable language-exchange matching.
 
 

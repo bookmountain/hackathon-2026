@@ -11,7 +11,7 @@ namespace UniMap.Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/me")]
-public class MeController(AppDbContext db, StorageService storage, MatchingService matching) : ControllerBase
+public class MeController(AppDbContext db, StorageService storage) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<MeResponse>> Get()
@@ -20,7 +20,7 @@ public class MeController(AppDbContext db, StorageService storage, MatchingServi
             .FirstOrDefaultAsync(u => u.Id == User.UserId());
         if (user is null) return NotFound();
 
-        var profile = user.Profile is null ? null : MatchingService.ToDto(user.Profile, storage);
+        var profile = user.Profile is null ? null : ProfileMapper.ToDto(user.Profile, storage);
         return new MeResponse(user.Id, user.Email, user.University, profile);
     }
 
@@ -66,7 +66,6 @@ public class MeController(AppDbContext db, StorageService storage, MatchingServi
         p.UpdatedAt = DateTimeOffset.UtcNow;
 
         await db.SaveChangesAsync();
-        await matching.InvalidateAsync(userId);
-        return MatchingService.ToDto(p, storage);
+        return ProfileMapper.ToDto(p, storage);
     }
 }

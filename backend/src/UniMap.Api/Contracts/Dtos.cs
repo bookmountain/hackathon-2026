@@ -52,10 +52,6 @@ public record ProfileDto(
 
 public record MeResponse(Guid UserId, string Email, University University, ProfileDto? Profile);
 
-public record BuddySuggestion(ProfileDto Profile, double Score, List<string> SharedHabits, List<string> SharedInterests);
-
-public record ConnectionDto(Guid Id, ProfileDto Other, ConnectionStatus Status, bool IncomingRequest, DateTimeOffset CreatedAt);
-
 public record UploadUrlRequest([Required] string ContentType);
 
 public record UploadUrlResponse(string UploadUrl, string Key, string? ReadUrl, DateTimeOffset ExpiresAt);

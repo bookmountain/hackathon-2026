@@ -36,7 +36,6 @@ if (config.GetSection("Email").Get<EmailOptions>()?.IsConfigured == true)
     builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 else
     builder.Services.AddSingleton<IEmailSender, LoggingEmailSender>();
-builder.Services.AddScoped<MatchingService>();
 
 // --- Auth ---
 var jwt = config.GetSection("Jwt").Get<JwtOptions>()!;

@@ -4,7 +4,7 @@ using UniMap.Api.Domain;
 namespace UniMap.Api.Data;
 
 /// <summary>
-/// Fills an empty database with fake students so matching has something to work with.
+/// Fills an empty database with fake students so there is realistic data to work with.
 /// Runs only in Development (or when Seed:Enabled=true). Every seeded user's password is "password123".
 /// </summary>
 public static class DevSeeder

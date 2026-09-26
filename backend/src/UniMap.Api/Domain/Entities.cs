@@ -35,7 +35,6 @@ public class Degree
     public required string Url { get; set; }
 }
 
-public enum ConnectionStatus { Pending, Accepted, Declined }
 
 public class User
 {
@@ -78,15 +77,4 @@ public class Profile
     public string? AvatarKey { get; set; }
 
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
-}
-
-public class BuddyConnection
-{
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid RequesterId { get; set; }
-    public User Requester { get; set; } = null!;
-    public Guid AddresseeId { get; set; }
-    public User Addressee { get; set; } = null!;
-    public ConnectionStatus Status { get; set; } = ConnectionStatus.Pending;
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
