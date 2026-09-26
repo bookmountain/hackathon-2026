@@ -30,7 +30,7 @@ public static class FlatMapper
         var p = f.Owner.Profile;
         var owner = new FlatOwner(
             f.OwnerId, p?.DisplayName ?? "Student", f.Owner.University,
-            p?.Degree?.Name ?? p?.Department, storage.ReadUrl(p?.AvatarKey));
+            p?.Degree?.Name ?? p?.Department, storage.ReadUrl(p?.AvatarKey), p?.AvatarPreset);
         return new FlatDetail(
             ToSummary(f, viewerId, storage), f.Description, f.MinStayMonths, f.Features, f.HouseRhythm,
             f.PreferredFlatmate, f.Housemates,

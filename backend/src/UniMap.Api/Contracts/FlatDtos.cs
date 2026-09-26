@@ -35,7 +35,8 @@ public record FlatSummary(
     bool IsMine,
     DateTimeOffset CreatedAt);
 
-public record FlatOwner(Guid UserId, string DisplayName, University University, string? Major, string? AvatarUrl);
+/// <param name="AvatarPreset">Preset avatar colour, 0–7, or null. Shown when there's no photo.</param>
+public record FlatOwner(Guid UserId, string DisplayName, University University, string? Major, string? AvatarUrl, int? AvatarPreset);
 
 /// <summary>Room detail page.</summary>
 public record FlatDetail(

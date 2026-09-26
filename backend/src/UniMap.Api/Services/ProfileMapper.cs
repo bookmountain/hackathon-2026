@@ -10,5 +10,5 @@ public static class ProfileMapper
         p.UserId, p.DisplayName, p.User.University,
         p.Degree is null ? null : new DegreeSummary(p.Degree.Id, p.Degree.Name, p.Degree.Level, p.Degree.College),
         p.Department, p.Gender, p.Pronouns, p.YearOfStudy, p.Bio,
-        p.Habits, p.Interests, storage.ReadUrl(p.AvatarKey));
+        p.Habits, p.Interests, storage.ReadUrl(p.AvatarKey), p.AvatarKey, p.AvatarPreset);
 }

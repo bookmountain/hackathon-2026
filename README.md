@@ -58,7 +58,13 @@ Differences between the UCompass prototype and this API, for the app to handle, 
 5. Pick a degree with the three dropdown endpoints: `GET /api/degrees/levels` → `/api/degrees/colleges`
    → `/api/degrees`. There's also a `search` parameter for a type-ahead box.
 6. `PUT /api/me/profile` with the onboarding answers, including `degreeId`. The department is filled in
-   from the degree. `GET /api/meta/options` lists the suggested tags.
+   from the degree. `GET /api/meta/options` lists the suggested tags. It replaces the whole profile, so
+   send back what didn't change, including `avatarKey` from `GET /api/me`: a missing key removes the
+   photo. `avatarPreset` (0–7, or null) is the design's preset colour avatar; everyone sees it wherever
+   they'd see the photo, and the photo wins when there's both.
+7. `DELETE /api/me` deletes the account and everything in it: profile, consents, rooms, items, hosted
+   events, RSVPs, chats (for both people) and the account's photos in R2. It works before consent.
+   People going to a deleted event get `eventCancelled`.
 
 ### Flats (flatmate finder)
 

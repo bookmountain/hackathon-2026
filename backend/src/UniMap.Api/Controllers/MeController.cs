@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using UniMap.Api.Contracts;
 using UniMap.Api.Data;
 using UniMap.Api.Domain;
+using UniMap.Api.Hubs;
 using UniMap.Api.Services;
 
 namespace UniMap.Api.Controllers;
@@ -11,7 +13,12 @@ namespace UniMap.Api.Controllers;
 [ApiController]
 [Authorize(Policy = ConsentPolicy.SignedInOnly)] // GET works before consent; editing needs it (below)
 [Route("api/me")]
-public class MeController(AppDbContext db, StorageService storage, ConsentService consents) : ControllerBase
+public class MeController(
+    AppDbContext db,
+    StorageService storage,
+    ConsentService consents,
+    IHubContext<ChatHub> hub,
+    ILogger<MeController> log) : ControllerBase
 {
     /// <summary>Works before consent, so the app can decide which onboarding screen to show.</summary>
     [HttpGet]
@@ -65,9 +72,63 @@ public class MeController(AppDbContext db, StorageService storage, ConsentServic
         p.Habits = Catalog.Normalize(req.Habits);
         p.Interests = Catalog.Normalize(req.Interests);
         p.AvatarKey = req.AvatarKey;
+        p.AvatarPreset = req.AvatarPreset;
         p.UpdatedAt = DateTimeOffset.UtcNow;
 
         await db.SaveChangesAsync();
         return ProfileMapper.ToDto(p, storage);
+    }
+
+    /// <summary>
+    /// Delete your account and everything in it: profile, consents, rooms, items, the events you host,
+    /// the events you joined, and your chats (the other person loses them too), plus your photos in R2.
+    /// Works before consent. People going to an event you host get "eventCancelled"; events you were
+    /// going to get a new "eventGoing" headcount. Sign the app out afterwards: the token no longer has an account.
+    /// </summary>
+    [HttpDelete]
+    public async Task<IActionResult> Delete()
+    {
+        var me = User.UserId();
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == me);
+        if (user is null) return NotFound();
+
+        var flatIds = await db.FlatListings.Where(f => f.OwnerId == me).Select(f => f.Id).ToListAsync();
+        var itemIds = await db.MarketItems.Where(i => i.SellerId == me).Select(i => i.Id).ToListAsync();
+        var hosted = await db.MeetupEvents.Where(e => e.HostId == me)
+            .Select(e => new
+            {
+                e.Id,
+                e.Title,
+                Guests = e.Attendees.Where(a => a.UserId != me).Select(a => a.UserId.ToString()).ToList(),
+            })
+            .ToListAsync();
+        var joined = await db.EventAttendees.Where(a => a.UserId == me && a.Event.HostId != me)
+            .Select(a => a.EventId).ToListAsync();
+
+        // Everything else (profile, consents, listings, events, RSVPs, chats) cascades in the database
+        db.Users.Remove(user);
+        await db.SaveChangesAsync();
+
+        if (storage.IsConfigured)
+        {
+            var folders = flatIds.Select(id => $"flats/{id}/")
+                .Concat(itemIds.Select(id => $"items/{id}/"))
+                .Prepend($"avatars/{me}/");
+            foreach (var folder in folders)
+            {
+                // The account is already gone, so a storage hiccup only leaves orphaned photos behind
+                try { await storage.DeleteFolderAsync(folder); }
+                catch (Exception e) { log.LogWarning(e, "Couldn't delete {Folder} for deleted user {UserId}", folder, me); }
+            }
+        }
+
+        foreach (var e in hosted.Where(e => e.Guests.Count > 0))
+            await hub.Clients.Users(e.Guests).SendAsync("eventCancelled", new { eventId = e.Id, title = e.Title });
+        foreach (var eventId in joined)
+        {
+            var going = await db.EventAttendees.CountAsync(a => a.EventId == eventId);
+            await hub.Clients.All.SendAsync("eventGoing", new { eventId, goingCount = going });
+        }
+        return NoContent();
     }
 }

@@ -4,7 +4,8 @@ using UniMap.Api.Domain;
 namespace UniMap.Api.Contracts;
 
 /// <summary>What another student sees of you in chat: nickname, major, uni, avatar. Never email.</summary>
-public record ChatPerson(Guid UserId, string DisplayName, string? Major, University University, string? AvatarUrl);
+/// <param name="AvatarPreset">Preset avatar colour, 0–7, or null. Shown when there's no photo.</param>
+public record ChatPerson(Guid UserId, string DisplayName, string? Major, University University, string? AvatarUrl, int? AvatarPreset);
 
 public record ChatAbout(ChatAboutType Type, Guid Id);
 
