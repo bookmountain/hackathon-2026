@@ -1,5 +1,5 @@
 import { EVENT } from "@/test/fixtures";
-import { EMPTY_EVENT, eventProblem, eventRequest, fillPercent, joinLabel } from "../logic";
+import { calendarEntry, EMPTY_EVENT, eventProblem, eventRequest, fillPercent, joinLabel } from "../logic";
 
 const now = new Date(2026, 8, 26, 16, 0); // Sat 26 Sep 2026, 4pm
 const later = new Date(2026, 8, 29, 19, 0);
@@ -56,5 +56,22 @@ describe("eventRequest", () => {
       walkIn: false,
     });
     expect(body).toMatchObject({ placeId: null, placeName: "Rymill Park", lat: -34.9235, lng: 138.6155, walkInsWelcome: false });
+  });
+});
+
+describe("calendarEntry", () => {
+  it("runs two hours when the event has no end, and adds the description", () => {
+    const start = "2026-09-29T09:30:00Z";
+    const entry = calendarEntry({ ...EVENT, startsAt: start, endsAt: null }, "Bring snacks");
+    expect(entry.title).toBe(`${EVENT.title} · UCompass`);
+    expect(entry.location).toBe(`${EVENT.where.name}, Adelaide SA`);
+    expect(entry.details).toBe("Bring snacks\n\nWalk-in welcome. Host & guests stay anonymous on UCompass.");
+    expect(entry.end!.getTime() - entry.start.getTime()).toBe(2 * 60 * 60 * 1000);
+  });
+
+  it("uses the event's own end time", () => {
+    const entry = calendarEntry({ ...EVENT, startsAt: "2026-09-29T09:30:00Z", endsAt: "2026-09-29T10:00:00Z" });
+    expect(entry.end!.toISOString()).toBe("2026-09-29T10:00:00.000Z");
+    expect(entry.details).toBe("Walk-in welcome. Host & guests stay anonymous on UCompass.");
   });
 });

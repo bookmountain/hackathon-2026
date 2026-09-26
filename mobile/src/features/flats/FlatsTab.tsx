@@ -3,7 +3,9 @@ import { useState } from "react";
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRefreshOnFocus } from "@/api/hooks";
 import { ChipRow } from "@/components/ui";
-import { CampusMap, MapHint, MapMarker } from "@/features/map";
+import { CampusMap, MapChrome, MapMarker, ResultsSheet } from "@/features/map";
+import { useMapSearch } from "@/features/map/useMapSearch";
+import { matchesQuery, resultsTitle } from "@/features/search/query";
 import TabScreen from "@/features/shell/TabScreen";
 import type { TabView } from "@/features/shell/ViewToolbar";
 import { useAppStore } from "@/store";
@@ -13,6 +15,9 @@ import FlatPin from "./FlatPin";
 import FlatSheet from "./FlatSheet";
 import { FLAT_FILTERS, filterFlats, type FlatFilter } from "./logic";
 
+const openFlat = (id: string) => router.push({ pathname: "/flats/[id]", params: { id } });
+const listRoom = () => router.push("/flats/new");
+
 export default function FlatsTab() {
   const { state, actions } = useAppStore();
   const { refreshing, refresh } = useRefreshOnFocus(actions.loadFlats);
@@ -21,16 +26,20 @@ export default function FlatsTab() {
   const [handledFocus, setHandledFocus] = useState<string | undefined>();
   const [view, setView] = useState<TabView>("map");
   const [filters, setFilters] = useState<FlatFilter[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { mapRef, recenter, ...search } = useMapSearch<"flat">();
 
   if (focus && focus !== handledFocus) {
     setHandledFocus(focus);
     setView("map");
     setFilters([]);
-    setSelectedId(focus);
+    search.setQuery("");
+    search.setSheet({ kind: "flat", id: focus });
   }
 
   const flats = filterFlats(state.flats, filters);
+  // The search box narrows the map and its results; the list shows every match of the chips
+  const onMap = flats.filter((f) => matchesQuery(search.query, f.title, f.area));
+  const selectedId = search.selected("flat");
   const selected = state.flats.find((f) => f.id === selectedId);
   const chipOptions = FLAT_FILTERS.map((f) => ({
     label: f,
@@ -41,32 +50,57 @@ export default function FlatsTab() {
   return (
     <TabScreen
       title="Flatmates"
-      action={{ label: "List a room", onPress: () => router.push("/flats/new") }}
+      action={{ label: "List a room", onPress: listRoom }}
       view={view}
       onViewChange={(v) => {
         setView(v);
-        setSelectedId(null);
+        search.setSheet(null);
       }}
     >
       {view === "map" ? (
         <CampusMap
-          onBackgroundPress={() => setSelectedId(null)}
+          ref={mapRef}
+          onBackgroundPress={() => search.setSheet(null)}
           overlay={
             <>
-              <View style={styles.chips}>
-                <ChipRow options={chipOptions} floating height={34} inset={14} />
-              </View>
-              <MapHint text="Rooms listed by students · tap a price" />
+              <MapChrome
+                placeholder="Search rooms near campus"
+                query={search.query}
+                onQueryChange={search.setQuery}
+                onSearch={search.showResults}
+                chips={chipOptions}
+                sheetOpen={!!search.sheet}
+                onRecenter={recenter}
+                listLabel="List of rooms"
+                onList={() => setView("list")}
+                action={{ label: "List a room", onPress: listRoom }}
+              />
+              {search.sheet?.kind === "results" && (
+                <ResultsSheet
+                  title={resultsTitle(onMap.length, "room", search.query)}
+                  onClose={() => search.setSheet(null)}
+                  emptyText={`No matches for “${search.query.trim()}”. Try another word or clear filters.`}
+                  rows={onMap.map((f) => ({
+                    key: f.id,
+                    title: f.title,
+                    sub: `${f.area} · ${f.beds} bed`,
+                    right: `$${f.price}/wk`,
+                    image: f.photo,
+                    onPress: () => openFlat(f.id),
+                  }))}
+                />
+              )}
               {selected && <FlatSheet key={selected.id} flat={selected} />}
             </>
           }
         >
-          {flats.map((f) => (
+          {onMap.map((f) => (
             <MapMarker
               key={f.id}
               coordinate={f}
-              onPress={() => setSelectedId(f.id)}
+              onPress={() => search.setSheet({ kind: "flat", id: f.id })}
               label={`${f.title}, $${f.price} per week`}
+              zIndex={f.id === selectedId ? 10 : 3}
             >
               <FlatPin flat={f} selected={f.id === selectedId} />
             </MapMarker>
@@ -85,7 +119,7 @@ export default function FlatsTab() {
             <ChipRow options={chipOptions} />
           </View>
           {flats.map((f) => (
-            <FlatCard key={f.id} flat={f} onPress={() => router.push({ pathname: "/flats/[id]", params: { id: f.id } })} />
+            <FlatCard key={f.id} flat={f} onPress={() => openFlat(f.id)} />
           ))}
           {flats.length === 0 && <Text style={styles.empty}>No rooms match those filters.</Text>}
         </ScrollView>
@@ -95,7 +129,6 @@ export default function FlatsTab() {
 }
 
 const styles = StyleSheet.create({
-  chips: { position: "absolute", top: 2, left: 0, right: 0, zIndex: 6 },
   list: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 24, gap: 16 },
   intro: { gap: 4 },
   title: { color: colors.ink, ...font(800, 22, 1.2, -0.02) },

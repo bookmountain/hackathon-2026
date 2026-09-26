@@ -1,10 +1,31 @@
 import type { EventRequest } from "@/api/types";
 import type { EventCategory, MapPoint, MeetupEvent } from "@/data/types";
+import type { CalendarEvent } from "@/lib/calendar";
 
 export const EVENT_CATEGORIES: EventCategory[] = ["Study", "Casual", "Social", "Food"];
 
+/** Chips over the meetups map */
+export const MEETUP_FILTERS = ["All", "Study", "Social", "Casual", "Food"] as const;
+export type MeetupFilter = (typeof MEETUP_FILTERS)[number];
+
 export function fillPercent(event: MeetupEvent): number {
   return Math.round((event.going / event.cap) * 100);
+}
+
+/** Events without an end time go in the calendar as two hours long */
+const DEFAULT_LENGTH_MS = 2 * 60 * 60 * 1000;
+
+/** "Add to calendar" entry for an event; the list has no description, the detail page does */
+export function calendarEntry(event: MeetupEvent, desc = ""): CalendarEvent {
+  const start = new Date(event.startsAt);
+  return {
+    id: `event-${event.id}`,
+    title: `${event.title} · UCompass`,
+    location: `${event.where.name}, Adelaide SA`,
+    details: `${desc ? `${desc}\n\n` : ""}Walk-in welcome. Host & guests stay anonymous on UCompass.`,
+    start,
+    end: event.endsAt ? new Date(event.endsAt) : new Date(start.getTime() + DEFAULT_LENGTH_MS),
+  };
 }
 
 export const JOIN_TOAST = "You're in. Just walk in — no one sees your name.";

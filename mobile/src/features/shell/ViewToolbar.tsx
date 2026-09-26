@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon, Segmented } from "@/components/ui";
-import { colors, font } from "@/theme";
+import { brutal, colors, divider, font } from "@/theme";
 
 export type TabView = "map" | "list";
 
@@ -47,8 +47,7 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingHorizontal: 14,
     backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lineSoft,
+    ...divider.bottom,
   },
   toggle: { width: 156 },
   action: {
@@ -56,6 +55,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 11,
     backgroundColor: colors.brand,
+    ...brutal(3),
     flexDirection: "row",
     alignItems: "center",
     gap: 6,

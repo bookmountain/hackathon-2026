@@ -7,7 +7,7 @@ import { colors, font, shadows } from "@/theme";
 export default function FlatCard({ flat, onPress }: { flat: Flat; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={styles.card}>
-      <Photo uri={flat.photo} tone={flat.tone} label="room photo" style={styles.photo}>
+      <Photo uri={flat.photo} tone={colors.brandSoft} label="room photo" style={styles.photo}>
         <View style={styles.price}>
           <Text style={styles.priceText}>
             ${flat.price}

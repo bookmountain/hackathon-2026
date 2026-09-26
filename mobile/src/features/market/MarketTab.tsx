@@ -1,24 +1,54 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { FlatList, RefreshControl, StyleSheet, TextInput, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRefreshOnFocus } from "@/api/hooks";
 import { ChipRow, Icon } from "@/components/ui";
 import type { Item } from "@/data/types";
-import { CampusMap, MapHint, MapMarker } from "@/features/map";
+import { CampusMap, MapChrome, MapMarker, ResultsSheet, type ResultRow } from "@/features/map";
+import { useMapSearch } from "@/features/map/useMapSearch";
+import { imageSearchStatus } from "@/features/search/imageSearch";
+import { matchesQuery, resultsTitle } from "@/features/search/query";
+import { useImageSearch, type ImageQuery } from "@/features/search/useImageSearch";
 import TabScreen from "@/features/shell/TabScreen";
 import type { TabView } from "@/features/shell/ViewToolbar";
 import { useAppStore } from "@/store";
-import { colors, font } from "@/theme";
+import { brutal, colors, font } from "@/theme";
 import ItemCard from "./ItemCard";
-import { CATEGORIES, customPinItems, itemsAtPickup, listItems, type CategoryFilter } from "./logic";
+import { CATEGORIES, customPinItems, inCategory, isSold, itemsAtPickup, listItems, type CategoryFilter } from "./logic";
 import { ItemTag, PickupPin } from "./MarketPins";
 import { ItemSheet, PickupSheet } from "./MarketSheets";
 
-type Selection = { kind: "pickup" | "item"; id: string } | null;
+const openItem = (id: string) => router.push({ pathname: "/market/[id]", params: { id } });
+const sell = () => router.push("/market/new");
 
 /** Keeps a lone last card at half width in the two-column grid */
 function padToPairs(items: Item[]): (Item | null)[] {
   return items.length % 2 ? [...items, null] : items;
+}
+
+function itemRow(i: Item, sub: string): ResultRow {
+  return { key: i.id, title: i.title, sub, right: `$${i.price}`, image: i.photo, onPress: () => openItem(i.id) };
+}
+
+// "Searching by image" strip at the top of the results sheet
+function ImageQueryHeader({ query, onClear }: { query: ImageQuery; onClear: () => void }) {
+  return (
+    <View style={styles.imgHead}>
+      <Image source={{ uri: query.src }} style={styles.imgThumb} accessibilityIgnoresInvertColors />
+      <View style={styles.imgText}>
+        <Text style={styles.imgTitle}>Searching by image</Text>
+        <View style={styles.imgStatusRow}>
+          {query.loading && <ActivityIndicator size="small" color={colors.brand} />}
+          <Text style={[styles.imgStatus, { color: query.loading ? colors.brand : colors.success }]}>
+            {imageSearchStatus(query.loading, query.category)}
+          </Text>
+        </View>
+      </View>
+      <Pressable onPress={onClear} accessibilityRole="button" style={styles.imgClear}>
+        <Text style={styles.imgClearText}>Clear</Text>
+      </Pressable>
+    </View>
+  );
 }
 
 export default function MarketTab() {
@@ -29,37 +59,94 @@ export default function MarketTab() {
   const [handledPost, setHandledPost] = useState<string | undefined>();
   const [view, setView] = useState<TabView>("map");
   const [category, setCategory] = useState<CategoryFilter>("All");
-  const [query, setQuery] = useState("");
-  const [selection, setSelection] = useState<Selection>(null);
+  const [listQuery, setListQuery] = useState("");
+  const { mapRef, recenter, ...search } = useMapSearch<"pickup" | "item">();
+  const { imageQuery, startImageSearch, clearImageSearch } = useImageSearch(state.items, state.pickups);
 
   if (posted && posted !== handledPost) {
     setHandledPost(posted);
     setCategory("All");
   }
 
-  const chips = CATEGORIES.map((c) => ({ label: c, active: c === category, onPress: () => setCategory(c) }));
-  const selectedPickup = selection?.kind === "pickup" ? state.pickups.find((p) => p.id === selection.id) : undefined;
-  const selectedItem = selection?.kind === "item" ? state.items.find((i) => i.id === selection.id) : undefined;
+  const searchByImage = async () => {
+    if (!(await startImageSearch())) return;
+    setView("map");
+    setCategory("All");
+    search.setQuery("");
+    search.showResults();
+  };
+
+  const chips = CATEGORIES.map((c) => ({
+    label: c,
+    active: c === category,
+    onPress: () => setCategory(c),
+  }));
+  // Map pins and results: unsold, in the category, matching the search
+  const shown = (i: Item) => !isSold(i) && inCategory(i, category) && matchesQuery(search.query, i.title);
+  const selectedPickupId = search.selected("pickup");
+  const selectedItemId = search.selected("item");
+  const selectedPickup = state.pickups.find((p) => p.id === selectedPickupId);
+  const selectedItem = state.items.find((i) => i.id === selectedItemId);
+
+  const imageResults = imageQuery && !imageQuery.loading ? imageQuery.results : [];
+  const results = imageQuery
+    ? imageResults.map((i) => itemRow(i, `${i.cat} · ${i.loc.name}`))
+    : state.items.filter(shown).map((i) => itemRow(i, `${i.avail} · ${i.loc.name}`));
 
   return (
     <TabScreen
       title="Market"
-      action={{ label: "Sell", onPress: () => router.push("/market/new") }}
+      action={{ label: "Sell", onPress: sell }}
       view={view}
       onViewChange={(v) => {
         setView(v);
-        setSelection(null);
+        search.setSheet(null);
       }}
     >
       {view === "map" ? (
         <CampusMap
-          onBackgroundPress={() => setSelection(null)}
+          ref={mapRef}
+          onBackgroundPress={() => search.setSheet(null)}
           overlay={
             <>
-              <View style={styles.chips}>
-                <ChipRow options={chips} floating height={34} inset={14} />
-              </View>
-              <MapHint text="★ Safe pickup points · tags = seller pins" />
+              <MapChrome
+                placeholder="Search items"
+                query={search.query}
+                onQueryChange={(q) => {
+                  // Typing a word replaces a search by image
+                  if (q) clearImageSearch();
+                  search.setQuery(q);
+                }}
+                onSearch={search.showResults}
+                onImageSearch={searchByImage}
+                chips={chips}
+                sheetOpen={!!search.sheet}
+                onRecenter={recenter}
+                listLabel="List of items"
+                onList={() => setView("list")}
+                action={{ label: "Sell", onPress: sell }}
+              />
+              {search.sheet?.kind === "results" && (
+                <ResultsSheet
+                  header={
+                    imageQuery && (
+                      <ImageQueryHeader
+                        query={imageQuery}
+                        onClear={() => {
+                          clearImageSearch();
+                          search.setSheet(null);
+                        }}
+                      />
+                    )
+                  }
+                  title={resultsTitle(results.length, "item", search.query, imageQuery ?? undefined)}
+                  onClose={() => search.setSheet(null)}
+                  emptyText={
+                    imageQuery?.loading ? null : `No matches for “${search.query.trim()}”. Try another word or clear filters.`
+                  }
+                  rows={results}
+                />
+              )}
               {selectedPickup && (
                 <PickupSheet
                   key={selectedPickup.id}
@@ -75,29 +162,33 @@ export default function MarketTab() {
             <MapMarker
               key={p.id}
               coordinate={p}
-              onPress={() => setSelection({ kind: "pickup", id: p.id })}
+              onPress={() => search.setSheet({ kind: "pickup", id: p.id })}
               label={`${p.name}, safe pickup point`}
+              zIndex={p.id === selectedPickupId ? 10 : 3}
             >
               <PickupPin
-                count={itemsAtPickup(state.items, p.id, category).length}
-                selected={selection?.kind === "pickup" && selection.id === p.id}
+                count={itemsAtPickup(state.items, p.id, category).filter(shown).length}
+                selected={p.id === selectedPickupId}
               />
             </MapMarker>
           ))}
-          {customPinItems(state.items, category).map((i) => (
-            <MapMarker
-              key={i.id}
-              coordinate={i.loc}
-              onPress={() => setSelection({ kind: "item", id: i.id })}
-              label={`${i.title}, $${i.price}`}
-            >
-              <ItemTag item={i} selected={selection?.kind === "item" && selection.id === i.id} />
-            </MapMarker>
-          ))}
+          {customPinItems(state.items, category)
+            .filter(shown)
+            .map((i) => (
+              <MapMarker
+                key={i.id}
+                coordinate={i.loc}
+                onPress={() => search.setSheet({ kind: "item", id: i.id })}
+                label={`${i.title}, $${i.price}`}
+                zIndex={i.id === selectedItemId ? 10 : 3}
+              >
+                <ItemTag item={i} selected={i.id === selectedItemId} />
+              </MapMarker>
+            ))}
         </CampusMap>
       ) : (
         <FlatList
-          data={padToPairs(listItems(state.items, category, query))}
+          data={padToPairs(listItems(state.items, category, listQuery))}
           keyExtractor={(i, index) => i?.id ?? `spacer-${index}`}
           numColumns={2}
           columnWrapperStyle={styles.gridRow}
@@ -109,13 +200,21 @@ export default function MarketTab() {
               <View style={styles.search}>
                 <Icon name="search" size={18} color={colors.faint} />
                 <TextInput
-                  value={query}
-                  onChangeText={setQuery}
+                  value={listQuery}
+                  onChangeText={setListQuery}
                   placeholder="Search textbooks, desks, tech…"
                   placeholderTextColor={colors.faint}
                   style={styles.searchInput}
                   returnKeyType="search"
                 />
+                <Pressable
+                  onPress={searchByImage}
+                  accessibilityRole="button"
+                  accessibilityLabel="Search by image"
+                  style={styles.imageButton}
+                >
+                  <Icon name="imageSearch" size={21} color={colors.brand} strokeWidth={2.1} />
+                </Pressable>
               </View>
               <View style={styles.listChips}>
                 <ChipRow options={chips} />
@@ -123,11 +222,7 @@ export default function MarketTab() {
             </View>
           }
           renderItem={({ item }) =>
-            item ? (
-              <ItemCard item={item} onPress={() => router.push({ pathname: "/market/[id]", params: { id: item.id } })} />
-            ) : (
-              <View style={styles.spacer} />
-            )
+            item ? <ItemCard item={item} onPress={() => openItem(item.id)} /> : <View style={styles.spacer} />
           }
         />
       )}
@@ -136,22 +231,37 @@ export default function MarketTab() {
 }
 
 const styles = StyleSheet.create({
-  chips: { position: "absolute", top: 2, left: 0, right: 0, zIndex: 6 },
   list: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 24, gap: 12 },
   gridRow: { gap: 12 },
   header: { gap: 14, marginBottom: 2 },
   search: {
     height: 46,
     borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: colors.line,
+    ...brutal(0),
     backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    paddingHorizontal: 14,
+    paddingLeft: 14,
+    paddingRight: 6,
   },
   searchInput: { flex: 1, height: "100%", color: colors.ink, ...font(500, 14.5) },
+  imageButton: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   listChips: { marginHorizontal: -18 },
   spacer: { flex: 1 },
+  imgHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: colors.canvas,
+    borderRadius: 16,
+    padding: 8,
+  },
+  imgThumb: { width: 52, height: 52, borderRadius: 12, backgroundColor: colors.brandSofter },
+  imgText: { flex: 1, minWidth: 0, gap: 2 },
+  imgTitle: { color: colors.ink, ...font(800, 13.5) },
+  imgStatusRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  imgStatus: { ...font(600, 12) },
+  imgClear: { backgroundColor: colors.surface, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 6 },
+  imgClearText: { color: colors.brand, ...font(700, 12) },
 });

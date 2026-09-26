@@ -181,6 +181,8 @@ export function toEvent(e: EventSummaryDto): MeetupEvent {
     date: e.dateLabel,
     time: e.timeLabel,
     when: e.whenLabel,
+    startsAt: e.startsAt,
+    endsAt: e.endsAt,
     where: { name: e.place.name, latitude: e.place.lat, longitude: e.place.lng },
     going: e.goingCount,
     cap: e.capacity,

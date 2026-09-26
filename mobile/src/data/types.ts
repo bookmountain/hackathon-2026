@@ -104,6 +104,9 @@ export type MeetupEvent = {
   date: string;
   time: string;
   when: string;
+  /** UTC instants, for "Add to calendar"; no end = open-ended */
+  startsAt: string;
+  endsAt: string | null;
   where: MapPoint & { name: string };
   /** Headcount including you (and the host) */
   going: number;
