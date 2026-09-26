@@ -3,6 +3,9 @@ namespace UniMap.Api.Domain;
 /// <summary>Suggested tags for the onboarding UI. Users may still send custom tags.</summary>
 public static class Catalog
 {
+    /// <summary>Preset avatars are colours 0 to this, matching the design's palette.</summary>
+    public const int MaxAvatarPreset = 7;
+
     /// <summary>Suggestions only; pronouns are free text.</summary>
     public static readonly string[] Pronouns = ["she/her", "he/him", "they/them", "she/they", "he/they"];
 

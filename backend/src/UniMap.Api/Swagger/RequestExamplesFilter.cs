@@ -51,7 +51,8 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
             Bio: "Second-year CS student, keen for study buddies and weekend hikes.",
             Habits: ["night-owl", "gym", "coffee", "studies-in-library"],
             Interests: ["coding", "hackathons", "hiking", "board-games"],
-            AvatarKey: null),
+            AvatarKey: null,
+            AvatarPreset: 2),
         _ when type == typeof(UploadUrlRequest) => new UploadUrlRequest("image/jpeg"),
         _ when type == typeof(UpsertFlatRequest) => new UpsertFlatRequest(
             Id: null,

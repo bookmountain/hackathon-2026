@@ -62,6 +62,31 @@ public class StorageService
         }
     }
 
+    /// <summary>Deletes every object under a folder, e.g. "items/{itemId}/". Returns how many were deleted.</summary>
+    public async Task<int> DeleteFolderAsync(string prefix)
+    {
+        if (_s3 is null) throw new InvalidOperationException("R2 is not configured.");
+        if (!prefix.EndsWith('/')) throw new ArgumentException("Pass a folder ending in '/'.", nameof(prefix));
+        var deleted = 0;
+        string? token = null;
+        do
+        {
+            var page = await _s3.ListObjectsV2Async(new ListObjectsV2Request
+            {
+                BucketName = _opt.Bucket,
+                Prefix = prefix,
+                ContinuationToken = token,
+            });
+            foreach (var obj in page.S3Objects ?? [])
+            {
+                await _s3.DeleteObjectAsync(_opt.Bucket, obj.Key);
+                deleted++;
+            }
+            token = page.IsTruncated == true ? page.NextContinuationToken : null;
+        } while (token is not null);
+        return deleted;
+    }
+
     /// <summary>
     /// URL clients can load the object from. Uses PublicBaseUrl if the bucket is public
     /// (r2.dev or custom domain); otherwise a presigned GET valid for 24h, so private buckets work too.

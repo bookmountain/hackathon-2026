@@ -1,98 +1,104 @@
-import { REPLIES } from "@/data/seed";
-import type { ChatTopic, Flat, Item, MeetupEvent } from "@/data/types";
-import type { AppState, Consents, Session } from "./state";
+import type { Me } from "@/api/types";
+import type { ChatMessage, ChatThread, Flat, Item, MeetupEvent, Pickup } from "@/data/types";
+import { initialState, signedOutSession, type AppState, type Session } from "./state";
 
 export type Action =
-  | { type: "signIn"; email: string }
-  | { type: "setConsents"; consents: Consents }
-  | { type: "updateProfile"; profile: Partial<Pick<Session, "nick" | "major" | "avatar">> }
-  | { type: "enterApp" }
+  | { type: "booted"; session: Partial<Session> }
+  | { type: "setSession"; session: Partial<Session> }
+  | { type: "setMe"; me: Me }
   | { type: "signOut" }
-  | { type: "toggleJoin"; eventId: string }
-  | { type: "addFlat"; flat: Flat }
-  | { type: "addItem"; item: Item }
-  | { type: "addEvent"; event: MeetupEvent }
-  | { type: "openChat"; personId: string; topic: ChatTopic; context?: string; firstMessage?: string }
-  | { type: "sendMessage"; personId: string; text: string }
-  | { type: "setTyping"; personId: string | null }
-  | { type: "receiveReply"; personId: string };
+  | { type: "setFlats"; flats: Flat[] }
+  | { type: "setItems"; items: Item[] }
+  | { type: "setPickups"; pickups: Pickup[] }
+  | { type: "setEvents"; events: MeetupEvent[] }
+  | { type: "putEvent"; event: MeetupEvent }
+  | { type: "setGoing"; eventId: string; going: number }
+  | { type: "removeEvent"; eventId: string }
+  | { type: "setChats"; chats: ChatThread[] }
+  | { type: "putChat"; chat: ChatThread }
+  | { type: "setMessages"; chatId: string; messages: ChatMessage[] }
+  | { type: "addMessage"; chatId: string; message: ChatMessage; preview: string; unread: boolean }
+  | { type: "markRead"; chatId: string }
+  | { type: "setTyping"; chatId: string | null };
+
+/** Replace the element with the same id, or put the new one first */
+function upsert<T extends { id: string }>(list: T[], value: T): T[] {
+  return list.some((x) => x.id === value.id) ? list.map((x) => (x.id === value.id ? value : x)) : [value, ...list];
+}
 
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
-    case "signIn":
-      return { ...state, session: { ...state.session, email: action.email } };
+    case "booted":
+      return { ...state, session: { ...state.session, ...action.session, booted: true } };
 
-    case "setConsents":
-      return { ...state, session: { ...state.session, consents: action.consents } };
+    case "setSession":
+      return { ...state, session: { ...state.session, ...action.session } };
 
-    case "updateProfile":
-      return { ...state, session: { ...state.session, ...action.profile } };
-
-    case "enterApp":
-      return { ...state, session: { ...state.session, signedIn: true } };
+    case "setMe":
+      return { ...state, session: { ...state.session, me: action.me, email: action.me.email } };
 
     case "signOut":
-      // Like the design, the profile is kept so signing back in skips setup
-      return { ...state, session: { ...state.session, signedIn: false } };
+      // Nothing from the last account stays in memory
+      return { ...initialState, session: signedOutSession };
 
-    case "toggleJoin":
-      return { ...state, joined: { ...state.joined, [action.eventId]: !state.joined[action.eventId] } };
+    case "setFlats":
+      return { ...state, flats: action.flats };
 
-    case "addFlat":
-      return { ...state, flats: [action.flat, ...state.flats] };
+    case "setItems":
+      return { ...state, items: action.items };
 
-    case "addItem":
-      return { ...state, items: [action.item, ...state.items] };
+    case "setPickups":
+      return { ...state, pickups: action.pickups };
 
-    case "addEvent":
-      // Hosts are counted as going to their own event
+    case "setEvents":
+      return { ...state, events: action.events };
+
+    case "putEvent":
+      return { ...state, events: upsert(state.events, action.event) };
+
+    case "setGoing":
       return {
         ...state,
-        events: [action.event, ...state.events],
-        joined: { ...state.joined, [action.event.id]: true },
+        events: state.events.map((e) =>
+          e.id === action.eventId ? { ...e, going: action.going, full: action.going >= e.cap } : e,
+        ),
       };
 
-    case "openChat": {
-      const { personId, topic, context, firstMessage } = action;
-      const thread = [...(state.chats[personId] ?? [])];
-      // Each listing/context line appears once per thread, however often it's opened
-      if (context && !thread.some((m) => m.from === "system" && m.text === context)) {
-        thread.push({ from: "system", text: context });
-      }
-      if (firstMessage) thread.push({ from: "me", text: firstMessage });
+    case "removeEvent":
+      return { ...state, events: state.events.filter((e) => e.id !== action.eventId) };
+
+    case "setChats":
+      return { ...state, chats: action.chats };
+
+    case "putChat":
+      return { ...state, chats: upsert(state.chats, action.chat) };
+
+    case "setMessages":
+      return { ...state, messages: { ...state.messages, [action.chatId]: action.messages } };
+
+    case "addMessage": {
+      const { chatId, message, preview, unread } = action;
+      const thread = state.messages[chatId];
+      const chat = state.chats.find((c) => c.id === chatId);
+      // Real-time events can repeat a message already added from the send response
+      const known = !!thread?.some((m) => m.id === message.id);
       return {
         ...state,
-        chats: { ...state.chats, [personId]: thread },
-        chatTopics: { ...state.chatTopics, [personId]: topic },
-        unread: { ...state.unread, [personId]: false },
+        typingIn: message.from === "them" && state.typingIn === chatId ? null : state.typingIn,
+        messages: thread && !known ? { ...state.messages, [chatId]: [...thread, message] } : state.messages,
+        chats: chat
+          ? [
+              { ...chat, preview, unread: unread && !known ? chat.unread + 1 : chat.unread, lastAt: new Date().toISOString() },
+              ...state.chats.filter((c) => c.id !== chatId),
+            ]
+          : state.chats,
       };
     }
 
-    case "sendMessage":
-      return {
-        ...state,
-        chats: {
-          ...state.chats,
-          [action.personId]: [...(state.chats[action.personId] ?? []), { from: "me", text: action.text }],
-        },
-      };
+    case "markRead":
+      return { ...state, chats: state.chats.map((c) => (c.id === action.chatId ? { ...c, unread: 0 } : c)) };
 
     case "setTyping":
-      return { ...state, typingWith: action.personId };
-
-    case "receiveReply": {
-      const thread = state.chats[action.personId] ?? [];
-      const replies = REPLIES[state.chatTopics[action.personId] ?? "person"];
-      // Cycle through the canned replies in order
-      const sentSoFar = thread.filter((m) => m.from === "them").length;
-      return {
-        ...state,
-        typingWith: state.typingWith === action.personId ? null : state.typingWith,
-        chats: {
-          ...state.chats,
-          [action.personId]: [...thread, { from: "them", text: replies[sentSoFar % replies.length] }],
-        },
-      };
-    }
+      return { ...state, typingIn: action.chatId };
   }
 }

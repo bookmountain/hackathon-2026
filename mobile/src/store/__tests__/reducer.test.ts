@@ -1,80 +1,92 @@
-import { REPLIES } from "@/data/seed";
-import type { MeetupEvent } from "@/data/types";
+import type { ChatThread } from "@/data/types";
+import { EVENT, ME } from "@/test/fixtures";
 import { reducer } from "../reducer";
-import { initialState } from "../state";
+import { initialState, type AppState } from "../state";
 
-const event: MeetupEvent = {
-  id: "e-new",
-  title: "Friday coffee & code",
-  cat: "Social",
-  day: "FRI",
-  date: "2",
-  time: "6:00 pm",
-  when: "Fri 2 Oct · 6:00 pm",
-  where: { name: "Barr Smith Library", latitude: -34.91888, longitude: 138.60448 },
-  going: 0,
-  cap: 20,
-  desc: "",
+const chat: ChatThread = {
+  id: "c1",
+  person: { id: "tom", nick: "TomTheTutor", major: "Mathematics", uni: "Adelaide Uni", avatar: -1 },
+  preview: "Hey!",
+  unread: 0,
+  lastAt: "2026-09-26T08:00:00Z",
 };
+const other: ChatThread = { ...chat, id: "c2" };
 
 describe("session", () => {
-  it("keeps the profile after sign out so setup is skipped next time", () => {
-    let state = reducer(initialState, { type: "updateProfile", profile: { nick: "CompassRookie", major: "Law" } });
-    state = reducer(state, { type: "enterApp" });
+  it("finishes booting with the restored session", () => {
+    const state = reducer(initialState, { type: "booted", session: { token: "t", me: ME } });
+    expect(state.session).toMatchObject({ booted: true, token: "t", me: ME });
+  });
+
+  it("forgets everything on sign-out", () => {
+    let state = reducer(initialState, { type: "setSession", session: { token: "t", me: ME } });
+    state = reducer(state, { type: "setEvents", events: [EVENT] });
     state = reducer(state, { type: "signOut" });
-    expect(state.session.signedIn).toBe(false);
-    expect(state.session.nick).toBe("CompassRookie");
+    expect(state.session).toEqual({ booted: true, token: null, me: null, email: "", devCode: null });
+    expect(state.events).toEqual([]);
   });
 });
 
-describe("meetups", () => {
-  it("toggles joining an event", () => {
-    const joined = reducer(initialState, { type: "toggleJoin", eventId: "e1" });
-    expect(joined.joined.e1).toBe(true);
-    expect(reducer(joined, { type: "toggleJoin", eventId: "e1" }).joined.e1).toBe(false);
+describe("events", () => {
+  const withEvent = reducer(initialState, { type: "setEvents", events: [EVENT] });
+
+  it("replaces an event by id, or adds a new one first", () => {
+    const joined = reducer(withEvent, { type: "putEvent", event: { ...EVENT, joined: true, going: 16 } });
+    expect(joined.events).toEqual([{ ...EVENT, joined: true, going: 16 }]);
+    const hosted = reducer(joined, { type: "putEvent", event: { ...EVENT, id: "e-new", host: true } });
+    expect(hosted.events.map((e) => e.id)).toEqual(["e-new", "e1"]);
   });
 
-  it("puts a hosted event first and marks the host as going", () => {
-    const state = reducer(initialState, { type: "addEvent", event });
-    expect(state.events[0].id).toBe("e-new");
-    expect(state.joined["e-new"]).toBe(true);
+  it("takes live headcounts and marks full events", () => {
+    const state = reducer(withEvent, { type: "setGoing", eventId: "e1", going: 30 });
+    expect(state.events[0]).toMatchObject({ going: 30, full: true });
+    expect(reducer(withEvent, { type: "removeEvent", eventId: "e1" }).events).toEqual([]);
   });
 });
 
-describe("chat", () => {
-  it("adds a context line only once per thread and clears unread", () => {
-    let state = reducer(initialState, { type: "openChat", personId: "p7", topic: "flat", context: "About: Sunny room" });
-    state = reducer(state, { type: "openChat", personId: "p7", topic: "flat", context: "About: Sunny room" });
-    expect(state.chats.p7.filter((m) => m.from === "system")).toHaveLength(1);
-
-    const read = reducer(initialState, { type: "openChat", personId: "p5", topic: "item" });
-    expect(read.unread.p5).toBe(false);
+describe("chats", () => {
+  let state: AppState;
+  beforeEach(() => {
+    state = reducer(initialState, { type: "setChats", chats: [other, chat] });
+    state = reducer(state, { type: "setMessages", chatId: "c1", messages: [{ id: "m1", from: "them", text: "Hey!" }] });
   });
 
-  it("appends the opening message from me", () => {
-    const state = reducer(initialState, {
-      type: "openChat",
-      personId: "p7",
-      topic: "flat",
-      context: "About: Sunny room",
-      firstMessage: "Is it still available?",
+  it("adds an incoming message, moves the chat to the top and counts it unread", () => {
+    const next = reducer(state, {
+      type: "addMessage",
+      chatId: "c1",
+      message: { id: "m2", from: "them", text: "Still keen?" },
+      preview: "Still keen?",
+      unread: true,
     });
-    expect(state.chats.p7.at(-1)).toEqual({ from: "me", text: "Is it still available?" });
+    expect(next.messages.c1.map((m) => m.id)).toEqual(["m1", "m2"]);
+    expect(next.chats.map((c) => c.id)).toEqual(["c1", "c2"]);
+    expect(next.chats[0]).toMatchObject({ preview: "Still keen?", unread: 1 });
   });
 
-  it("cycles through the topic's canned replies and stops typing", () => {
-    let state = reducer(initialState, { type: "openChat", personId: "p7", topic: "flat", firstMessage: "Hi" });
-    state = reducer(state, { type: "setTyping", personId: "p7" });
-    state = reducer(state, { type: "receiveReply", personId: "p7" });
-    state = reducer(state, { type: "receiveReply", personId: "p7" });
-    const replies = state.chats.p7.filter((m) => m.from === "them").map((m) => m.text);
-    expect(replies).toEqual([REPLIES.flat[0], REPLIES.flat[1]]);
-    expect(state.typingWith).toBeNull();
+  it("ignores a message it already has (send response + real-time echo)", () => {
+    const again = reducer(state, {
+      type: "addMessage",
+      chatId: "c1",
+      message: { id: "m1", from: "them", text: "Hey!" },
+      preview: "Hey!",
+      unread: true,
+    });
+    expect(again.messages.c1).toHaveLength(1);
+    expect(again.chats.find((c) => c.id === "c1")?.unread).toBe(0);
   });
 
-  it("continues after messages already in the thread (seeded chat with p5)", () => {
-    const state = reducer(initialState, { type: "receiveReply", personId: "p5" });
-    // p5 already sent one message, so the next canned reply is the second one
-    expect(state.chats.p5.at(-1)?.text).toBe(REPLIES.item[1]);
+  it("clears typing when their message lands, and unread when read", () => {
+    let next = reducer(state, { type: "setTyping", chatId: "c1" });
+    expect(next.typingIn).toBe("c1");
+    next = reducer(next, {
+      type: "addMessage",
+      chatId: "c1",
+      message: { id: "m2", from: "them", text: "Yes" },
+      preview: "Yes",
+      unread: true,
+    });
+    expect(next.typingIn).toBeNull();
+    expect(reducer(next, { type: "markRead", chatId: "c1" }).chats[0].unread).toBe(0);
   });
 });

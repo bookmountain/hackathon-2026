@@ -1,9 +1,13 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as api from "@/api/endpoints";
+import { useLoad } from "@/api/hooks";
 import { Button, ScreenHeader } from "@/components/ui";
-import type { MeetupEvent } from "@/data/types";
+import { toEventDetail } from "@/data/adapters";
+import type { EventDetail as EventDetailData } from "@/data/types";
 import { MapDot, MiniMap, regionAround } from "@/features/map";
+import { LoadingScreen } from "@/features/shell/LoadingScreen";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { fillPercent } from "./logic";
@@ -12,18 +16,24 @@ import { useJoin } from "./useJoin";
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { state } = useAppStore();
-  const event = state.events.find((e) => e.id === id);
-  return event ? <EventDetail event={event} /> : null;
+  const { data, error, reload } = useLoad(() => api.events.get(id), id);
+  if (!data) return <LoadingScreen error={error} onRetry={reload} />;
+  const detail = toEventDetail(data);
+  // The list copy has the live headcount and your Join state
+  const live = state.events.find((e) => e.id === id);
+  return <EventDetail event={live ? { ...detail, ...live } : detail} />;
 }
 
-function EventDetail({ event }: { event: MeetupEvent }) {
-  const { joined, going, toggle } = useJoin(event);
+function EventDetail({ event }: { event: EventDetailData }) {
+  const { joined, going, busy, toggle } = useJoin(event);
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
       <ScreenHeader onBack={() => router.back()} bordered={false} />
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.headline}>
-          <Text style={styles.kicker}>{event.cat} · Walk-in welcome</Text>
+          <Text style={styles.kicker}>
+            {event.cat} · {event.walkIns ? "Walk-in welcome" : "Join to go"}
+          </Text>
           <Text style={styles.title}>{event.title}</Text>
         </View>
 
@@ -50,7 +60,7 @@ function EventDetail({ event }: { event: MeetupEvent }) {
           />
         </MiniMap>
 
-        <Text style={styles.desc}>{event.desc}</Text>
+        {event.desc ? <Text style={styles.desc}>{event.desc}</Text> : null}
 
         <View style={styles.host}>
           <View style={styles.hostRow}>
@@ -58,7 +68,7 @@ function EventDetail({ event }: { event: MeetupEvent }) {
               <Text style={styles.anonText}>?</Text>
             </View>
             <View>
-              <Text style={styles.hostTitle}>Hosted anonymously</Text>
+              <Text style={styles.hostTitle}>{event.host ? "You're hosting · anonymously" : "Hosted anonymously"}</Text>
               <Text style={styles.hostSub}>Verified student host</Text>
             </View>
           </View>
@@ -68,15 +78,25 @@ function EventDetail({ event }: { event: MeetupEvent }) {
               <Text style={[styles.capacityText, { color: colors.muted }]}>{event.cap} spots</Text>
             </View>
             <View style={styles.bar}>
-              <View style={[styles.barFill, { width: `${Math.min(100, fillPercent(event, joined))}%` }]} />
+              <View style={[styles.barFill, { width: `${Math.min(100, fillPercent(event))}%` }]} />
             </View>
           </View>
         </View>
       </ScrollView>
       <View style={styles.footer}>
         <Button
-          label={joined ? "You're going — just walk in" : "Join — walk in anytime"}
+          label={
+            event.host
+              ? "You're hosting"
+              : joined
+                ? "You're going — just walk in"
+                : event.full
+                  ? "Full"
+                  : "Join — walk in anytime"
+          }
           variant={joined ? "soft" : "primary"}
+          inactive={event.host || (event.full && !joined)}
+          disabled={busy}
           onPress={toggle}
         />
       </View>

@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { colors, font } from "@/theme";
 import Icon from "./Icon";
@@ -41,33 +41,52 @@ export function Striped({ tone, stripe = 12, gap = 2, base = colors.canvas, labe
   );
 }
 
-// Dashed "Add photo" button; toggles a mock photo on/off
-export function PhotoDropzone({ added, onPress, emptyText, addedText }: {
-  added: boolean;
-  onPress: () => void;
+type DropzoneProps = {
+  /** Local image URIs, in order; the first is the cover */
+  photos: string[];
+  max: number;
+  onAdd: () => void;
+  onRemove: (index: number) => void;
   emptyText: string;
-  addedText: string;
-}) {
-  const content = (
-    <>
-      <Icon name="camera" size={26} color={colors.brand} />
-      <Text style={styles.dropText}>{added ? addedText : emptyText}</Text>
-    </>
-  );
+};
+
+// Dashed "Add photo" box; once photos are picked it shows them (tap one to remove)
+export function PhotoDropzone({ photos, max, onAdd, onRemove, emptyText }: DropzoneProps) {
+  if (photos.length === 0) {
+    return (
+      <Pressable onPress={onAdd} accessibilityRole="button" style={[styles.drop, { borderColor: colors.brandLight }]}>
+        <Icon name="camera" size={26} color={colors.brand} />
+        <Text style={styles.dropText}>{emptyText}</Text>
+      </Pressable>
+    );
+  }
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={[styles.drop, { borderColor: added ? colors.brand : colors.brandLight }]}
-    >
-      {added ? (
-        <Striped tone="#DCE6FF" stripe={10} gap={2} base={colors.canvas} style={styles.dropFill}>
-          {content}
-        </Striped>
-      ) : (
-        content
-      )}
-    </Pressable>
+    <View style={styles.picked}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs}>
+        {photos.map((uri, i) => (
+          <Pressable
+            key={uri}
+            onPress={() => onRemove(i)}
+            accessibilityRole="button"
+            accessibilityLabel={`Remove photo ${i + 1}`}
+            style={styles.thumb}
+          >
+            <Image source={{ uri }} style={StyleSheet.absoluteFill} accessibilityIgnoresInvertColors />
+            <View style={styles.remove}>
+              <Text style={styles.removeText}>×</Text>
+            </View>
+          </Pressable>
+        ))}
+        {photos.length < max && (
+          <Pressable onPress={onAdd} accessibilityRole="button" accessibilityLabel="Add photo" style={[styles.thumb, styles.add]}>
+            <Icon name="plus" size={22} color={colors.brand} />
+          </Pressable>
+        )}
+      </ScrollView>
+      <Text style={styles.pickedText}>
+        {photos.length} of {max} photos · the first is the cover · tap one to remove
+      </Text>
+    </View>
   );
 }
 
@@ -85,6 +104,28 @@ const styles = StyleSheet.create({
     gap: 6,
     overflow: "hidden",
   },
-  dropFill: { ...StyleSheet.absoluteFill, gap: 6 },
   dropText: { color: colors.brand, ...font(700, 14) },
+  picked: { gap: 8 },
+  thumbs: { gap: 8 },
+  thumb: { width: 104, height: 104, borderRadius: 16, overflow: "hidden", backgroundColor: colors.canvas },
+  add: {
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: colors.brandLight,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  remove: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "rgba(10,26,63,0.7)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  removeText: { color: colors.surface, ...font(800, 14, 1) },
+  pickedText: { color: colors.muted, ...font(600, 12) },
 });

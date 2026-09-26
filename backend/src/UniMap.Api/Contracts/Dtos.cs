@@ -24,6 +24,9 @@ public record AuthResponse(string AccessToken, DateTimeOffset ExpiresAt, bool Co
 /// <param name="Department">Only used when DegreeId is not set.</param>
 /// <param name="AgeRange">Deprecated: removed at the PM's request. Ignored by the server.</param>
 /// <param name="Nationality">Deprecated: removed at the PM's request. Ignored by the server.</param>
+/// <param name="AvatarKey">From POST /api/uploads/avatar. This replaces the saved photo: send back the
+/// profile's current avatarKey to keep it, or null to remove it.</param>
+/// <param name="AvatarPreset">The design's preset avatar colour, 0–7; null for none ("?").</param>
 public record UpsertProfileRequest(
     [Required, MaxLength(64)] string DisplayName,
     int? DegreeId,
@@ -36,8 +39,12 @@ public record UpsertProfileRequest(
     [MaxLength(500)] string? Bio,
     [MaxLength(20)] List<string> Habits,
     [MaxLength(20)] List<string> Interests,
-    string? AvatarKey);
+    string? AvatarKey,
+    [Range(0, Catalog.MaxAvatarPreset)] int? AvatarPreset = null);
 
+/// <param name="AvatarUrl">Photo avatar, valid for 24 hours.</param>
+/// <param name="AvatarKey">The photo's R2 key. Send it back on PUT /api/me/profile to keep the photo.</param>
+/// <param name="AvatarPreset">Preset avatar colour, 0–7, or null. Shown when there's no photo.</param>
 public record ProfileDto(
     Guid UserId,
     string DisplayName,
@@ -50,7 +57,9 @@ public record ProfileDto(
     string? Bio,
     List<string> Habits,
     List<string> Interests,
-    string? AvatarUrl);
+    string? AvatarUrl,
+    string? AvatarKey,
+    int? AvatarPreset);
 
 public record MeResponse(Guid UserId, string Email, University University, bool ConsentComplete, ProfileDto? Profile);
 

@@ -1,7 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Icon, Striped } from "@/components/ui";
+import { Icon, Photo } from "@/components/ui";
 import type { Item } from "@/data/types";
-import { resolvePlace } from "@/store";
 import { colors, font, shadows } from "@/theme";
 import { availabilityColors, availabilityShort, isSold } from "./logic";
 
@@ -10,13 +9,13 @@ export default function ItemCard({ item, onPress }: { item: Item; onPress: () =>
   const badge = availabilityColors(item.avail);
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={[styles.card, isSold(item) && styles.sold]}>
-      <Striped tone={item.tone} stripe={10} label={item.cat} style={styles.photo}>
+      <Photo uri={item.photo} tone={item.tone} stripe={10} label={item.cat} style={styles.photo}>
         {item.avail !== "Available now" && (
           <View style={[styles.badge, { backgroundColor: badge.bg }]}>
             <Text style={[styles.badgeText, { color: badge.fg }]}>{availabilityShort(item.avail)}</Text>
           </View>
         )}
-      </Striped>
+      </Photo>
       <View style={styles.body}>
         <Text style={styles.price}>${item.price}</Text>
         <Text style={styles.title} numberOfLines={1}>
@@ -25,7 +24,7 @@ export default function ItemCard({ item, onPress }: { item: Item; onPress: () =>
         <View style={styles.place}>
           <Icon name="pin" size={11} color={colors.muted} />
           <Text style={styles.placeText} numberOfLines={1}>
-            {resolvePlace(item.loc).short}
+            {item.loc.short}
           </Text>
         </View>
       </View>

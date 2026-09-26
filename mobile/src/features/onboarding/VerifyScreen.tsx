@@ -2,22 +2,27 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as api from "@/api/endpoints";
+import { useSubmit } from "@/api/hooks";
 import { BackButton, Button } from "@/components/ui";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
-import { DEMO_CODE } from "./uniEmail";
+import { continueOnboarding } from "./navigation";
 
 const CODE_LENGTH = 6;
 
 export default function VerifyScreen() {
-  const { state } = useAppStore();
+  const { state, actions } = useAppStore();
+  const { busy, submit } = useSubmit();
   const [code, setCode] = useState("");
   const [focused, setFocused] = useState(false);
   const complete = code.length === CODE_LENGTH;
+  // The hosted demo API has no email yet, so it hands the code back to the app
+  const { email, devCode } = state.session;
 
   const verify = () => {
-    // No backend yet: any 6 digits are accepted
-    if (complete) router.push("/consent");
+    if (!complete) return;
+    void submit(async () => continueOnboarding(await actions.signIn(await api.auth.verify(email, code))));
   };
 
   return (
@@ -27,7 +32,7 @@ export default function VerifyScreen() {
         <View style={styles.intro}>
           <Text style={styles.title}>Check your uni inbox</Text>
           <Text style={styles.text}>
-            We sent a 6-digit code to <Text style={styles.email}>{state.session.email}</Text>.
+            We sent a 6-digit code to <Text style={styles.email}>{email}</Text>.
             {" Your email is only used to verify you're a student. No one else sees it."}
           </Text>
         </View>
@@ -44,11 +49,19 @@ export default function VerifyScreen() {
           textContentType="oneTimeCode"
           style={[styles.code, focused && { borderColor: colors.brand }]}
         />
-        <Pressable onPress={() => setCode(DEMO_CODE)} style={styles.autofill}>
-          <Text style={styles.autofillText}>Autofill demo code</Text>
-        </Pressable>
+        {devCode && (
+          <Pressable onPress={() => setCode(devCode)} style={styles.autofill}>
+            <Text style={styles.autofillText}>Autofill demo code</Text>
+          </Pressable>
+        )}
         <View style={styles.flex} />
-        <Button label="Verify" onPress={verify} inactive={!complete} weight={700} />
+        <Button
+          label={busy ? "Verifying…" : "Verify"}
+          onPress={verify}
+          inactive={!complete}
+          disabled={busy}
+          weight={700}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

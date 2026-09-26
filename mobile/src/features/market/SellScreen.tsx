@@ -2,30 +2,62 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as api from "@/api/endpoints";
+import { useSubmit } from "@/api/hooks";
+import { pickPhotos, uploadPhotos } from "@/api/photos";
 import { useToast } from "@/components/feedback/Toast";
-import { Button, DateField, FieldLabel, Icon, PhotoDropzone, ScreenHeader, Segmented, TextField } from "@/components/ui";
-import { PICKUPS } from "@/data/seed";
+import {
+  Button,
+  ChipWrap,
+  DateField,
+  FieldLabel,
+  Icon,
+  PhotoDropzone,
+  ScreenHeader,
+  Segmented,
+  TextField,
+} from "@/components/ui";
 import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
-import { buildItem, EMPTY_ITEM, itemProblem, type Availability, type ItemDraft } from "./logic";
+import {
+  CATEGORY_OPTIONS,
+  CONDITION_OPTIONS,
+  EMPTY_ITEM,
+  itemProblem,
+  itemRequest,
+  MAX_ITEM_PHOTOS,
+  type Availability,
+  type ItemDraft,
+} from "./logic";
 
 export default function SellScreen() {
-  const { actions } = useAppStore();
+  const { state, actions } = useAppStore();
   const toast = useToast();
+  const { busy, submit } = useSubmit();
   const [draft, setDraft] = useState<ItemDraft>(EMPTY_ITEM);
   const update = (patch: Partial<ItemDraft>) => setDraft((d) => ({ ...d, ...patch }));
   const problem = itemProblem(draft);
+
+  const addPhotos = () =>
+    submit(async () => {
+      const picked = await pickPhotos(MAX_ITEM_PHOTOS - draft.photos.length);
+      setDraft((d) => ({ ...d, photos: [...d.photos, ...picked].slice(0, MAX_ITEM_PHOTOS) }));
+    });
 
   const post = () => {
     if (problem) {
       toast(problem);
       return;
     }
-    const item = buildItem(draft, `m${Date.now()}`);
-    actions.addItem(item);
-    toast("Listed! Buyers can see it on the map.");
-    router.dismissTo({ pathname: "/market", params: { posted: item.id } });
+    void submit(async () => {
+      const { id, keys } = await uploadPhotos(draft.photos, api.uploads.itemPhoto, (res) => res.itemId);
+      if (!id) throw new Error("Add a photo first");
+      const created = await api.items.create(itemRequest(draft, id, keys));
+      await actions.loadItems();
+      toast("Listed! Buyers can see it on the map.");
+      router.dismissTo({ pathname: "/market", params: { posted: created.summary.id } });
+    });
   };
 
   return (
@@ -34,10 +66,11 @@ export default function SellScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
           <PhotoDropzone
-            added={draft.photo}
-            onPress={() => update({ photo: !draft.photo })}
+            photos={draft.photos.map((p) => p.uri)}
+            max={MAX_ITEM_PHOTOS}
+            onAdd={addPhotos}
+            onRemove={(i) => update({ photos: draft.photos.filter((_, j) => j !== i) })}
             emptyText="Add product photo"
-            addedText="1 photo added · tap to remove"
           />
           <TextField
             label="Title"
@@ -59,7 +92,29 @@ export default function SellScreen() {
             value={draft.desc}
             onChangeText={(desc) => update({ desc })}
             placeholder="Condition, what's included, when you're free to meet"
+            maxLength={1000}
           />
+
+          <View style={styles.group}>
+            <FieldLabel>Category</FieldLabel>
+            <ChipWrap
+              options={CATEGORY_OPTIONS.map((c) => ({
+                label: c.label,
+                active: draft.category === c.value,
+                onPress: () => update({ category: c.value }),
+              }))}
+            />
+          </View>
+          <View style={styles.group}>
+            <FieldLabel>Condition</FieldLabel>
+            <ChipWrap
+              options={CONDITION_OPTIONS.map((c) => ({
+                label: c.label,
+                active: draft.condition === c.value,
+                onPress: () => update({ condition: c.value }),
+              }))}
+            />
+          </View>
 
           <View style={styles.group}>
             <FieldLabel>Availability</FieldLabel>
@@ -67,19 +122,19 @@ export default function SellScreen() {
               value={draft.avail}
               onChange={(avail) => update({ avail })}
               options={[
-                { value: "Available now", label: "Now" },
-                { value: "Available from", label: "From date" },
+                { value: "Now", label: "Now" },
+                { value: "From", label: "From date" },
                 { value: "Pending", label: "Pending" },
               ]}
             />
-            {draft.avail === "Available from" && (
+            {draft.avail === "From" && (
               <DateField label="Available from" value={draft.from} onChange={(from) => update({ from })} />
             )}
           </View>
 
           <View style={styles.group}>
             <FieldLabel>Pickup — suggested safe spots</FieldLabel>
-            {PICKUPS.map((p) => {
+            {state.pickups.map((p) => {
               const active = draft.pickup === p.id;
               return (
                 <Pressable
@@ -105,7 +160,7 @@ export default function SellScreen() {
               label="Or tap the map to drop your own pin"
               onPressPoint={(pin) => update({ pickup: "custom", pin })}
             >
-              {PICKUPS.map((p) => (
+              {state.pickups.map((p) => (
                 <MapDot
                   key={p.id}
                   latitude={p.latitude}
@@ -118,10 +173,23 @@ export default function SellScreen() {
               ))}
               {draft.pin && <MapDot {...draft.pin} halo={28} size={12} strokeWidth={2.5} />}
             </MiniMap>
+            {draft.pickup === "custom" && (
+              <TextField
+                value={draft.placeName}
+                onChangeText={(placeName) => update({ placeName })}
+                placeholder="Name this spot (optional), e.g. Rundle St East"
+                maxLength={64}
+              />
+            )}
           </View>
         </ScrollView>
         <View style={styles.footer}>
-          <Button label="Post listing" onPress={post} inactive={problem !== null} />
+          <Button
+            label={busy ? "Posting…" : "Post listing"}
+            onPress={post}
+            inactive={problem !== null}
+            disabled={busy}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

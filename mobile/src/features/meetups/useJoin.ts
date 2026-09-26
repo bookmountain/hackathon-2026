@@ -1,19 +1,26 @@
+import { useSubmit } from "@/api/hooks";
 import { useToast } from "@/components/feedback/Toast";
 import type { MeetupEvent } from "@/data/types";
 import { useAppStore } from "@/store";
-import { goingCount, JOIN_TOAST } from "./logic";
+import { JOIN_TOAST, joinLabel } from "./logic";
 
-/** Join state for an event, shared by the map card, list rows and detail screen */
+/** Join / "Going ✓" for an event, shared by the map card, list rows and detail screen */
 export function useJoin(event: MeetupEvent) {
-  const { state, actions } = useAppStore();
+  const { actions } = useAppStore();
   const toast = useToast();
-  const joined = !!state.joined[event.id];
+  const { busy, submit } = useSubmit();
   return {
-    joined,
-    going: goingCount(event, joined),
+    joined: event.joined,
+    going: event.going,
+    label: joinLabel(event),
+    busy,
     toggle: () => {
-      actions.toggleJoin(event.id);
-      if (!joined) toast(JOIN_TOAST);
+      if (event.host) return toast("You're hosting this one — it's anonymous");
+      if (event.full && !event.joined) return toast("This event is full");
+      void submit(async () => {
+        const updated = await actions.toggleJoin(event);
+        if (updated.joined) toast(JOIN_TOAST);
+      });
     },
   };
 }

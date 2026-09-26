@@ -10,7 +10,7 @@ const openEvent = (id: string) => router.push({ pathname: "/meetups/[id]", param
 
 // Card over the map after tapping an event pin
 export function EventSheet({ event }: { event: MeetupEvent }) {
-  const { joined, going, toggle } = useJoin(event);
+  const { joined, going, label, busy, toggle } = useJoin(event);
   return (
     <MapSheet>
       <View style={styles.sheetText}>
@@ -25,7 +25,15 @@ export function EventSheet({ event }: { event: MeetupEvent }) {
         <Text style={styles.meta}>{going} going · host & guests hidden</Text>
       </View>
       <View style={styles.actions}>
-        <Button label={joined ? "Going ✓" : "Join"} size="md" variant={joined ? "soft" : "primary"} onPress={toggle} style={styles.grow} />
+        <Button
+          label={label}
+          size="md"
+          variant={joined ? "soft" : "primary"}
+          inactive={event.full && !joined}
+          disabled={busy}
+          onPress={toggle}
+          style={styles.grow}
+        />
         <Button label="Details" size="md" variant="outline" weight={700} onPress={() => openEvent(event.id)} />
       </View>
     </MapSheet>
@@ -34,7 +42,7 @@ export function EventSheet({ event }: { event: MeetupEvent }) {
 
 // Row in the Meetups list
 export function EventCard({ event }: { event: MeetupEvent }) {
-  const { joined, going, toggle } = useJoin(event);
+  const { joined, going, label, busy, toggle } = useJoin(event);
   return (
     <View style={styles.card}>
       <Pressable onPress={() => openEvent(event.id)} accessibilityRole="button" style={styles.cardTop}>
@@ -57,7 +65,14 @@ export function EventCard({ event }: { event: MeetupEvent }) {
             {going}/{event.cap}
           </Text>
         </View>
-        <Button label={joined ? "Going ✓" : "Join"} size="sm" variant={joined ? "soft" : "primary"} onPress={toggle} />
+        <Button
+          label={label}
+          size="sm"
+          variant={joined ? "soft" : "primary"}
+          inactive={event.full && !joined}
+          disabled={busy}
+          onPress={toggle}
+        />
       </View>
     </View>
   );

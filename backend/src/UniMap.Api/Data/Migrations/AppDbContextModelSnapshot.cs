@@ -589,6 +589,10 @@ namespace UniMap.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("avatar_key");
 
+                    b.Property<int?>("AvatarPreset")
+                        .HasColumnType("integer")
+                        .HasColumnName("avatar_preset");
+
                     b.Property<string>("Bio")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")

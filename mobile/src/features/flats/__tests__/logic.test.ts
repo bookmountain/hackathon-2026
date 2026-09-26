@@ -1,7 +1,9 @@
-import { FLATS } from "@/data/seed";
-import { buildFlat, EMPTY_ROOM, filterFlats, roomProblem, streetOf } from "../logic";
+import { FLATS } from "@/test/fixtures";
+import { EMPTY_ROOM, filterFlats, flatRequest, housemateLine, roomProblem, streetOf, type RoomDraft } from "../logic";
 
 const ids = (flats: { id: string }[]) => flats.map((f) => f.id);
+const photo = { uri: "file:///room.jpg", contentType: "image/jpeg" };
+const pin = { latitude: -34.92, longitude: 138.6 };
 
 describe("filterFlats", () => {
   it("returns everything with no filters", () => {
@@ -16,52 +18,72 @@ describe("filterFlats", () => {
 });
 
 describe("roomProblem", () => {
-  it("asks for the pin first, then photos/title/rent", () => {
+  it("asks for the pin, then photos/title/rent, then the suburb", () => {
     expect(roomProblem(EMPTY_ROOM)).toBe("Pin your flat on the map");
-    expect(roomProblem({ ...EMPTY_ROOM, pin: { latitude: -34.92, longitude: 138.6 } })).toBe("Add photos, title and rent");
-    expect(roomProblem({ ...EMPTY_ROOM, pin: { latitude: -34.92, longitude: 138.6 }, photo: true, title: "Room", price: "200" })).toBeNull();
+    expect(roomProblem({ ...EMPTY_ROOM, pin })).toBe("Add photos, title and rent");
+    const ready: RoomDraft = { ...EMPTY_ROOM, pin, photos: [photo], title: "Room", price: "200" };
+    expect(roomProblem(ready)).toBe("Add the suburb");
+    expect(roomProblem({ ...ready, suburb: "Adelaide" })).toBeNull();
+  });
+
+  it("keeps rent in the API's range", () => {
+    const draft: RoomDraft = { ...EMPTY_ROOM, pin, photos: [photo], title: "Room", suburb: "Adelaide", price: "20" };
+    expect(roomProblem(draft)).toBe("Rent is $50–$2000 a week");
   });
 });
 
-describe("buildFlat", () => {
-  it("fills defaults and marks the listing as mine", () => {
-    const flat = buildFlat(
-      { ...EMPTY_ROOM, photo: true, title: "  Bright room ", price: "220", pin: { latitude: -34.9199, longitude: 138.6043 } },
+describe("flatRequest", () => {
+  it("builds the POST /api/flats body", () => {
+    const body = flatRequest(
+      {
+        ...EMPTY_ROOM,
+        pin,
+        photos: [photo],
+        title: "  Bright room ",
+        street: " Frome St ",
+        suburb: "Adelaide",
+        price: "220",
+        minStay: 6,
+        from: new Date(2026, 9, 14),
+      },
       { major: "Law", uni: "Flinders Uni" },
-      "f-new",
+      "listing-1",
+      ["flats/listing-1/a.jpg"],
     );
-    expect(flat).toMatchObject({
-      id: "f-new",
+    expect(body).toEqual({
+      id: "listing-1",
       title: "Bright room",
-      area: "Adelaide · Pinned location",
-      price: 220,
-      bills: 0,
-      tenant: "me",
-      from: "Available now",
-      minStay: "Flexible",
-      feats: ["Ask the tenant"],
-      tenants: ["Flinders Uni · Law (you)"],
-      // Pinned right at Adelaide Uni: the 2-minute minimum
-      walkA: 2,
-      latitude: -34.9199,
-      longitude: 138.6043,
+      description: null,
+      suburb: "Adelaide",
+      street: "Frome St",
+      lat: -34.92,
+      lng: 138.6,
+      rentPerWeek: 220,
+      billsPerWeek: 0,
+      bedrooms: 3,
+      flatmates: 2,
+      toilet: "PrivateEnsuite",
+      bathroom: "Ensuite",
+      furnished: "Fully",
+      minStayMonths: 6,
+      availableFrom: "2026-10-14",
+      features: [],
+      houseRhythm: [],
+      preferredFlatmate: null,
+      housemates: ["Flinders · Law"],
+      photoKeys: ["flats/listing-1/a.jpg"],
     });
   });
 
-  it("formats the move-in date", () => {
-    const flat = buildFlat(
-      { ...EMPTY_ROOM, photo: true, title: "Room", price: "200", pin: { latitude: -34.92, longitude: 138.6 }, from: new Date(2026, 9, 14) },
-      { major: "", uni: "Adelaide Uni" },
-      "f-new",
-    );
-    expect(flat.from).toBe("From 14 Oct");
-    expect(flat.tenants).toEqual(["Adelaide Uni · Student (you)"]);
+  it("keeps the housemate line within 60 characters", () => {
+    expect(housemateLine({ major: "", uni: "Adelaide Uni" })).toBe("Adelaide · Student");
+    expect(housemateLine({ major: "x".repeat(80), uni: "Adelaide Uni" })).toHaveLength(60);
   });
 });
 
 describe("streetOf", () => {
   it("takes the part after the dot", () => {
-    expect(streetOf("Adelaide CBD · Frome St")).toBe("Frome St");
+    expect(streetOf("Adelaide · Frome St")).toBe("Frome St");
     expect(streetOf("Somewhere")).toBe("Somewhere");
   });
 });

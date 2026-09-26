@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as api from "@/api/endpoints";
+import { useSubmit } from "@/api/hooks";
 import { useToast } from "@/components/feedback/Toast";
-import { AvatarPicker, Button, FieldLabel, SelectField, TextField } from "@/components/ui";
-import { MAJORS } from "@/data/seed";
-import { uniOfEmail, useAppStore } from "@/store";
+import { AvatarPicker, Button, FieldLabel, TextField } from "@/components/ui";
+import DegreeField from "@/features/profile/DegreeField";
+import { presetOf, profileRequest } from "@/features/profile/profileRequest";
+import { selectMe, useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { NICKNAME_MAX } from "./constants";
 import { goToApp } from "./navigation";
@@ -12,20 +15,26 @@ import { goToApp } from "./navigation";
 export default function SetupScreen() {
   const { state, actions } = useAppStore();
   const toast = useToast();
-  const [nick, setNick] = useState(state.session.nick);
-  const [major, setMajor] = useState(state.session.major);
-  const [avatar, setAvatar] = useState(state.session.avatar);
-  const ready = nick.trim().length > 0 && major.length > 0;
+  const { busy, submit } = useSubmit();
+  const profile = state.session.me?.profile ?? null;
+  const [nick, setNick] = useState(profile?.displayName ?? "");
+  const [degree, setDegree] = useState(profile?.degree ?? null);
+  const [avatar, setAvatar] = useState(profile?.avatarPreset ?? -1);
+  const ready = nick.trim().length > 0 && degree !== null;
 
   const finish = () => {
-    if (!ready) {
+    if (!ready || !degree) {
       toast("Add a nickname and your major");
       return;
     }
-    actions.updateProfile({ nick: nick.trim(), major, avatar });
-    actions.enterApp();
-    toast(`Welcome to UCompass, ${nick.trim()}`);
-    goToApp();
+    void submit(async () => {
+      await api.me.saveProfile(
+        profileRequest(profile, { displayName: nick.trim(), degreeId: degree.id, avatarPreset: presetOf(avatar) }),
+      );
+      await actions.refreshMe();
+      toast(`Welcome to UCompass, ${nick.trim()}`);
+      goToApp();
+    });
   };
 
   return (
@@ -49,18 +58,24 @@ export default function SetupScreen() {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          <SelectField label="Major" value={major} options={MAJORS} onChange={setMajor} placeholder="Select your major" />
+          <DegreeField university={state.session.me?.university ?? "Adelaide"} value={degree} onChange={setDegree} />
 
           <View style={styles.group}>
             <FieldLabel>Uni</FieldLabel>
             <View style={styles.uni}>
-              <Text style={styles.uniName}>{uniOfEmail(state.session.email)}</Text>
+              <Text style={styles.uniName}>{selectMe(state).uni}</Text>
               <Text style={styles.verified}>Verified via email</Text>
             </View>
           </View>
         </ScrollView>
         <View style={styles.footer}>
-          <Button label="Enter UCompass" onPress={finish} inactive={!ready} weight={700} />
+          <Button
+            label={busy ? "Saving…" : "Enter UCompass"}
+            onPress={finish}
+            inactive={!ready}
+            disabled={busy}
+            weight={700}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

@@ -1,8 +1,8 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { FlatList, StyleSheet, TextInput, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, TextInput, View } from "react-native";
+import { useRefreshOnFocus } from "@/api/hooks";
 import { ChipRow, Icon } from "@/components/ui";
-import { PICKUPS } from "@/data/seed";
 import type { Item } from "@/data/types";
 import { CampusMap, MapHint, MapMarker } from "@/features/map";
 import TabScreen from "@/features/shell/TabScreen";
@@ -22,7 +22,8 @@ function padToPairs(items: Item[]): (Item | null)[] {
 }
 
 export default function MarketTab() {
-  const { state } = useAppStore();
+  const { state, actions } = useAppStore();
+  const { refreshing, refresh } = useRefreshOnFocus(actions.loadItems);
   // Set by "Sell" after posting, to show every category again
   const { posted } = useLocalSearchParams<{ posted?: string }>();
   const [handledPost, setHandledPost] = useState<string | undefined>();
@@ -37,7 +38,7 @@ export default function MarketTab() {
   }
 
   const chips = CATEGORIES.map((c) => ({ label: c, active: c === category, onPress: () => setCategory(c) }));
-  const selectedPickup = selection?.kind === "pickup" ? PICKUPS.find((p) => p.id === selection.id) : undefined;
+  const selectedPickup = selection?.kind === "pickup" ? state.pickups.find((p) => p.id === selection.id) : undefined;
   const selectedItem = selection?.kind === "item" ? state.items.find((i) => i.id === selection.id) : undefined;
 
   return (
@@ -70,7 +71,7 @@ export default function MarketTab() {
             </>
           }
         >
-          {PICKUPS.map((p) => (
+          {state.pickups.map((p) => (
             <MapMarker
               key={p.id}
               coordinate={p}
@@ -102,6 +103,7 @@ export default function MarketTab() {
           columnWrapperStyle={styles.gridRow}
           contentContainerStyle={styles.list}
           keyboardShouldPersistTaps="handled"
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}
           ListHeaderComponent={
             <View style={styles.header}>
               <View style={styles.search}>

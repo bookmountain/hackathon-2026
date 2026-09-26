@@ -1,38 +1,50 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Avatar, BackButton, Button, Pill, Striped } from "@/components/ui";
-import { MapDot, MiniMap, regionAround } from "@/features/map";
+import * as api from "@/api/endpoints";
+import { useLoad, useSubmit } from "@/api/hooks";
+import { Avatar, BackButton, Button, Pill } from "@/components/ui";
+import { toItemDetail } from "@/data/adapters";
+import type { ItemDetail } from "@/data/types";
 import { startChat } from "@/features/chat/startChat";
-import { findPerson, resolvePlace, selectMe, useAppStore } from "@/store";
+import { MapDot, MiniMap, regionAround } from "@/features/map";
+import { LoadingScreen } from "@/features/shell/LoadingScreen";
+import PhotoPager from "@/features/shell/PhotoPager";
+import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { availabilityColors, isSold, openingMessage } from "./logic";
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { state, actions } = useAppStore();
-  const item = state.items.find((i) => i.id === id);
-  if (!item) return null;
+  const { state } = useAppStore();
+  const { data, error, reload } = useLoad(() => api.items.get(id), id);
+  if (!data) return <LoadingScreen error={error} onRetry={reload} />;
+  return <ItemDetailView item={toItemDetail(data, state.pickups)} />;
+}
 
-  const place = resolvePlace(item.loc);
-  const mine = item.seller === "me";
-  const seller = mine ? selectMe(state) : findPerson(item.seller);
+function ItemDetailView({ item }: { item: ItemDetail }) {
+  const { actions } = useAppStore();
+  const { busy, submit } = useSubmit();
+  const place = item.loc;
+  const central = place.pickupId !== null;
+  const { mine, seller } = item;
   const avail = availabilityColors(item.avail);
-  const cta = mine ? "Your listing" : isSold(item) ? "Sold" : "Message seller";
+  const cta = mine ? "Your listing" : isSold(item) ? "Sold" : busy ? "Opening chat…" : "Message seller";
 
+  // The server adds "About: {title} · ${price}" to the chat
   const message = () => {
     if (mine || isSold(item)) return;
-    startChat(actions, item.seller, "item", `About: ${item.title} · $${item.price}`, openingMessage(item));
+    void submit(() => startChat(actions, { itemId: item.id, text: openingMessage(item) }));
   };
 
   return (
     <View style={styles.screen}>
       <ScrollView>
-        <Striped tone={item.tone} stripe={14} label="product photo" style={styles.photo}>
+        <PhotoPager photos={item.photos} tone={item.tone} label="product photo" height={290}>
           <SafeAreaView edges={["top"]} style={styles.back}>
             <BackButton variant="white" onPress={() => router.back()} />
           </SafeAreaView>
-        </Striped>
+        </PhotoPager>
 
         <View style={styles.body}>
           <View style={styles.headline}>
@@ -57,8 +69,8 @@ export default function ItemDetailScreen() {
               footer={
                 <View style={styles.placeInfo}>
                   <Text style={styles.placeName}>{place.name}</Text>
-                  <Text style={[styles.placeSub, { color: place.central ? colors.brand : colors.muted }]}>
-                    {place.central ? `Suggested safe pickup point · ${place.sub}` : "Seller's own pinned location"}
+                  <Text style={[styles.placeSub, { color: central ? colors.brand : colors.muted }]}>
+                    {central ? `Suggested safe pickup point · ${place.sub}` : "Seller's own pinned location · approximate"}
                   </Text>
                 </View>
               }
@@ -67,22 +79,23 @@ export default function ItemDetailScreen() {
             </MiniMap>
           </View>
 
-          {seller && (
-            <View style={styles.seller}>
-              <Avatar index={seller.avatar} nick={seller.nick} size={42} />
-              <View>
-                <Text style={styles.sellerNick}>{seller.nick}</Text>
-                <Text style={styles.sellerMeta}>
-                  {seller.major} · {seller.uni}
-                </Text>
-              </View>
+          <View style={styles.seller}>
+            <Avatar index={seller.avatar} nick={seller.nick} url={seller.avatarUrl} size={42} />
+            <View style={styles.sellerText}>
+              <Text style={styles.sellerNick}>
+                {seller.nick}
+                {mine ? " (you)" : ""}
+              </Text>
+              <Text style={styles.sellerMeta} numberOfLines={1}>
+                {seller.major} · {seller.uni}
+              </Text>
             </View>
-          )}
+          </View>
         </View>
       </ScrollView>
 
       <SafeAreaView edges={["bottom"]} style={styles.footer}>
-        <Button label={cta} onPress={message} inactive={mine || isSold(item)} />
+        <Button label={cta} onPress={message} inactive={mine || isSold(item)} disabled={busy} />
       </SafeAreaView>
     </View>
   );
@@ -90,7 +103,6 @@ export default function ItemDetailScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  photo: { height: 290 },
   back: { position: "absolute", left: 14, top: 14 },
   body: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 20, gap: 18 },
   headline: { gap: 6 },
@@ -104,6 +116,7 @@ const styles = StyleSheet.create({
   placeName: { color: colors.ink, ...font(800, 14.5) },
   placeSub: { ...font(600, 12.5) },
   seller: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, backgroundColor: colors.canvas, borderRadius: 16 },
+  sellerText: { flex: 1 },
   sellerNick: { color: colors.ink, ...font(800, 14.5) },
   sellerMeta: { color: colors.muted, ...font(500, 12.5) },
   footer: {

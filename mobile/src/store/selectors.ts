@@ -1,5 +1,5 @@
-import { PEOPLE, PICKUPS } from "@/data/seed";
-import type { MapPoint, Person, Place, Uni } from "@/data/types";
+import { majorLabel, UNI_LABEL } from "@/data/adapters";
+import type { Person, Uni } from "@/data/types";
 import type { AppState } from "./state";
 
 /** The design only lets @adelaide / @flinders emails in, so anything else is Adelaide */
@@ -7,33 +7,26 @@ export function uniOfEmail(email: string): Uni {
   return /flinders/i.test(email) ? "Flinders Uni" : "Adelaide Uni";
 }
 
-export function findPerson(id: string): Person | undefined {
-  return PEOPLE.find((p) => p.id === id);
+/** Signed in, consented and with a profile: the app proper is open */
+export function selectSignedIn(state: AppState): boolean {
+  const { token, me } = state.session;
+  return !!token && !!me?.consentComplete && !!me.profile;
 }
 
 /** The signed-in user shaped like the other people in the app */
 export function selectMe(state: AppState): Person {
-  const { nick, major, avatar, email } = state.session;
-  return { id: "me", nick: nick || "You", major, uni: uniOfEmail(email), avatar };
-}
-
-export type ResolvedPlace = MapPoint & {
-  name: string;
-  /** Short label for cards, e.g. "Barr Smith" */
-  short: string;
-  /** Safe pickup description, empty for custom pins */
-  sub: string;
-  /** True for the suggested safe pickup points */
-  central: boolean;
-};
-
-export function resolvePlace(place: Place): ResolvedPlace {
-  if (typeof place !== "string") return { ...place, short: place.name, sub: "", central: false };
-  const pickup = PICKUPS.find((p) => p.id === place);
-  if (!pickup) throw new Error(`Unknown pickup point "${place}"`);
-  return { ...pickup, central: true };
+  const { me, email } = state.session;
+  const profile = me?.profile;
+  return {
+    id: me?.userId ?? "me",
+    nick: profile?.displayName || "You",
+    major: majorLabel(profile?.degree?.name ?? profile?.department),
+    uni: me ? UNI_LABEL[me.university] : uniOfEmail(email),
+    avatar: profile?.avatarPreset ?? -1,
+    avatarUrl: profile?.avatarUrl,
+  };
 }
 
 export function selectHasUnread(state: AppState): boolean {
-  return Object.values(state.unread).some(Boolean);
+  return state.chats.some((c) => c.unread > 0);
 }

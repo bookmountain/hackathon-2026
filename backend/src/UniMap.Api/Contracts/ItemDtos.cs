@@ -31,7 +31,8 @@ public record ItemSummary(
     bool IsMine,
     DateTimeOffset CreatedAt);
 
-public record ItemSeller(Guid UserId, string DisplayName, University University, string? Major, string? AvatarUrl);
+/// <param name="AvatarPreset">Preset avatar colour, 0–7, or null. Shown when there's no photo.</param>
+public record ItemSeller(Guid UserId, string DisplayName, University University, string? Major, string? AvatarUrl, int? AvatarPreset);
 
 /// <summary>Item detail page.</summary>
 /// <param name="PhotoKeys">Only for the seller, to send back unchanged on PUT.</param>

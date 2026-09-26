@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { avatarLook, Icon, Logo } from "@/components/ui";
+import { Avatar, Icon, Logo } from "@/components/ui";
 import { selectHasUnread, selectMe, useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 
@@ -8,7 +8,6 @@ import { colors, font } from "@/theme";
 export default function AppHeader({ title }: { title: string }) {
   const { state } = useAppStore();
   const me = selectMe(state);
-  const look = avatarLook(me.avatar, me.nick);
 
   return (
     <View style={styles.bar}>
@@ -21,9 +20,9 @@ export default function AppHeader({ title }: { title: string }) {
           onPress={() => router.push("/profile")}
           accessibilityRole="button"
           accessibilityLabel="Profile"
-          style={[styles.round, { backgroundColor: look.bg }]}
+          style={styles.round}
         >
-          <Text style={[font(800, 16), { color: look.fg }]}>{look.text}</Text>
+          <Avatar index={me.avatar} nick={me.nick} url={me.avatarUrl} size={40} />
         </Pressable>
         <Pressable
           onPress={() => router.push("/chats")}

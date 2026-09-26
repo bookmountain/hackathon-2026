@@ -2,17 +2,33 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { errorMessage } from "@/api/client";
+import { useToast } from "@/components/feedback/Toast";
 import { Avatar, Icon, ScreenHeader } from "@/components/ui";
 import type { ChatMessage } from "@/data/types";
-import { findPerson, useAppStore } from "@/store";
+import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
+
+/** Send a typing ping at most this often while the user types */
+const TYPING_PING_MS = 2000;
+
+/** "About: …" lines open the listing they're about */
+function openAbout(message: ChatMessage) {
+  if (message.about?.type === "Flat") router.push({ pathname: "/flats/[id]", params: { id: message.about.id } });
+  if (message.about?.type === "Item") router.push({ pathname: "/market/[id]", params: { id: message.about.id } });
+}
 
 function Message({ message }: { message: ChatMessage }) {
   if (message.from === "system") {
     return (
-      <View style={styles.context}>
+      <Pressable
+        onPress={() => openAbout(message)}
+        disabled={!message.about}
+        accessibilityRole={message.about ? "link" : undefined}
+        style={styles.context}
+      >
         <Text style={styles.contextText}>{message.text}</Text>
-      </View>
+      </Pressable>
     );
   }
   const mine = message.from === "me";
@@ -24,35 +40,58 @@ function Message({ message }: { message: ChatMessage }) {
 }
 
 export default function ChatScreen() {
-  const { personId } = useLocalSearchParams<{ personId: string }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const { state, actions } = useAppStore();
+  const toast = useToast();
   const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
   const scroll = useRef<ScrollView>(null);
-  const person = findPerson(personId);
-  const thread = state.chats[personId] ?? [];
-  const unread = !!state.unread[personId];
-  const topic = state.chatTopics[personId] ?? "person";
+  const lastPing = useRef(0);
+  const chat = state.chats.find((c) => c.id === id);
+  const thread = state.messages[id];
+  const unread = chat?.unread ?? 0;
 
-  // Opening the thread marks it read
   useEffect(() => {
-    if (unread) actions.openChat(personId, topic);
-  }, [unread, personId, topic, actions]);
+    actions.loadMessages(id).catch((e) => toast(errorMessage(e)));
+  }, [id, actions, toast]);
 
-  if (!person) return null;
+  // Reading the thread (now, or as replies arrive) marks it read
+  useEffect(() => {
+    if (unread > 0) actions.markRead(id).catch(() => {});
+  }, [unread, id, actions]);
 
-  const send = () => {
-    if (!draft.trim()) return;
-    actions.sendMessage(personId, draft);
-    setDraft("");
+  if (!chat) return null;
+  const person = chat.person;
+
+  const onChange = (text: string) => {
+    setDraft(text);
+    const now = Date.now();
+    if (text && now - lastPing.current > TYPING_PING_MS) {
+      lastPing.current = now;
+      actions.typing(id);
+    }
+  };
+
+  const send = async () => {
+    if (!draft.trim() || sending) return;
+    setSending(true);
+    try {
+      await actions.sendMessage(id, draft);
+      setDraft("");
+    } catch (e) {
+      toast(errorMessage(e));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
       <ScreenHeader onBack={() => router.back()} height={64}>
-        <Avatar index={person.avatar} nick={person.nick} size={40} />
+        <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} size={40} />
         <View style={styles.who}>
           <Text style={styles.nick}>{person.nick}</Text>
-          <Text style={styles.meta}>
+          <Text style={styles.meta} numberOfLines={1}>
             {person.major} · {person.uni}
           </Text>
         </View>
@@ -68,12 +107,12 @@ export default function ChatScreen() {
         >
           <View style={styles.privacy}>
             <Icon name="shield" size={12} color={colors.muted} strokeWidth={2.6} />
-            <Text style={styles.privacyText}>Only nickname, major & uni are shared</Text>
+            <Text style={styles.privacyText}>Only nickname, major, uni & avatar are shared</Text>
           </View>
-          {thread.map((m, i) => (
-            <Message key={i} message={m} />
+          {thread?.map((m) => (
+            <Message key={m.id} message={m} />
           ))}
-          {state.typingWith === personId && (
+          {state.typingIn === id && (
             <View style={styles.typing}>
               <Text style={styles.typingText}>•••</Text>
             </View>
@@ -83,14 +122,21 @@ export default function ChatScreen() {
         <View style={styles.composer}>
           <TextInput
             value={draft}
-            onChangeText={setDraft}
+            onChangeText={onChange}
             placeholder="Message…"
             placeholderTextColor={colors.faint}
             returnKeyType="send"
             onSubmitEditing={send}
+            maxLength={2000}
             style={styles.input}
           />
-          <Pressable onPress={send} accessibilityRole="button" accessibilityLabel="Send" style={styles.send}>
+          <Pressable
+            onPress={send}
+            disabled={sending}
+            accessibilityRole="button"
+            accessibilityLabel="Send"
+            style={[styles.send, sending && { opacity: 0.6 }]}
+          >
             <Icon name="arrowRight" color={colors.surface} />
           </Pressable>
         </View>

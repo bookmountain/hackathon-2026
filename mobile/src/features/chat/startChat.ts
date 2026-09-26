@@ -1,18 +1,13 @@
 import { router } from "expo-router";
-import type { ChatTopic } from "@/data/types";
+import type { StartChatRequest } from "@/api/types";
 import type { AppActions } from "@/store";
 
 /**
- * Open (or continue) a chat from a listing and show it. `context` becomes a
- * one-off banner like "About: Sunny room…"; `firstMessage` is sent for the user.
+ * Open (or continue) the chat about a listing, or with a student, and show it.
+ * The server adds the "About: …" line for flats and items; `text` is sent as the
+ * first message.
  */
-export function startChat(
-  actions: AppActions,
-  personId: string,
-  topic: ChatTopic,
-  context?: string,
-  firstMessage?: string,
-) {
-  actions.openChat(personId, topic, context, firstMessage);
-  router.push({ pathname: "/chats/[personId]", params: { personId } });
+export async function startChat(actions: AppActions, req: StartChatRequest) {
+  const id = await actions.startChat(req);
+  router.push({ pathname: "/chats/[id]", params: { id } });
 }

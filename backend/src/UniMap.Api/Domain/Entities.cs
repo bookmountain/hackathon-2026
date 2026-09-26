@@ -75,6 +75,11 @@ public class Profile
 
     /// <summary>Object key in R2 (not a full URL).</summary>
     public string? AvatarKey { get; set; }
+    /// <summary>
+    /// The design's preset avatar: a colour (0–7) behind the nickname's initial. Null = none ("?").
+    /// An uploaded photo (AvatarKey) is shown instead when there is one.
+    /// </summary>
+    public int? AvatarPreset { get; set; }
 
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

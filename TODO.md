@@ -71,8 +71,9 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 
 ## Privacy
 
-- [ ] **Account deletion.** The consent screen promises "Delete your account and data anytime". There's no
-      endpoint yet. It should also delete the user's R2 folders (`avatars/{userId}/`, their `flats/{id}/`).
+- [ ] **Account deletion asks no password.** `DELETE /api/me` (Profile → "Delete account", after a confirm
+      dialog) needs only the token. Consider asking for the password again. It also deletes chats for the
+      other person, and the JWT stays valid until it expires (the account is gone, so calls fail).
 - [ ] **Terms of Use and Privacy Policy text.** Consent points to documents that don't exist yet.
       `ConsentPolicy.Version` should change whenever they do, which asks everyone to consent again.
 - [ ] **Usage-stats consent** is recorded but nothing collects stats yet. Check it before adding analytics.
