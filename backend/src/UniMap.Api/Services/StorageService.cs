@@ -47,6 +47,21 @@ public class StorageService
         return (url, expires);
     }
 
+    /// <summary>True if the object has been uploaded (a HEAD request).</summary>
+    public async Task<bool> ExistsAsync(string key)
+    {
+        if (_s3 is null) throw new InvalidOperationException("R2 is not configured.");
+        try
+        {
+            await _s3.GetObjectMetadataAsync(_opt.Bucket, key);
+            return true;
+        }
+        catch (AmazonS3Exception e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return false;
+        }
+    }
+
     /// <summary>
     /// URL clients can load the object from. Uses PublicBaseUrl if the bucket is public
     /// (r2.dev or custom domain); otherwise a presigned GET valid for 24h, so private buckets work too.

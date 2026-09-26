@@ -79,8 +79,38 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
         _ when type == typeof(UpdateConsentsRequest) => new UpdateConsentsRequest(
             Terms: true, Location: true, AgeAndEnrolment: true, UsageStats: false),
         _ when type == typeof(FlatStatusRequest) => new FlatStatusRequest(ListingStatus.Taken),
+        _ when type == typeof(ItemPhotoUploadRequest) => new ItemPhotoUploadRequest("image/jpeg", null),
+        // id and photoKeys are placeholders: replace them with the itemId and key from POST
+        // /api/uploads/item-photo after uploading the image, or the server answers "hasn't been uploaded yet".
+        _ when type == typeof(UpsertItemRequest) => new UpsertItemRequest(
+            Id: ExampleItemId,
+            Title: "Chemistry textbook, 3rd ed.",
+            Price: 30,
+            Description: "Used for first-year chem. A few pencil notes, no torn pages. Free to meet after 4pm.",
+            Category: ItemCategory.Textbooks,
+            Condition: ItemCondition.Good,
+            ConditionNote: "a few pencil notes",
+            Availability: ItemAvailability.Now,
+            AvailableFrom: null,
+            PickupPointId: "barr-smith-library",
+            PlaceName: null,
+            Lat: null,
+            Lng: null,
+            PhotoKeys: [$"items/{ExampleItemId}/9c1e5a4b2f7d4e0c8a3b6d1f2e4c7a90.jpg"]),
+        _ when type == typeof(ItemAvailabilityRequest) => new ItemAvailabilityRequest(
+            ItemAvailability.From, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))),
+        // Koala_Kai (the login example) messaging TomTheTutor about his seeded Calculus textbook.
+        _ when type == typeof(StartChatRequest) => new StartChatRequest(
+            UserId: null, FlatId: null, ItemId: SeedCalculusTextbookId,
+            Text: "Hi! Is the calculus textbook still available?"),
+        _ when type == typeof(SendMessageRequest) => new SendMessageRequest("Great — see you at Barr Smith after 4pm!"),
         _ => null,
     };
+
+    private static readonly Guid ExampleItemId = Guid.Parse("5b0c3e2a-8f41-4d7e-9a26-1c7f0e9d4b83");
+
+    /// <summary>m01 in items.json.</summary>
+    private static readonly Guid SeedCalculusTextbookId = Guid.Parse("f0de4bd7-d359-54b6-9baf-225c93f7be2e");
 
     /// <summary>Real id of Adelaide's Bachelor of Computer Science, matching the Adelaide login example.</summary>
     private int? ExampleDegreeId()

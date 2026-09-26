@@ -8,16 +8,13 @@ public static class FlatMapper
     private static readonly Campus AdelaideCity = Campuses.Find("adelaide-city")!;
     private static readonly Campus FlindersCity = Campuses.Find("flinders-city")!;
 
-    /// <summary>~110 m. Enough for "which block", not "which house".</summary>
-    private static double Blur(double v) => Math.Round(v, 3);
-
     public static FlatSummary ToSummary(FlatListing f, Guid viewerId, StorageService storage)
     {
         var mine = f.OwnerId == viewerId;
         double lat = f.Location.Y, lng = f.Location.X;
         return new FlatSummary(
             f.Id, f.Title, f.Suburb, f.Street,
-            mine ? lat : Blur(lat), mine ? lng : Blur(lng),
+            mine ? lat : LocationPrivacy.Blur(lat), mine ? lng : LocationPrivacy.Blur(lng),
             f.RentPerWeek, f.BillsPerWeek, f.RentPerWeek + f.BillsPerWeek,
             f.Bedrooms, f.Flatmates, f.Toilet, f.Bathroom, f.Furnished, f.AvailableFrom,
             storage.ReadUrl(f.PhotoKeys.FirstOrDefault()),

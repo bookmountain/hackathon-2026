@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<Degree> Degrees => Set<Degree>();
     public DbSet<FlatListing> FlatListings => Set<FlatListing>();
+    public DbSet<MarketItem> MarketItems => Set<MarketItem>();
     public DbSet<Conversation> Conversations => Set<Conversation>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
     public DbSet<ConsentRecord> ConsentRecords => Set<ConsentRecord>();
@@ -69,6 +70,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(f => new { f.Status, f.RentPerWeek });
             e.HasIndex(f => f.Features).HasMethod("gin");
             e.HasOne(f => f.Owner).WithMany().HasForeignKey(f => f.OwnerId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<MarketItem>(e =>
+        {
+            e.Property(i => i.Title).HasMaxLength(80);
+            e.Property(i => i.Description).HasMaxLength(1000);
+            e.Property(i => i.Category).HasConversion<string>().HasMaxLength(16);
+            e.Property(i => i.Condition).HasConversion<string>().HasMaxLength(16);
+            e.Property(i => i.ConditionNote).HasMaxLength(60);
+            e.Property(i => i.Availability).HasConversion<string>().HasMaxLength(16);
+            e.Property(i => i.PickupPointId).HasMaxLength(32);
+            e.Property(i => i.PlaceName).HasMaxLength(64);
+            e.Property(i => i.Location).HasColumnType("geography (point, 4326)");
+            e.HasIndex(i => i.Location).HasMethod("gist");
+            e.HasIndex(i => new { i.Availability, i.Category, i.CreatedAt });
+            e.HasIndex(i => i.PickupPointId);
+            e.HasOne(i => i.Seller).WithMany().HasForeignKey(i => i.SellerId).OnDelete(DeleteBehavior.Cascade);
         });
 
         b.Entity<Conversation>(e =>

@@ -54,17 +54,19 @@ public class ChatsController(AppDbContext db, ChatService chats) : ControllerBas
     }
 
     /// <summary>
-    /// Open the chat with a student (userId), or with a listing's owner (flatId, the "Message tenant"
-    /// button), optionally with a first message. Reuses the existing chat if there is one.
+    /// Open the chat with a student (userId), a listing's owner (flatId, the "Message tenant" button) or
+    /// an item's seller (itemId, the "Message seller" button), optionally with a first message. Reuses the
+    /// existing chat if there is one.
     /// </summary>
     [HttpPost]
     public async Task<ActionResult<ChatSummary>> Start(StartChatRequest req)
     {
         var me = User.UserId();
-        if ((req.UserId is null) == (req.FlatId is null))
-            return Problem("Send either userId or flatId.", statusCode: StatusCodes.Status400BadRequest);
+        if (new object?[] { req.UserId, req.FlatId, req.ItemId }.Count(x => x is not null) != 1)
+            return Problem("Send exactly one of userId, flatId or itemId.", statusCode: StatusCodes.Status400BadRequest);
 
         FlatListing? flat = null;
+        MarketItem? item = null;
         Guid otherId;
         if (req.FlatId is { } flatId)
         {
@@ -73,18 +75,27 @@ public class ChatsController(AppDbContext db, ChatService chats) : ControllerBas
             if (flat is null) return NotFound();
             otherId = flat.OwnerId;
         }
+        else if (req.ItemId is { } itemId)
+        {
+            item = await db.MarketItems.AsNoTracking().FirstOrDefaultAsync(i => i.Id == itemId);
+            if (item is null) return NotFound();
+            if (item.Availability == ItemAvailability.Sold)
+                return Problem("This item has been sold.", statusCode: StatusCodes.Status409Conflict);
+            otherId = item.SellerId;
+        }
         else
         {
             otherId = req.UserId!.Value;
             if (!await db.Profiles.AnyAsync(p => p.UserId == otherId)) return NotFound();
         }
         if (otherId == me)
-            return Problem(flat is null ? "You can't message yourself." : "This is your listing.",
+            return Problem(flat is null && item is null ? "You can't message yourself." : "This is your listing.",
                 statusCode: StatusCodes.Status400BadRequest);
 
         var (conv, created) = await chats.GetOrCreateAsync(me, otherId);
         var added = new List<ChatMessage>();
-        if (flat is not null && await chats.AddAboutFlatAsync(conv, flat) is { } about) added.Add(about);
+        if (flat is not null && await chats.AddAboutFlatAsync(conv, flat) is { } aboutFlat) added.Add(aboutFlat);
+        if (item is not null && await chats.AddAboutItemAsync(conv, item) is { } aboutItem) added.Add(aboutItem);
         if (!string.IsNullOrWhiteSpace(req.Text)) added.Add(chats.AddText(conv, me, req.Text));
         await db.SaveChangesAsync();
         await chats.NotifyAsync(conv, added);
