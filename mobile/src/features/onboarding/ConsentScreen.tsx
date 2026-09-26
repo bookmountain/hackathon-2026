@@ -8,13 +8,13 @@ import type { ConsentsResponse, ConsentType } from "@/api/types";
 import { Button, Checkbox, Icon } from "@/components/ui";
 import { useToast } from "@/components/feedback/Toast";
 import { selectMe, selectSignedIn, useAppStore } from "@/store";
-import { colors, font } from "@/theme";
+import { colors, divider, font } from "@/theme";
 import { PRIVACY_LINKS } from "./constants";
 import { goToApp } from "./navigation";
 
-type Consents = { terms: boolean; location: boolean; age: boolean; stats: boolean };
+type Consents = { terms: boolean; location: boolean; age: boolean };
 
-const NO_CONSENTS: Consents = { terms: false, location: false, age: false, stats: false };
+const NO_CONSENTS: Consents = { terms: false, location: false, age: false };
 
 function fromApi(res: ConsentsResponse): Consents {
   const granted = (type: ConsentType) => !!res.items.find((i) => i.type === type)?.granted;
@@ -22,7 +22,6 @@ function fromApi(res: ConsentsResponse): Consents {
     terms: granted("Terms"),
     location: granted("Location"),
     age: granted("AgeAndEnrolment"),
-    stats: granted("UsageStats"),
   };
 }
 
@@ -32,11 +31,11 @@ const SUMMARY = [
   ["We never share or sell", "Your email, real name or student ID. Delete your account and data anytime."],
 ] as const;
 
-const CHECKS: { key: keyof Consents; label: string; required: boolean }[] = [
-  { key: "terms", label: "I agree to the Terms of Use and Privacy Policy", required: true },
-  { key: "location", label: "Use my approximate campus-zone location on the map", required: true },
-  { key: "age", label: "I'm 18+ and currently enrolled at Adelaide Uni or Flinders", required: true },
-  { key: "stats", label: "Share anonymous usage stats to improve UCompass", required: false },
+// The v4 design drops the optional usage-stats consent; the API still takes it, so it's sent as false
+const CHECKS: { key: keyof Consents; label: string }[] = [
+  { key: "terms", label: "I agree to the Terms of Use and Privacy Policy" },
+  { key: "location", label: "Use my approximate campus-zone location on the map" },
+  { key: "age", label: "I'm 18+ and currently enrolled at Adelaide Uni or Flinders" },
 ];
 
 function Link({ url, children }: { url: string; children: string }) {
@@ -53,7 +52,7 @@ export default function ConsentScreen() {
   const toast = useToast();
   const { busy, submit } = useSubmit();
   const [consents, setConsents] = useState<Consents>(NO_CONSENTS);
-  const ready = CHECKS.every((c) => !c.required || consents[c.key]);
+  const ready = CHECKS.every((c) => consents[c.key]);
   // Reviewing from Profile rather than onboarding
   const reviewing = selectSignedIn(state);
 
@@ -71,7 +70,7 @@ export default function ConsentScreen() {
 
   const accept = () => {
     if (!ready) {
-      toast("Tick the three required boxes to continue");
+      toast("Tick all three boxes to continue");
       return;
     }
     void submit(async () => {
@@ -79,7 +78,7 @@ export default function ConsentScreen() {
         terms: consents.terms,
         location: consents.location,
         ageAndEnrolment: consents.age,
-        usageStats: consents.stats,
+        usageStats: false,
       });
       const me = await actions.refreshMe();
       if (reviewing) router.back();
@@ -123,7 +122,7 @@ export default function ConsentScreen() {
             checked={consents[c.key]}
             onPress={() => setConsents({ ...consents, [c.key]: !consents[c.key] })}
             label={c.label}
-            note={c.required ? "(required)" : "(optional)"}
+            note="(required)"
           />
         ))}
       </ScrollView>
@@ -133,6 +132,7 @@ export default function ConsentScreen() {
           onPress={accept}
           inactive={!ready}
           disabled={busy}
+          variant="flat"
           weight={700}
         />
       </View>
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, ...font(800, 28, 1.15, -0.02) },
   intro: { color: colors.muted, ...font(500, 14.5, 1.5) },
   link: { color: colors.brand, textDecorationLine: "underline" },
-  summary: { gap: 1, backgroundColor: colors.line, borderRadius: 18, overflow: "hidden" },
+  summary: { gap: 1, backgroundColor: colors.ink, borderRadius: 18, overflow: "hidden" },
   summaryRow: { backgroundColor: colors.canvas, paddingHorizontal: 16, paddingVertical: 14, gap: 3 },
   summaryTitle: { color: colors.ink, ...font(700, 14) },
   summaryText: { color: colors.body, ...font(500, 13.5, 1.45) },
@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.lineSoft,
+    ...divider.top,
   },
 });

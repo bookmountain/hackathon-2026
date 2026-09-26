@@ -4,9 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
 import { useToast } from "@/components/feedback/Toast";
-import { AvatarPicker, Button, FieldLabel, TextField } from "@/components/ui";
+import { Button, FieldLabel, TextField } from "@/components/ui";
 import DegreeField from "@/features/profile/DegreeField";
-import { presetOf, profileRequest } from "@/features/profile/profileRequest";
+import { profileRequest } from "@/features/profile/profileRequest";
 import { selectMe, useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { NICKNAME_MAX } from "./constants";
@@ -19,7 +19,6 @@ export default function SetupScreen() {
   const profile = state.session.me?.profile ?? null;
   const [nick, setNick] = useState(profile?.displayName ?? "");
   const [degree, setDegree] = useState(profile?.degree ?? null);
-  const [avatar, setAvatar] = useState(profile?.avatarPreset ?? -1);
   const ready = nick.trim().length > 0 && degree !== null;
 
   const finish = () => {
@@ -29,7 +28,7 @@ export default function SetupScreen() {
     }
     void submit(async () => {
       await api.me.saveProfile(
-        profileRequest(profile, { displayName: nick.trim(), degreeId: degree.id, avatarPreset: presetOf(avatar) }),
+        profileRequest(profile, { displayName: nick.trim(), degreeId: degree.id }),
       );
       await actions.refreshMe();
       toast(`Welcome to UCompass, ${nick.trim()}`);
@@ -42,12 +41,9 @@ export default function SetupScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>{"How you'll appear"}</Text>
-          <Text style={styles.intro}>Stay anonymous. Pick a nickname — an avatar is optional.</Text>
-
-          <View style={styles.group}>
-            <FieldLabel>Avatar (optional)</FieldLabel>
-            <AvatarPicker value={avatar} nick={nick} onChange={setAvatar} />
-          </View>
+          <Text style={styles.intro}>
+            Stay anonymous. Just a nickname and your major — you can add an avatar later in your profile.
+          </Text>
 
           <TextField
             label="Nickname"

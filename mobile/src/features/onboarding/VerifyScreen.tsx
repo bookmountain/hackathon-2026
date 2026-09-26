@@ -77,8 +77,8 @@ const styles = StyleSheet.create({
   email: { color: colors.ink, ...font(700, 15) },
   code: {
     height: 64,
-    borderWidth: 1.5,
-    borderColor: colors.line,
+    borderWidth: 2,
+    borderColor: colors.ink,
     borderRadius: 16,
     paddingHorizontal: 20,
     textAlign: "center",
