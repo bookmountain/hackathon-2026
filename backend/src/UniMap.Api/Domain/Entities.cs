@@ -16,6 +16,25 @@ public enum AgeRange
     [JsonStringEnumMemberName("30+")] Over30,
 }
 
+/// <summary>Grouping for the degree dropdowns. Honours years are folded into Undergraduate.</summary>
+public enum DegreeLevel { Undergraduate, Postgraduate, Research }
+
+/// <summary>Reference data: real courses, loaded from Data/Seed/*.csv on startup.</summary>
+public class Degree
+{
+    public int Id { get; set; }
+    public University University { get; set; }
+    public DegreeLevel Level { get; set; }
+    /// <summary>As the uni writes it, e.g. "Bachelor", "Graduate Certificate", "Master".</summary>
+    public required string AwardType { get; set; }
+    public required string Name { get; set; }
+    /// <summary>College/faculty. "Other" when the uni's course page doesn't say.</summary>
+    public required string College { get; set; }
+    public List<string> Campuses { get; set; } = [];
+    public bool IsDoubleDegree { get; set; }
+    public required string Url { get; set; }
+}
+
 public enum ConnectionStatus { Pending, Accepted, Declined }
 
 public class User
@@ -39,10 +58,14 @@ public class Profile
     public required string DisplayName { get; set; }
     public required string Department { get; set; }
     public Gender Gender { get; set; }
+    public int? DegreeId { get; set; }
+    public Degree? Degree { get; set; }
+
     /// <summary>Free text, e.g. "she/her". Optional.</summary>
     public string? Pronouns { get; set; }
+    /// <summary>Deprecated (PM, 2026-09-26): no longer written or returned. Column to be dropped.</summary>
     public AgeRange? AgeRange { get; set; }
-    /// <summary>ISO 3166-1 alpha-2 code, e.g. "AU". Optional.</summary>
+    /// <summary>Deprecated (PM, 2026-09-26): no longer written or returned. Column to be dropped.</summary>
     public string? Nationality { get; set; }
     public int? YearOfStudy { get; set; }
     public string? Bio { get; set; }

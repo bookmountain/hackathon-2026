@@ -16,7 +16,7 @@ public class MeController(AppDbContext db, StorageService storage, MatchingServi
     [HttpGet]
     public async Task<ActionResult<MeResponse>> Get()
     {
-        var user = await db.Users.Include(u => u.Profile)
+        var user = await db.Users.Include(u => u.Profile).ThenInclude(p => p!.Degree)
             .FirstOrDefaultAsync(u => u.Id == User.UserId());
         if (user is null) return NotFound();
 
@@ -24,7 +24,10 @@ public class MeController(AppDbContext db, StorageService storage, MatchingServi
         return new MeResponse(user.Id, user.Email, user.University, profile);
     }
 
-    /// <summary>Create or update the onboarding questionnaire (department, gender, habits, ...).</summary>
+    /// <summary>
+    /// Create or update the onboarding questionnaire. Pick the degree with the /api/degrees dropdowns and
+    /// send its id; department is then filled in from the degree's college.
+    /// </summary>
     [HttpPut("profile")]
     public async Task<ActionResult<ProfileDto>> UpsertProfile(UpsertProfileRequest req)
     {
@@ -32,21 +35,29 @@ public class MeController(AppDbContext db, StorageService storage, MatchingServi
         var user = await db.Users.Include(u => u.Profile).FirstOrDefaultAsync(u => u.Id == userId);
         if (user is null) return NotFound();
 
-        var nationality = string.IsNullOrWhiteSpace(req.Nationality) ? null : req.Nationality.Trim().ToUpperInvariant();
-        if (nationality is not null && !Countries.IsValid(nationality))
-            return Problem($"Unknown country code '{req.Nationality}'. See GET /api/meta/options.",
-                statusCode: StatusCodes.Status400BadRequest);
+        Degree? degree = null;
+        if (req.DegreeId is { } degreeId)
+        {
+            degree = await db.Degrees.FirstOrDefaultAsync(d => d.Id == degreeId);
+            if (degree is null || degree.University != user.University)
+                return Problem($"Degree {degreeId} doesn't exist at {user.University}. See GET /api/degrees.",
+                    statusCode: StatusCodes.Status400BadRequest);
+        }
+        else if (string.IsNullOrWhiteSpace(req.Department))
+        {
+            return Problem("Send a degreeId (preferred) or a department.", statusCode: StatusCodes.Status400BadRequest);
+        }
 
         if (req.AvatarKey is not null && !req.AvatarKey.StartsWith($"avatars/{userId}/"))
             return Problem("Invalid avatar key.", statusCode: StatusCodes.Status400BadRequest);
 
         var p = user.Profile ??= new Profile { UserId = userId, DisplayName = "", Department = "" };
         p.DisplayName = req.DisplayName.Trim();
-        p.Department = req.Department.Trim();
+        p.DegreeId = degree?.Id;
+        p.Degree = degree;
+        p.Department = degree?.College ?? req.Department!.Trim();
         p.Gender = req.Gender;
         p.Pronouns = string.IsNullOrWhiteSpace(req.Pronouns) ? null : req.Pronouns.Trim();
-        p.AgeRange = req.AgeRange;
-        p.Nationality = nationality;
         p.YearOfStudy = req.YearOfStudy;
         p.Bio = req.Bio?.Trim();
         p.Habits = Catalog.Normalize(req.Habits);

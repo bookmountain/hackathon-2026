@@ -56,9 +56,9 @@ public class SmtpEmailSender(IOptions<EmailOptions> options, ILogger<SmtpEmailSe
         };
 
         using var smtp = new SmtpClient();
-        await smtp.ConnectAsync(_opt.Host, _opt.Port, security);
+        await smtp.ConnectAsync(_opt.Host!, _opt.Port, security); // only registered when Host is set
         if (!string.IsNullOrEmpty(_opt.Username))
-            await smtp.AuthenticateAsync(_opt.Username, _opt.Password);
+            await smtp.AuthenticateAsync(_opt.Username, _opt.Password ?? "");
         await smtp.SendAsync(msg);
         await smtp.DisconnectAsync(true);
         log.LogInformation("Sent verification code to {Email}", email);

@@ -11,6 +11,5 @@ public class MetaController : ControllerBase
     /// <summary>Dropdown/tag options for the onboarding questionnaire.</summary>
     [HttpGet("options")]
     public OptionsResponse Options() => new(
-        Enum.GetNames<University>(), Enum.GetNames<Gender>(), Catalog.Pronouns, Enum.GetValues<AgeRange>(),
-        Countries.All, Catalog.Habits, Catalog.Interests);
+        Enum.GetNames<University>(), Enum.GetNames<Gender>(), Catalog.Pronouns, Catalog.Habits, Catalog.Interests);
 }

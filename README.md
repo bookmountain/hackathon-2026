@@ -29,9 +29,11 @@ automatically when an edit can't be hot-applied.
    and the code is also printed in the `api` logs.
 2. `POST /api/auth/verify` `{ email, code }` returns `accessToken`.
 3. In Swagger, click **Authorize** and paste the token.
-4. `PUT /api/me/profile` with the onboarding answers (department, gender, habits, interests…).
-   `GET /api/meta/options` lists the suggested tags.
-5. `GET /api/buddies/suggestions` returns ranked matches. `POST /api/buddies/{userId}/request`,
+4. Pick a degree with the three dropdown endpoints: `GET /api/degrees/levels` → `/api/degrees/colleges`
+   → `/api/degrees`. There's also a `search` parameter for a type-ahead box.
+5. `PUT /api/me/profile` with the onboarding answers, including `degreeId`. The department is filled in
+   from the degree. `GET /api/meta/options` lists the suggested tags.
+6. `GET /api/buddies/suggestions` returns ranked matches. `POST /api/buddies/{userId}/request`,
    then the other user accepts via `/api/buddies/connections/{id}/accept`.
 
 In Development, an empty database is seeded with 40 verified fake students, split between the
@@ -39,6 +41,10 @@ two unis (e.g. `a1900000@adelaide.edu.au`, `seed001@flinders.edu.au`, password `
 Run `docker compose down -v && docker compose up` to reseed.
 
 Allowed email domains are in `appsettings.json` → `Universities:Domains`.
+
+The degree lists (Adelaide University and Flinders, researched from their websites) load into the
+`degrees` table on startup, from `backend/src/UniMap.Api/Data/Seed/*.csv`. Known data issues are in
+[TODO.md](TODO.md).
 
 ### Database migrations (EF Core)
 

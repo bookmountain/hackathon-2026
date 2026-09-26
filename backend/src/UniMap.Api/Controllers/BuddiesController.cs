@@ -27,8 +27,8 @@ public class BuddiesController(AppDbContext db, MatchingService matching, Storag
     {
         var me = User.UserId();
         var rows = await db.BuddyConnections.AsNoTracking()
-            .Include(c => c.Requester).ThenInclude(u => u.Profile)
-            .Include(c => c.Addressee).ThenInclude(u => u.Profile)
+            .Include(c => c.Requester).ThenInclude(u => u.Profile).ThenInclude(p => p!.Degree)
+            .Include(c => c.Addressee).ThenInclude(u => u.Profile).ThenInclude(p => p!.Degree)
             .Where(c => c.RequesterId == me || c.AddresseeId == me)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();

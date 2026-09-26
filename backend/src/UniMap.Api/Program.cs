@@ -68,6 +68,8 @@ builder.Services.AddSwaggerGen(o =>
 {
     o.SwaggerDoc("v1", new OpenApiInfo { Title = "UniMap API", Version = "v1" });
     o.SchemaFilter<RequestExamplesFilter>();
+    // Lets enum/object properties carry their own description and "deprecated" flag.
+    o.UseAllOfToExtendReferenceSchemas();
     o.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
     o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -89,6 +91,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
+    await DegreeSeeder.SeedAsync(db, app.Logger);
     if (app.Environment.IsDevelopment() || config.GetValue<bool>("Seed:Enabled"))
         await DevSeeder.SeedAsync(db, app.Logger);
 }

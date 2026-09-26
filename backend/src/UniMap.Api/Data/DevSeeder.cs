@@ -18,25 +18,6 @@ public static class DevSeeder
         "Hiroshi", "Sofia", "Arjun", "Mei", "Tom", "Hannah", "Ali", "Emma", "Kai", "Yuki",
     ];
 
-    private static readonly string[] Departments =
-    [
-        "Computer Science", "Engineering", "Medicine", "Nursing", "Law", "Business",
-        "Psychology", "Architecture", "Music", "Biology", "Mathematics", "Education",
-    ];
-
-    // Rough mix for Adelaide uni students; null = didn't answer (the field is optional).
-    private static readonly (string? Code, int Weight)[] Nationalities =
-    [
-        ("AU", 55), ("CN", 8), ("IN", 8), ("VN", 4), ("MY", 3), ("NP", 3), ("HK", 2),
-        ("ID", 2), ("LK", 2), ("GB", 2), ("KR", 1), ("PK", 1), (null, 9),
-    ];
-
-    private static readonly (AgeRange? Range, int Weight)[] AgeRanges =
-    [
-        (AgeRange.From18To20, 40), (AgeRange.From21To24, 35), (AgeRange.From25To29, 12),
-        (AgeRange.Over30, 5), (null, 8),
-    ];
-
     public static async Task SeedAsync(AppDbContext db, ILogger logger, int count = 40)
     {
         if (await db.Users.AnyAsync()) return;
@@ -45,10 +26,20 @@ public static class DevSeeder
         var hash = BCrypt.Net.BCrypt.HashPassword(Password); // bcrypt is slow; hash once and reuse
         var genders = Enum.GetValues<Gender>();
 
+        // Real degrees from the reference table (DegreeSeeder runs first). Mostly undergrads.
+        var degrees = await db.Degrees.AsNoTracking().ToListAsync();
+        Degree PickDegree(University uni)
+        {
+            var level = rng.Next(10) < 8 ? DegreeLevel.Undergraduate : DegreeLevel.Postgraduate;
+            var pool = degrees.Where(d => d.University == uni && d.Level == level).ToList();
+            return pool[rng.Next(pool.Count)];
+        }
+
         for (var i = 0; i < count; i++)
         {
             var gender = genders[rng.Next(genders.Length)];
             var uni = i % 2 == 0 ? University.Adelaide : University.Flinders;
+            var degree = PickDegree(uni);
             var email = uni == University.Adelaide
                 ? $"a{1_900_000 + i}@adelaide.edu.au"
                 : $"seed{i:D3}@flinders.edu.au";
@@ -62,12 +53,11 @@ public static class DevSeeder
                 Profile = new Profile
                 {
                     DisplayName = FirstNames[i % FirstNames.Length],
-                    Department = Departments[rng.Next(Departments.Length)],
+                    DegreeId = degree.Id,
+                    Department = degree.College,
                     Gender = gender,
                     Pronouns = PronounsFor(gender, rng),
-                    AgeRange = Weighted(rng, AgeRanges),
-                    Nationality = Weighted(rng, Nationalities),
-                    YearOfStudy = rng.Next(1, 5),
+                    YearOfStudy = degree.Level == DegreeLevel.Undergraduate ? rng.Next(1, 5) : rng.Next(1, 3),
                     Bio = "Seeded test user.",
                     Habits = Pick(rng, Catalog.Habits, 3, 6),
                     Interests = Pick(rng, Catalog.Interests, 2, 5),
@@ -87,17 +77,6 @@ public static class DevSeeder
         Gender.NonBinary => "they/them",
         _ => null,
     };
-
-    private static T Weighted<T>(Random rng, (T Value, int Weight)[] options)
-    {
-        var roll = rng.Next(options.Sum(o => o.Weight));
-        foreach (var (value, weight) in options)
-        {
-            if (roll < weight) return value;
-            roll -= weight;
-        }
-        return options[^1].Value;
-    }
 
     private static List<string> Pick(Random rng, string[] source, int min, int max) =>
         source.OrderBy(_ => rng.Next()).Take(rng.Next(min, max + 1)).ToList();

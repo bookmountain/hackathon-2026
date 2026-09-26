@@ -18,13 +18,18 @@ public record LoginRequest([Required, EmailAddress] string Email, [Required] str
 
 public record AuthResponse(string AccessToken, DateTimeOffset ExpiresAt, bool OnboardingComplete);
 
+/// <param name="DegreeId">From GET /api/degrees. When set, Department is filled in from the degree's college.</param>
+/// <param name="Department">Only used when DegreeId is not set.</param>
+/// <param name="AgeRange">Deprecated: removed at the PM's request. Ignored by the server.</param>
+/// <param name="Nationality">Deprecated: removed at the PM's request. Ignored by the server.</param>
 public record UpsertProfileRequest(
     [Required, MaxLength(64)] string DisplayName,
-    [Required, MaxLength(128)] string Department,
+    int? DegreeId,
+    [MaxLength(128)] string? Department,
     [Required] Gender Gender,
     [MaxLength(32)] string? Pronouns,
-    AgeRange? AgeRange,
-    [RegularExpression("^[A-Za-z]{2}$", ErrorMessage = "Use a 2-letter ISO country code, e.g. AU.")] string? Nationality,
+    [property: Obsolete("Removed at the PM's request; ignored.")] AgeRange? AgeRange,
+    [property: Obsolete("Removed at the PM's request; ignored.")] string? Nationality,
     [Range(1, 10)] int? YearOfStudy,
     [MaxLength(500)] string? Bio,
     [MaxLength(20)] List<string> Habits,
@@ -35,11 +40,10 @@ public record ProfileDto(
     Guid UserId,
     string DisplayName,
     University University,
+    DegreeSummary? Degree,
     string Department,
     Gender Gender,
     string? Pronouns,
-    AgeRange? AgeRange,
-    string? Nationality,
     int? YearOfStudy,
     string? Bio,
     List<string> Habits,
@@ -60,7 +64,21 @@ public record OptionsResponse(
     IEnumerable<string> Universities,
     IEnumerable<string> Genders,
     IEnumerable<string> Pronouns,
-    IEnumerable<AgeRange> AgeRanges,
-    IEnumerable<Country> Countries,
     IEnumerable<string> Habits,
     IEnumerable<string> Interests);
+
+public record DegreeSummary(int Id, string Name, DegreeLevel Level, string College);
+
+public record DegreeDto(
+    int Id,
+    University University,
+    DegreeLevel Level,
+    string AwardType,
+    string Name,
+    string College,
+    List<string> Campuses,
+    bool IsDoubleDegree,
+    string Url);
+
+/// <summary>One dropdown option plus how many degrees sit under it.</summary>
+public record DegreeOption<T>(T Value, int Count);

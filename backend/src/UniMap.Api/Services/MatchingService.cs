@@ -13,7 +13,8 @@ namespace UniMap.Api.Services;
 /// </summary>
 public class MatchingService(AppDbContext db, IConnectionMultiplexer redis, StorageService storage)
 {
-    private const double HabitWeight = 45, InterestWeight = 35, DepartmentWeight = 10, UniWeight = 5, YearWeight = 5;
+    private const double HabitWeight = 40, InterestWeight = 30, DegreeWeight = 10, DepartmentWeight = 10,
+        UniWeight = 5, YearWeight = 5;
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
     private readonly IDatabase _cache = redis.GetDatabase();
 
@@ -27,7 +28,7 @@ public class MatchingService(AppDbContext db, IConnectionMultiplexer redis, Stor
         if (cached.HasValue)
             return JsonSerializer.Deserialize<List<BuddySuggestion>>(cached.ToString())!.Take(limit).ToList();
 
-        var me = await db.Profiles.AsNoTracking().Include(p => p.User)
+        var me = await db.Profiles.AsNoTracking().Include(p => p.User).Include(p => p.Degree)
             .FirstOrDefaultAsync(p => p.UserId == userId, ct);
         if (me is null) return [];
 
@@ -37,7 +38,7 @@ public class MatchingService(AppDbContext db, IConnectionMultiplexer redis, Stor
             .Select(c => c.RequesterId == userId ? c.AddresseeId : c.RequesterId)
             .ToListAsync(ct);
 
-        var candidates = await db.Profiles.AsNoTracking().Include(p => p.User)
+        var candidates = await db.Profiles.AsNoTracking().Include(p => p.User).Include(p => p.Degree)
             .Where(p => p.UserId != userId && !connected.Contains(p.UserId))
             .ToListAsync(ct);
 
@@ -59,6 +60,7 @@ public class MatchingService(AppDbContext db, IConnectionMultiplexer redis, Stor
 
         double score = HabitWeight * Jaccard(me.Habits, other.Habits)
                      + InterestWeight * Jaccard(me.Interests, other.Interests);
+        if (me.DegreeId is not null && me.DegreeId == other.DegreeId) score += DegreeWeight;
         if (string.Equals(me.Department, other.Department, StringComparison.OrdinalIgnoreCase)) score += DepartmentWeight;
         if (me.User.University == other.User.University) score += UniWeight;
         if (me.YearOfStudy is not null && me.YearOfStudy == other.YearOfStudy) score += YearWeight;
@@ -75,7 +77,8 @@ public class MatchingService(AppDbContext db, IConnectionMultiplexer redis, Stor
     }
 
     public static ProfileDto ToDto(Profile p, StorageService storage) => new(
-        p.UserId, p.DisplayName, p.User.University, p.Department, p.Gender, p.Pronouns, p.AgeRange, p.Nationality,
-        p.YearOfStudy, p.Bio,
+        p.UserId, p.DisplayName, p.User.University,
+        p.Degree is null ? null : new DegreeSummary(p.Degree.Id, p.Degree.Name, p.Degree.Level, p.Degree.College),
+        p.Department, p.Gender, p.Pronouns, p.YearOfStudy, p.Bio,
         p.Habits, p.Interests, storage.ReadUrl(p.AvatarKey));
 }

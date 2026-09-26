@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<BuddyConnection> BuddyConnections => Set<BuddyConnection>();
+    public DbSet<Degree> Degrees => Set<Degree>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -32,6 +33,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             // GIN indexes make tag-overlap queries (&&) fast.
             e.HasIndex(p => p.Habits).HasMethod("gin");
             e.HasIndex(p => p.Interests).HasMethod("gin");
+            e.HasOne(p => p.Degree).WithMany().HasForeignKey(p => p.DegreeId).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        b.Entity<Degree>(e =>
+        {
+            e.Property(d => d.University).HasConversion<string>().HasMaxLength(32);
+            e.Property(d => d.Level).HasConversion<string>().HasMaxLength(16);
+            e.Property(d => d.AwardType).HasMaxLength(64);
+            e.Property(d => d.Name).HasMaxLength(200);
+            e.Property(d => d.College).HasMaxLength(128);
+            e.Property(d => d.Url).HasMaxLength(300);
+            e.HasIndex(d => new { d.University, d.Level, d.Name }).IsUnique();
+            e.HasIndex(d => new { d.University, d.Level, d.College });
         });
 
         b.Entity<BuddyConnection>(e =>
