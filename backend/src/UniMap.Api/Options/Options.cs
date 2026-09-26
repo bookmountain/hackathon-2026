@@ -43,6 +43,15 @@ public class R2Options
         !string.IsNullOrWhiteSpace(SecretAccessKey) && !string.IsNullOrWhiteSpace(Bucket);
 }
 
+/// <summary>Claude, for photo analysis (the Sell and "List a room" forms, search by photo).</summary>
+public class AnthropicOptions
+{
+    public string? ApiKey { get; set; }
+    public string Model { get; set; } = "claude-opus-5";
+
+    public bool IsConfigured => !string.IsNullOrWhiteSpace(ApiKey);
+}
+
 public class EmailOptions
 {
     /// <summary>SMTP host. Leave empty to just log codes instead of sending.</summary>
