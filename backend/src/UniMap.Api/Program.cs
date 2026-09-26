@@ -22,7 +22,7 @@ builder.Services.Configure<EmailOptions>(config.GetSection("Email"));
 
 // --- Infrastructure ---
 builder.Services.AddDbContext<AppDbContext>(o => o
-    .UseNpgsql(config.GetConnectionString("Postgres"))
+    .UseNpgsql(config.GetConnectionString("Postgres"), npgsql => npgsql.UseNetTopologySuite())
     .UseSnakeCaseNamingConvention());
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>

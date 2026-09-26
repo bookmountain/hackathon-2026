@@ -1,0 +1,46 @@
+using UniMap.Api.Contracts;
+using UniMap.Api.Domain;
+
+namespace UniMap.Api.Services;
+
+public static class FlatMapper
+{
+    /// <summary>~110 m. Enough for "which block", not "which house".</summary>
+    private static double Blur(double v) => Math.Round(v, 3);
+
+    public static FlatSummary ToSummary(FlatListing f, Guid viewerId, StorageService storage)
+    {
+        var mine = f.OwnerId == viewerId;
+        double lat = f.Location.Y, lng = f.Location.X;
+        return new FlatSummary(
+            f.Id, f.Title, f.Suburb, f.Street,
+            mine ? lat : Blur(lat), mine ? lng : Blur(lng),
+            f.RentPerWeek, f.BillsPerWeek, f.RentPerWeek + f.BillsPerWeek,
+            f.Bedrooms, f.Flatmates, f.Toilet, f.Bathroom, f.Furnished, f.AvailableFrom,
+            storage.ReadUrl(f.PhotoKeys.FirstOrDefault()),
+            Walks(lat, lng).Take(2).ToList(),
+            f.Status, mine, f.CreatedAt);
+    }
+
+    /// <summary>Needs Owner, Owner.Profile and Owner.Profile.Degree loaded.</summary>
+    public static FlatDetail ToDetail(FlatListing f, Guid viewerId, StorageService storage)
+    {
+        var p = f.Owner.Profile;
+        var owner = new FlatOwner(
+            f.OwnerId, p?.DisplayName ?? "Student", f.Owner.University,
+            p?.Degree?.Name ?? p?.Department, storage.ReadUrl(p?.AvatarKey));
+        return new FlatDetail(
+            ToSummary(f, viewerId, storage), f.Description, f.MinStayMonths, f.Features, f.HouseRhythm,
+            f.PreferredFlatmate, f.Housemates,
+            f.PhotoKeys.Select(k => storage.ReadUrl(k)!).ToList(),
+            f.OwnerId == viewerId ? f.PhotoKeys : [],
+            Walks(f.Location.Y, f.Location.X).ToList(),
+            owner);
+    }
+
+    /// <summary>All campuses, nearest first.</summary>
+    private static IEnumerable<CampusWalk> Walks(double lat, double lng) =>
+        Campuses.All
+            .Select(c => new CampusWalk(c.Id, c.Name, c.University, Campuses.WalkMinutes(lat, lng, c)))
+            .OrderBy(w => w.WalkMinutes);
+}

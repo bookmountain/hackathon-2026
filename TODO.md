@@ -28,6 +28,22 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **The CSVs exist twice**: `deliverable/degrees/` (for the PM) and
       `backend/src/UniMap.Api/Data/Seed/` (what the app loads). Keep them in step, or pick one.
 
+## Flats
+
+- [ ] **Deleted listings leave their photos in R2.** Delete the objects when a listing is deleted, and
+      clean up uploads that never get attached to a listing.
+- [ ] **Uploads aren't checked.** `photoKeys` only verifies the key prefix, not that the file exists,
+      is an image, or is a reasonable size.
+- [ ] **Walk times are estimates:** straight-line distance × 1.25 at 4.8 km/h. A routing service
+      (OSRM, or Mapbox/Google) would give real walking times, plus public transport, which matters more
+      for suburbs like Glenelg or Prospect.
+- [ ] **Messaging.** The prototype's "Message tenant" needs a chat API. Market and meetups need it too.
+- [ ] **Profile mismatch with the prototype.** UCompass shows only nickname, major, uni and an optional
+      preset avatar. Our profile still has gender, pronouns, bio, habits and interests. The PM or designer
+      should pick one.
+- [ ] **Consent screen.** The prototype's 4 consents (3 required) aren't stored anywhere yet. We should
+      record them with timestamps, as the Australian Privacy Principles expect.
+
 ## Removed profile fields
 
 - [ ] **Age range and Nationality** (removed by the PM on 2026-09-26). The API still accepts them, but

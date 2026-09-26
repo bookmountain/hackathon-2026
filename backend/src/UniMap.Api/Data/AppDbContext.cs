@@ -8,9 +8,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<Degree> Degrees => Set<Degree>();
+    public DbSet<FlatListing> FlatListings => Set<FlatListing>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
+        b.HasPostgresExtension("postgis");
+
         b.Entity<User>(e =>
         {
             e.HasIndex(u => u.Email).IsUnique();
@@ -45,6 +48,24 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(d => d.Url).HasMaxLength(300);
             e.HasIndex(d => new { d.University, d.Level, d.Name }).IsUnique();
             e.HasIndex(d => new { d.University, d.Level, d.College });
+        });
+
+        b.Entity<FlatListing>(e =>
+        {
+            e.Property(f => f.Title).HasMaxLength(80);
+            e.Property(f => f.Description).HasMaxLength(1000);
+            e.Property(f => f.Suburb).HasMaxLength(64);
+            e.Property(f => f.Street).HasMaxLength(64);
+            e.Property(f => f.PreferredFlatmate).HasMaxLength(200);
+            e.Property(f => f.Location).HasColumnType("geography (point, 4326)");
+            e.Property(f => f.Toilet).HasConversion<string>().HasMaxLength(16);
+            e.Property(f => f.Bathroom).HasConversion<string>().HasMaxLength(16);
+            e.Property(f => f.Furnished).HasConversion<string>().HasMaxLength(16);
+            e.Property(f => f.Status).HasConversion<string>().HasMaxLength(16);
+            e.HasIndex(f => f.Location).HasMethod("gist");
+            e.HasIndex(f => new { f.Status, f.RentPerWeek });
+            e.HasIndex(f => f.Features).HasMethod("gin");
+            e.HasOne(f => f.Owner).WithMany().HasForeignKey(f => f.OwnerId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

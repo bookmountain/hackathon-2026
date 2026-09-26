@@ -34,8 +34,33 @@ automatically when an edit can't be hot-applied.
 5. `PUT /api/me/profile` with the onboarding answers, including `degreeId`. The department is filled in
    from the degree. `GET /api/meta/options` lists the suggested tags.
 
-In Development, an empty database is seeded with 40 verified fake students, split between the
-two unis (e.g. `a1900000@adelaide.edu.au`, `seed001@flinders.edu.au`, password `password123`).
+### Flats (flatmate finder)
+
+All of these need a login token, except `options`.
+
+- `GET /api/flats/options`: chip options for the "List a room" form, plus campus locations for the map.
+- `GET /api/flats`: search, for both the map and the list view. Filters are `maxRent`, `maxBills`,
+  `furnished`, `toilet`, `features`, a map viewport (`minLat`…`maxLng`), and
+  `campus` + `maxWalkMinutes`. `sort` is `newest`, `cheapest` or `nearest`.
+- `GET /api/flats/{id}`: room detail, with walk times to every campus and the owner's nickname, major
+  and avatar.
+- `POST /api/uploads/flat-photo`, then `POST /api/flats`: upload up to 5 photos to R2, then list the room.
+- `PUT /api/flats/{id}`, `PUT /api/flats/{id}/status` (`Active` or `Taken`), `DELETE /api/flats/{id}`,
+  `GET /api/flats/mine`.
+
+Other students see each pin rounded to about 100 m; only the owner sees the exact spot.
+
+### Demo data
+
+In Development, an empty database is seeded from `backend/src/UniMap.Api/Data/Seed/`:
+- `students.json`: 48 fictional students with real degrees, including the 8 characters from the
+  UCompass prototype, e.g. Koala_Kai = `a1900000@adelaide.edu.au`, hana_k = `hkim0044@flinders.edu.au`.
+  The password is `password123` for everyone.
+- `flats.json`: 20 room listings on real Adelaide streets near each campus. Pins were placed with
+  OpenStreetMap, then moved slightly so they don't point at a specific house.
+- Images are already in R2 under `seed/`: CC0 avatars (`avatars.json`) and openly licensed room photos
+  (`flat-photos.json`). Credits are in those files.
+
 Run `docker compose down -v && docker compose up` to reseed.
 
 Allowed email domains are in `appsettings.json` → `Universities:Domains`.
@@ -71,7 +96,7 @@ profile. If the bucket isn't public, avatar URLs are presigned GET links that la
 
 ```
 backend/src/UniMap.Api/
-  Controllers/   Auth, Me (profile), Degrees (dropdowns), Uploads, Meta
+  Controllers/   Auth, Me (profile), Degrees (dropdowns), Flats (listings), Uploads, Meta
   Domain/        Entities + tag catalog
   Data/          DbContext + migrations
   Services/      JWT, Redis verification codes, R2 storage, email (SMTP, or Mailpit in dev)
