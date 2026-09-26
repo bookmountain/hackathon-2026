@@ -32,6 +32,11 @@ public class MeController(AppDbContext db, StorageService storage, MatchingServi
         var user = await db.Users.Include(u => u.Profile).FirstOrDefaultAsync(u => u.Id == userId);
         if (user is null) return NotFound();
 
+        var nationality = string.IsNullOrWhiteSpace(req.Nationality) ? null : req.Nationality.Trim().ToUpperInvariant();
+        if (nationality is not null && !Countries.IsValid(nationality))
+            return Problem($"Unknown country code '{req.Nationality}'. See GET /api/meta/options.",
+                statusCode: StatusCodes.Status400BadRequest);
+
         if (req.AvatarKey is not null && !req.AvatarKey.StartsWith($"avatars/{userId}/"))
             return Problem("Invalid avatar key.", statusCode: StatusCodes.Status400BadRequest);
 
@@ -39,6 +44,9 @@ public class MeController(AppDbContext db, StorageService storage, MatchingServi
         p.DisplayName = req.DisplayName.Trim();
         p.Department = req.Department.Trim();
         p.Gender = req.Gender;
+        p.Pronouns = string.IsNullOrWhiteSpace(req.Pronouns) ? null : req.Pronouns.Trim();
+        p.AgeRange = req.AgeRange;
+        p.Nationality = nationality;
         p.YearOfStudy = req.YearOfStudy;
         p.Bio = req.Bio?.Trim();
         p.Habits = Catalog.Normalize(req.Habits);

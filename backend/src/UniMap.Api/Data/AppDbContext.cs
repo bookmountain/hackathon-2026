@@ -26,6 +26,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(p => p.Department).HasMaxLength(128);
             e.Property(p => p.Bio).HasMaxLength(500);
             e.Property(p => p.Gender).HasConversion<string>().HasMaxLength(32);
+            e.Property(p => p.Pronouns).HasMaxLength(32);
+            e.Property(p => p.AgeRange).HasConversion<string>().HasMaxLength(16);
+            e.Property(p => p.Nationality).HasMaxLength(2).IsFixedLength();
             // GIN indexes make tag-overlap queries (&&) fast.
             e.HasIndex(p => p.Habits).HasMethod("gin");
             e.HasIndex(p => p.Interests).HasMethod("gin");

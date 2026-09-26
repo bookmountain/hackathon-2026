@@ -1,8 +1,20 @@
+using System.Text.Json.Serialization;
+
 namespace UniMap.Api.Domain;
 
 public enum University { Adelaide, Flinders }
 
 public enum Gender { Male, Female, NonBinary, Other, PreferNotToSay }
+
+/// <summary>A range rather than a birth date, so we store as little personal data as possible.</summary>
+public enum AgeRange
+{
+    [JsonStringEnumMemberName("under-18")] Under18,
+    [JsonStringEnumMemberName("18-20")] From18To20,
+    [JsonStringEnumMemberName("21-24")] From21To24,
+    [JsonStringEnumMemberName("25-29")] From25To29,
+    [JsonStringEnumMemberName("30+")] Over30,
+}
 
 public enum ConnectionStatus { Pending, Accepted, Declined }
 
@@ -27,6 +39,11 @@ public class Profile
     public required string DisplayName { get; set; }
     public required string Department { get; set; }
     public Gender Gender { get; set; }
+    /// <summary>Free text, e.g. "she/her". Optional.</summary>
+    public string? Pronouns { get; set; }
+    public AgeRange? AgeRange { get; set; }
+    /// <summary>ISO 3166-1 alpha-2 code, e.g. "AU". Optional.</summary>
+    public string? Nationality { get; set; }
     public int? YearOfStudy { get; set; }
     public string? Bio { get; set; }
 

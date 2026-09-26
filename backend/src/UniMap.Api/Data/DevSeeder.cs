@@ -24,6 +24,19 @@ public static class DevSeeder
         "Psychology", "Architecture", "Music", "Biology", "Mathematics", "Education",
     ];
 
+    // Rough mix for Adelaide uni students; null = didn't answer (the field is optional).
+    private static readonly (string? Code, int Weight)[] Nationalities =
+    [
+        ("AU", 55), ("CN", 8), ("IN", 8), ("VN", 4), ("MY", 3), ("NP", 3), ("HK", 2),
+        ("ID", 2), ("LK", 2), ("GB", 2), ("KR", 1), ("PK", 1), (null, 9),
+    ];
+
+    private static readonly (AgeRange? Range, int Weight)[] AgeRanges =
+    [
+        (AgeRange.From18To20, 40), (AgeRange.From21To24, 35), (AgeRange.From25To29, 12),
+        (AgeRange.Over30, 5), (null, 8),
+    ];
+
     public static async Task SeedAsync(AppDbContext db, ILogger logger, int count = 40)
     {
         if (await db.Users.AnyAsync()) return;
@@ -34,6 +47,7 @@ public static class DevSeeder
 
         for (var i = 0; i < count; i++)
         {
+            var gender = genders[rng.Next(genders.Length)];
             var uni = i % 2 == 0 ? University.Adelaide : University.Flinders;
             var email = uni == University.Adelaide
                 ? $"a{1_900_000 + i}@adelaide.edu.au"
@@ -49,7 +63,10 @@ public static class DevSeeder
                 {
                     DisplayName = FirstNames[i % FirstNames.Length],
                     Department = Departments[rng.Next(Departments.Length)],
-                    Gender = genders[rng.Next(genders.Length)],
+                    Gender = gender,
+                    Pronouns = PronounsFor(gender, rng),
+                    AgeRange = Weighted(rng, AgeRanges),
+                    Nationality = Weighted(rng, Nationalities),
                     YearOfStudy = rng.Next(1, 5),
                     Bio = "Seeded test user.",
                     Habits = Pick(rng, Catalog.Habits, 3, 6),
@@ -60,6 +77,26 @@ public static class DevSeeder
 
         await db.SaveChangesAsync();
         logger.LogWarning("Seeded {Count} dev users (password: {Password}), e.g. a1900000@adelaide.edu.au", count, Password);
+    }
+
+    private static string? PronounsFor(Gender gender, Random rng) => gender switch
+    {
+        _ when rng.Next(4) == 0 => null, // lots of people leave it blank
+        Gender.Female => "she/her",
+        Gender.Male => "he/him",
+        Gender.NonBinary => "they/them",
+        _ => null,
+    };
+
+    private static T Weighted<T>(Random rng, (T Value, int Weight)[] options)
+    {
+        var roll = rng.Next(options.Sum(o => o.Weight));
+        foreach (var (value, weight) in options)
+        {
+            if (roll < weight) return value;
+            roll -= weight;
+        }
+        return options[^1].Value;
     }
 
     private static List<string> Pick(Random rng, string[] source, int min, int max) =>

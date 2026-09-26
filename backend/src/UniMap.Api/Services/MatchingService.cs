@@ -75,6 +75,7 @@ public class MatchingService(AppDbContext db, IConnectionMultiplexer redis, Stor
     }
 
     public static ProfileDto ToDto(Profile p, StorageService storage) => new(
-        p.UserId, p.DisplayName, p.User.University, p.Department, p.Gender, p.YearOfStudy, p.Bio,
+        p.UserId, p.DisplayName, p.User.University, p.Department, p.Gender, p.Pronouns, p.AgeRange, p.Nationality,
+        p.YearOfStudy, p.Bio,
         p.Habits, p.Interests, storage.ReadUrl(p.AvatarKey));
 }

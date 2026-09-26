@@ -3,6 +3,9 @@ namespace UniMap.Api.Domain;
 /// <summary>Suggested tags for the onboarding UI. Users may still send custom tags.</summary>
 public static class Catalog
 {
+    /// <summary>Suggestions only; pronouns are free text.</summary>
+    public static readonly string[] Pronouns = ["she/her", "he/him", "they/them", "she/they", "he/they"];
+
     public static readonly string[] Habits =
     [
         "early-bird", "night-owl", "gym", "running", "non-smoker", "smoker", "drinks-socially",

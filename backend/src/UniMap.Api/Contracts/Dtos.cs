@@ -22,6 +22,9 @@ public record UpsertProfileRequest(
     [Required, MaxLength(64)] string DisplayName,
     [Required, MaxLength(128)] string Department,
     [Required] Gender Gender,
+    [MaxLength(32)] string? Pronouns,
+    AgeRange? AgeRange,
+    [RegularExpression("^[A-Za-z]{2}$", ErrorMessage = "Use a 2-letter ISO country code, e.g. AU.")] string? Nationality,
     [Range(1, 10)] int? YearOfStudy,
     [MaxLength(500)] string? Bio,
     [MaxLength(20)] List<string> Habits,
@@ -34,6 +37,9 @@ public record ProfileDto(
     University University,
     string Department,
     Gender Gender,
+    string? Pronouns,
+    AgeRange? AgeRange,
+    string? Nationality,
     int? YearOfStudy,
     string? Bio,
     List<string> Habits,
@@ -53,5 +59,8 @@ public record UploadUrlResponse(string UploadUrl, string Key, string? ReadUrl, D
 public record OptionsResponse(
     IEnumerable<string> Universities,
     IEnumerable<string> Genders,
+    IEnumerable<string> Pronouns,
+    IEnumerable<AgeRange> AgeRanges,
+    IEnumerable<Country> Countries,
     IEnumerable<string> Habits,
     IEnumerable<string> Interests);
