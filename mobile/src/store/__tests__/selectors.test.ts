@@ -2,7 +2,7 @@ import { ME } from "@/test/fixtures";
 import { selectHasUnread, selectMe, selectSignedIn, uniOfEmail } from "../selectors";
 import { initialState, type AppState } from "../state";
 
-const signedIn: AppState = { ...initialState, session: { ...initialState.session, booted: true, token: "t", me: ME, avatar: 2 } };
+const signedIn: AppState = { ...initialState, session: { ...initialState.session, booted: true, token: "t", me: ME } };
 
 describe("uniOfEmail", () => {
   it("detects Flinders and defaults to Adelaide", () => {
@@ -29,7 +29,7 @@ describe("selectMe", () => {
       nick: "Koala_Kai",
       major: "Computer Science",
       uni: "Adelaide Uni",
-      avatar: 2,
+      avatar: 3,
       avatarUrl: ME.profile?.avatarUrl,
     });
   });

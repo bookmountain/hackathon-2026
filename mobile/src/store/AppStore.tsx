@@ -14,7 +14,6 @@ import { initialState, type AppState } from "./state";
 export const TYPING_TIMEOUT_MS = 4000;
 
 const TOKEN_KEY = "ucompass.token";
-const avatarKey = (userId: string) => `ucompass.avatar.${userId}`;
 
 // SecureStore can be unavailable (e.g. on web); the app then just forgets the session on reload
 async function readStored(key: string): Promise<string | null> {
@@ -32,11 +31,6 @@ async function writeStored(key: string, value: string | null) {
   } catch {
     // Not persisted; the session still works until the app restarts
   }
-}
-
-async function storedAvatar(userId: string): Promise<number> {
-  const value = Number(await readStored(avatarKey(userId)));
-  return Number.isInteger(value) ? value : -1;
 }
 
 function useStoreValue() {
@@ -93,16 +87,15 @@ function useStoreValue() {
       signIn: async (auth: AuthResponse): Promise<Me> => {
         setToken(auth.accessToken);
         const me = await api.me.get();
-        const avatar = await storedAvatar(me.userId);
         await writeStored(TOKEN_KEY, auth.accessToken);
-        dispatch({ type: "setSession", session: { token: auth.accessToken, me, email: me.email, devCode: null, avatar } });
+        dispatch({ type: "setSession", session: { token: auth.accessToken, me, email: me.email, devCode: null } });
         return me;
       },
 
-      setAvatar: (avatar: number) => {
-        const me = stateRef.current.session.me;
-        if (me) void writeStored(avatarKey(me.userId), String(avatar));
-        dispatch({ type: "setSession", session: { avatar } });
+      /** Deletes the account and everything in it, then signs out */
+      deleteAccount: async () => {
+        await api.me.deleteAccount();
+        signOut();
       },
 
       loadFlats: async () => {
@@ -186,8 +179,7 @@ function useStoreValue() {
       setToken(token);
       try {
         const me = await api.me.get();
-        const avatar = await storedAvatar(me.userId);
-        if (!cancelled) dispatch({ type: "booted", session: { token, me, email: me.email, avatar } });
+        if (!cancelled) dispatch({ type: "booted", session: { token, me, email: me.email } });
       } catch {
         // Expired token or offline: start from the login screen
         setToken(null);

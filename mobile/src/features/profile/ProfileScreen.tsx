@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
@@ -12,7 +12,7 @@ import { NICKNAME_MAX, PRIVACY_LINKS } from "@/features/onboarding/constants";
 import { selectMe, useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import DegreeField from "./DegreeField";
-import { profileRequest } from "./profileRequest";
+import { presetOf, profileRequest } from "./profileRequest";
 
 // Like the design there's no save button: the nickname saves when you leave the
 // field, the major as soon as you pick it
@@ -24,10 +24,10 @@ export default function ProfileScreen() {
   const profile = state.session.me?.profile ?? null;
   const [nick, setNick] = useState(profile?.displayName ?? "");
   const [picking, setPicking] = useState(false);
-  const { avatar } = state.session;
+  const avatar = me.avatar;
   const hasPhoto = !!me.avatarUrl;
 
-  const save = (change: { displayName?: string; degreeId?: number }, done: string) =>
+  const save = (change: Parameters<typeof profileRequest>[1], done: string) =>
     submit(async () => {
       await api.me.saveProfile(profileRequest(profile, change));
       await actions.refreshMe();
@@ -48,6 +48,29 @@ export default function ProfileScreen() {
     if (degree.id !== profile?.degree?.id) void save({ degreeId: degree.id }, "Major saved");
   };
 
+  const saveAvatar = (index: number) => {
+    if (index !== avatar) void save({ avatarPreset: presetOf(index) }, "Avatar saved");
+  };
+
+  const confirmDelete = () =>
+    Alert.alert(
+      "Delete your account?",
+      "Your profile, rooms, items, meetups and chats are deleted for good. This can't be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete account",
+          style: "destructive",
+          // Signing out flips the (app) guard, which redirects to login
+          onPress: () =>
+            void submit(async () => {
+              await actions.deleteAccount();
+              toast("Your account and data have been deleted");
+            }),
+        },
+      ],
+    );
+
   const pickerLabel = picking ? "Done" : avatar < 0 ? "Add avatar (optional)" : "Edit avatar";
 
   return (
@@ -56,7 +79,7 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         <View style={styles.avatarBlock}>
           <Avatar index={avatar} nick={me.nick} url={me.avatarUrl} size={96} />
-          {/* Preset colours are drawn by the app; an uploaded photo always wins */}
+          {/* A preset colour; an uploaded photo is shown instead when there is one */}
           {!hasPhoto && (
             <Pressable onPress={() => setPicking(!picking)} style={styles.avatarButton}>
               <Text style={styles.avatarButtonText}>{pickerLabel}</Text>
@@ -65,7 +88,7 @@ export default function ProfileScreen() {
         </View>
         {picking && !hasPhoto && (
           <View style={styles.picker}>
-            <AvatarPicker value={avatar} nick={nick} onChange={actions.setAvatar} size={18} />
+            <AvatarPicker value={avatar} nick={nick} onChange={saveAvatar} size={18} />
           </View>
         )}
 
@@ -112,8 +135,11 @@ export default function ProfileScreen() {
             <Text style={styles.linkIcon}>›</Text>
           </Pressable>
           {/* Signing out flips the (app) guard, which redirects to login */}
-          <Pressable onPress={actions.signOut} style={styles.link}>
+          <Pressable onPress={actions.signOut} style={[styles.link, styles.linkDivider]}>
             <Text style={[styles.linkText, { color: colors.danger }]}>Sign out</Text>
+          </Pressable>
+          <Pressable onPress={confirmDelete} style={styles.link}>
+            <Text style={[styles.linkText, { color: colors.danger }]}>Delete account</Text>
           </Pressable>
         </View>
       </ScrollView>

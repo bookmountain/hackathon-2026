@@ -39,6 +39,8 @@ export const auth = {
 export const me = {
   get: () => api<Me>("/api/me"),
   saveProfile: (profile: ProfileRequest) => api<Profile>("/api/me/profile", { method: "PUT", body: profile }),
+  /** Deletes the account and everything in it */
+  deleteAccount: () => api<void>("/api/me", { method: "DELETE" }),
   getConsents: () => api<ConsentsResponse>("/api/consents"),
   saveConsents: (consents: ConsentsRequest) => api<ConsentsResponse>("/api/consents", { method: "PUT", body: consents }),
 };

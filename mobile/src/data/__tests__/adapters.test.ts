@@ -91,11 +91,11 @@ describe("chat", () => {
     expect(
       toThread({
         id: "c1",
-        other: { userId: "tom", displayName: "TomTheTutor", major: "Bachelor of Mathematics (Honours)", university: "Adelaide", avatarUrl: null },
+        other: { userId: "tom", displayName: "TomTheTutor", major: "Bachelor of Mathematics (Honours)", university: "Adelaide", avatarUrl: null, avatarPreset: 4 },
         lastMessage: messageDto(),
         unreadCount: 2,
         lastMessageAt: "2026-09-26T12:19:58Z",
       }),
-    ).toMatchObject({ person: { nick: "TomTheTutor", major: "Mathematics (Honours)", uni: "Adelaide Uni" }, unread: 2 });
+    ).toMatchObject({ person: { nick: "TomTheTutor", major: "Mathematics (Honours)", uni: "Adelaide Uni", avatar: 4 }, unread: 2 });
   });
 });

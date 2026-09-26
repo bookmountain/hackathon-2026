@@ -44,7 +44,7 @@ server, so run `npx expo start` once after adding a route):
 
 ```bash
 npx tsc --noEmit
-npx expo lint
+npm run lint      # ESLint directly: `expo lint` exits 0 if it can't start npx
 npm test          # unit tests for the store and pure helpers
 ```
 
@@ -59,6 +59,8 @@ endpoints are in the repo's [README](../README.md)). To use a local API instead,
   account with any `@adelaide.edu.au` / `@flinders.edu.au` address. There's no real email yet, so the
   hosted API hands the code back and "Autofill demo code" fills it in.
 - **Session:** the token is kept in SecureStore, so reopening the app skips login.
+- **Profile:** the nickname, major and preset avatar colour save to the API. Profile → "Delete account"
+  deletes the account and all its data (`DELETE /api/me`).
 - **Data:** each tab reloads from the API when it comes into focus (photo URLs expire after 24 hours);
   lists also have pull-to-refresh.
 - **Live updates:** chat messages, "•••" typing and meetup headcounts arrive over a WebSocket to

@@ -144,5 +144,7 @@ export const ME: Me = {
     interests: ["coding"],
     avatarUrl:
       "https://b36c.r2.cloudflarestorage.com/hackathon-2026/avatars/ee9726cb-293a-5f25-935d-1f97a6322528/avatar.png?X-Amz-Expires=86400&X-Amz-Signature=abc",
+    avatarKey: "avatars/ee9726cb-293a-5f25-935d-1f97a6322528/avatar.png",
+    avatarPreset: 3,
   },
 };

@@ -19,10 +19,10 @@ describe("session", () => {
   });
 
   it("forgets everything on sign-out", () => {
-    let state = reducer(initialState, { type: "setSession", session: { token: "t", me: ME, avatar: 2 } });
+    let state = reducer(initialState, { type: "setSession", session: { token: "t", me: ME } });
     state = reducer(state, { type: "setEvents", events: [EVENT] });
     state = reducer(state, { type: "signOut" });
-    expect(state.session).toEqual({ booted: true, token: null, me: null, email: "", devCode: null, avatar: -1 });
+    expect(state.session).toEqual({ booted: true, token: null, me: null, email: "", devCode: null });
     expect(state.events).toEqual([]);
   });
 });

@@ -30,6 +30,10 @@ export type Profile = {
   habits: string[];
   interests: string[];
   avatarUrl: string | null;
+  /** Send back on PUT /api/me/profile to keep the photo */
+  avatarKey: string | null;
+  /** Preset avatar colour (index into AVATAR_COLORS), null for none */
+  avatarPreset: number | null;
 };
 
 export type Me = {
@@ -49,7 +53,8 @@ export type ProfileRequest = {
   bio: string | null;
   habits: string[];
   interests: string[];
-  avatarKey?: string | null;
+  avatarKey: string | null;
+  avatarPreset: number | null;
 };
 
 export type ConsentType = "Terms" | "Location" | "AgeAndEnrolment" | "UsageStats";
@@ -69,6 +74,7 @@ export type PersonDto = {
   major: string | null;
   university: University;
   avatarUrl: string | null;
+  avatarPreset: number | null;
 };
 
 // Flats

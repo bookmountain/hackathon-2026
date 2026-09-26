@@ -51,7 +51,7 @@ export function toPerson(p: PersonDto): Person {
     nick: p.displayName,
     major: majorLabel(p.major),
     uni: UNI_LABEL[p.university],
-    avatar: -1,
+    avatar: p.avatarPreset ?? -1,
     avatarUrl: p.avatarUrl,
   };
 }

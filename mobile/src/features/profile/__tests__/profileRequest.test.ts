@@ -1,25 +1,11 @@
 import type { Profile } from "@/api/types";
 import { ME } from "@/test/fixtures";
-import { avatarKeyOf, profileRequest } from "../profileRequest";
+import { presetOf, profileRequest } from "../profileRequest";
 
 const profile = ME.profile as Profile;
 
-describe("avatarKeyOf", () => {
-  it("recovers the R2 key from a path-style presigned URL", () => {
-    expect(avatarKeyOf(profile)).toBe(`avatars/${ME.userId}/avatar.png`);
-  });
-
-  it("works for a custom domain, and refuses someone else's key", () => {
-    expect(avatarKeyOf({ ...profile, avatarUrl: `https://cdn.example/avatars/${ME.userId}/a.png?sig` })).toBe(
-      `avatars/${ME.userId}/a.png`,
-    );
-    expect(avatarKeyOf({ ...profile, avatarUrl: "https://cdn.example/avatars/someone-else/a.png" })).toBeNull();
-    expect(avatarKeyOf({ ...profile, avatarUrl: null })).toBeNull();
-  });
-});
-
 describe("profileRequest", () => {
-  it("changes only what was edited and keeps the avatar", () => {
+  it("changes only what was edited and sends the photo's key back", () => {
     expect(profileRequest(profile, { displayName: "Kai" })).toEqual({
       displayName: "Kai",
       degreeId: 21,
@@ -30,11 +16,19 @@ describe("profileRequest", () => {
       habits: ["night-owl", "coffee"],
       interests: ["coding"],
       avatarKey: `avatars/${ME.userId}/avatar.png`,
+      avatarPreset: 3,
     });
   });
 
+  it("sets or clears the preset colour", () => {
+    expect(profileRequest(profile, { avatarPreset: 5 }).avatarPreset).toBe(5);
+    expect(profileRequest(profile, { avatarPreset: null }).avatarPreset).toBeNull();
+    expect(presetOf(-1)).toBeNull();
+    expect(presetOf(0)).toBe(0);
+  });
+
   it("fills what the API requires for a new profile", () => {
-    expect(profileRequest(null, { displayName: "CompassRookie", degreeId: 96 })).toEqual({
+    expect(profileRequest(null, { displayName: "CompassRookie", degreeId: 96, avatarPreset: presetOf(2) })).toEqual({
       displayName: "CompassRookie",
       degreeId: 96,
       gender: "PreferNotToSay",
@@ -44,6 +38,7 @@ describe("profileRequest", () => {
       habits: [],
       interests: [],
       avatarKey: null,
+      avatarPreset: 2,
     });
   });
 });

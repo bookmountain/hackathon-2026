@@ -15,14 +15,14 @@ export function selectSignedIn(state: AppState): boolean {
 
 /** The signed-in user shaped like the other people in the app */
 export function selectMe(state: AppState): Person {
-  const { me, avatar, email } = state.session;
+  const { me, email } = state.session;
   const profile = me?.profile;
   return {
     id: me?.userId ?? "me",
     nick: profile?.displayName || "You",
     major: majorLabel(profile?.degree?.name ?? profile?.department),
     uni: me ? UNI_LABEL[me.university] : uniOfEmail(email),
-    avatar,
+    avatar: profile?.avatarPreset ?? -1,
     avatarUrl: profile?.avatarUrl,
   };
 }

@@ -11,8 +11,6 @@ export type Session = {
   email: string;
   /** Verification code the hosted demo API returns instead of emailing it */
   devCode: string | null;
-  /** Preset colour avatar (index into AVATAR_COLORS). Only kept on this device. */
-  avatar: number;
 };
 
 export type AppState = {
@@ -28,7 +26,7 @@ export type AppState = {
   typingIn: string | null;
 };
 
-export const signedOutSession: Session = { booted: true, token: null, me: null, email: "", devCode: null, avatar: -1 };
+export const signedOutSession: Session = { booted: true, token: null, me: null, email: "", devCode: null };
 
 export const initialState: AppState = {
   session: { ...signedOutSession, booted: false },

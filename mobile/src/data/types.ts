@@ -8,7 +8,7 @@ export type Person = {
   nick: string;
   major: string;
   uni: Uni;
-  /** Index into AVATAR_COLORS; -1 = no preset colour */
+  /** Preset colour, an index into AVATAR_COLORS; -1 = none */
   avatar: number;
   /** Uploaded photo avatar; shown instead of the preset when set */
   avatarUrl?: string | null;
