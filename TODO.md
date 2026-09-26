@@ -56,6 +56,24 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
       Adelaide. The same goes for the check that a new date is in the future.
 - [ ] **No report or block** for scam listings. The consent screen promises "Report & block in one tap".
 
+## Dcard
+
+- [ ] **`drawnToday` counts real draws only.** Seeded students are dealt to people, but never press Draw
+      themselves, so the demo shows small numbers where the design shows "143". A job that draws for some
+      seeded students each day would fix it.
+- [ ] **Dormant accounts can be drawn.** Anyone who has never pressed Draw counts as new and can be
+      dealt, so an active student can draw someone who never opens the app. Consider only dealing students
+      who were active in the last week (once the app records activity).
+- [ ] **Not run against a database yet** (no Docker on the build machine): built and migrated only.
+
+## Photo analysis
+
+- [ ] **No rate limit.** Every call costs money on the Anthropic account. Add a per-student limit
+      (e.g. a Redis counter, 30 a day).
+- [ ] **Not tested against the live API**: there was no Anthropic key on the build machine.
+- [ ] **Search by photo ranks by keywords only.** It looks at the newest 200 unsold items in the photo's
+      category. Image embeddings would find lookalikes better.
+
 ## Meetups
 
 - [ ] **No report or block** for events, like the market. An anonymous host makes this matter more: the

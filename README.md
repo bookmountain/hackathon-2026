@@ -61,9 +61,14 @@ Differences between the UCompass prototype and this API, for the app to handle, 
    from the degree. `GET /api/meta/options` lists the suggested tags. It replaces the whole profile, so
    send back what didn't change, including `avatarKey` from `GET /api/me`: a missing key removes the
    photo. `avatarPreset` (0–7, or null) is the design's preset colour avatar; everyone sees it wherever
-   they'd see the photo, and the photo wins when there's both.
+   they'd see the photo, and the photo wins when there's both. `avatarDesign` holds the rest of the avatar
+   builder: `style` (`Initials` or `Icon`), `initials` (1–2 letters, or null for the nickname's first
+   letter), `icon` (`Compass`, `Book`, `Coffee`, `Music`, `Code`, `Leaf`, `Camera`, `Ball`, `Paw`, `Rocket`),
+   `shape` (`Circle`, `Squircle` = "Soft", `Square`) and `ring` (`None`, `Gold`, `Blue`, `Navy`, `Sky`). It
+   comes back everywhere `avatarPreset` does. "Anonymous" is `avatarPreset: null`.
 7. `DELETE /api/me` deletes the account and everything in it: profile, consents, rooms, items, hosted
-   events, RSVPs, chats (for both people) and the account's photos in R2. It works before consent.
+   events, RSVPs, chats (for both people), Dcard cards and the account's photos in R2. It works before
+   consent. Students who drew them keep their card, with `match: null`.
    People going to a deleted event get `eventCancelled`.
 
 ### Flats (flatmate finder)
@@ -71,7 +76,8 @@ Differences between the UCompass prototype and this API, for the app to handle, 
 All of these need a login token, except `options`.
 
 - `GET /api/flats/options`: chip options for the "List a room" form, plus campus locations for the map.
-- `GET /api/flats`: search, for both the map and the list view. Filters are `maxRent`, `maxBills`,
+- `GET /api/flats`: search, for both the map and the list view. Filters are `search` (the search box:
+  title, suburb or street), `maxRent`, `maxBills`,
   `furnished`, `toilet`, `features`, a map viewport (`minLat`…`maxLng`), and
   `campus` + `maxWalkMinutes`. `sort` is `newest`, `cheapest` or `nearest`.
 - `GET /api/flats/{id}`: room detail, with walk times to every campus and the owner's nickname, major
@@ -81,6 +87,7 @@ All of these need a login token, except `options`.
   `listingId`. Send it with the remaining photos, and as `id` when creating the listing.
 - `PUT /api/flats/{id}`, `PUT /api/flats/{id}/status` (`Active` or `Taken`), `DELETE /api/flats/{id}`,
   `GET /api/flats/mine`.
+- `POST /api/flats/analyse-photo`: fill in "List a room" from a photo (see Photo analysis below).
 
 Other students see each pin rounded to about 100 m; only the owner sees the exact spot.
 
@@ -110,6 +117,8 @@ All of these need a login token, except `options`.
 - Condition is `New`, `LikeNew`, `Excellent`, `Good` or `Fair`, plus an optional note. `conditionLabel`
   is ready to show, e.g. "Good — some highlighting".
 - "Message seller" is `POST /api/chats` with `{ itemId, text }` (see below).
+- `POST /api/items/analyse-photo` fills in the Sell form from a photo, and `POST /api/items/search-by-photo`
+  is the camera button in the search box (see Photo analysis below).
 
 ### Meetups (walk-in events)
 
@@ -119,8 +128,8 @@ who hosts an event or who's going, only the headcount (`goingCount`) and whether
 
 - `GET /api/events/options`: the four types (`Study`, `Casual`, `Social`, `Food`), the preset places (the
   three safe pickup points) and the capacity slider's range (4 to 60, default 20).
-- `GET /api/events`: upcoming events, soonest first, for both the map and the list. Filters are `type` and a
-  map viewport (`minLat`…`maxLng`). Events that have ended are left out: after `endsAt`, or 2 hours after
+- `GET /api/events`: upcoming events, soonest first, for both the map and the list. Filters are `type`,
+  `search` (the search box: title or place name) and a map viewport (`minLat`…`maxLng`). Events that have ended are left out: after `endsAt`, or 2 hours after
   the start when there's no end time. Events happening now are included (`isHappeningNow`).
 - `GET /api/events/{id}`: event detail. Show the host as "Hosted anonymously · Verified student host".
 - `POST /api/events` ("Publish event"): `title`, `type`, `startsAt` (with a UTC offset, e.g.
@@ -150,14 +159,56 @@ One chat per pair of students. Other people only see your nickname, major, uni a
 - `POST /api/chats` with `{ itemId, text }`: the "Message seller" button. Adds an "About: {title} · $price"
   line. The prototype pre-fills the text as "Hi! Is the {title} still available?". Sold items return 409.
 - Use `{ userId, text }` to message a student directly.
+- `POST /api/chats` with `{ drawId, text }`: "Send a message to {nick}" on your Dcard. Adds a
+  "Daily card match · 27 Sep" line (`about.type` `DailyCard`, nothing to open). The prototype pre-fills
+  "Hey! We drew each other on Dcard today".
 - `GET /api/chats`: your chats, with the last message and unread count.
 - `GET /api/chats/{id}/messages` (page back with `before`), `POST /api/chats/{id}/messages`,
   `POST /api/chats/{id}/read`.
 - Real time: connect SignalR to `/hubs/chat?access_token={jwt}`. The server sends `message`, `read` and
   `typing` events (and the meetup events above). Call the hub method `Typing(conversationId)` to show "•••" to the other person.
 
+About lines have `about.type` `Flat`, `Item` or `DailyCard`.
+
 Koala_Kai (`a1900000@adelaide.edu.au`) has 3 seeded chats, 2 with unread replies. One of them is the
 prototype's: TomTheTutor messaging about his Calculus textbook.
+
+### Dcard (daily card)
+
+Draw one card a day to meet a random fellow student. All of these need a login token.
+
+- `GET /api/draw/today`: `status` is `Ready` ("Draw a card"), `Matched` ("Your card today") or `Locked`
+  ("Deck locked"). Also `drawnToday` ("143 students have drawn today") and `resetsAt`, the next Adelaide
+  midnight, for all three clocks ("Deck resets in", "Next draw in", "Unlocks in"). With `Matched`: `match`
+  (nickname, major, uni and avatar, like a chat) and `drawId`.
+- `POST /api/draw`: the Draw button. It returns the same thing, and does nothing if you've already drawn
+  today. 409 if nobody is left to draw.
+- **Draws are mutual.** Drawing deals you a random student who hasn't drawn yet today, and deals you to
+  them: when they press Draw they get you. Anyone with a profile and the required consents can be drawn,
+  except students who missed a day. You don't get the same student two days running unless nobody else is
+  left.
+- **Missing a day.** If you didn't press Draw yesterday, `GET` says `Ready` with `missedDay: true`. Pressing
+  Draw then deals nothing: it starts a new session and returns `Locked` until midnight, and from midnight you
+  can draw again. For example, you skipped yesterday and it's 10 pm: Draw shows a 2-hour countdown. A new
+  account can draw straight away.
+- "Send a message to {nick}" is `POST /api/chats { drawId, text }` (see Chats).
+
+### Photo analysis (Claude)
+
+The server asks Claude (`claude-opus-5`, set with `Anthropic:Model`) what a photo shows. Send the photo as
+multipart/form-data field `photo`: JPEG, PNG, GIF or WebP, up to 3.75 MB (resize to about 1500 px first).
+It's only sent to Claude, never stored, so still upload listing photos to R2 as usual. Without
+`ANTHROPIC_API_KEY` these return 503; if Claude is busy or down, 503 or 502; for a photo it won't
+describe, 422.
+
+- `POST /api/items/analyse-photo`: pre-fills Sell with `title`, `category`, `condition`, `colour`,
+  `texture`, `suggestedPrice` ("Use suggested price"), `description` and 3 `benefits`. The prototype
+  writes the description, then "Colour: … · Texture: … · Condition: …" and the benefits as "• " lines.
+- `POST /api/flats/analyse-photo`: pre-fills "List a room" with `title`, `style`, `colours`, `furnished`,
+  `features` (only values from `/api/flats/options`), `description` and 3 `benefits`.
+- `POST /api/items/search-by-photo?limit=5`: `label` ("Looks like: Desk lamp"), `category` (null if none
+  fits), the `keywords` it matched on, and `items`: unsold items in that category, those whose title or
+  description has the most keywords first.
 
 ### Demo data
 
@@ -217,13 +268,18 @@ ID and bucket are already filled in. The client calls `POST /api/uploads/avatar`
 URL, sends the image to that URL with `PUT`, then saves the returned `key` as `avatarKey` on the
 profile. If the bucket isn't public, avatar URLs are presigned GET links that last 24 hours.
 
+### Claude (photo analysis)
+
+Put an Anthropic API key in `.env` as `ANTHROPIC_API_KEY`. Without it, the photo analysis endpoints return
+503 and everything else works.
+
 ### Layout
 
 ```
 backend/src/UniMap.Api/
   Controllers/   Auth, Me (profile), Degrees (dropdowns), Flats (listings), Items (market),
-                 Events (meetups), Chats, Consents, Uploads, Meta
+                 Events (meetups), Chats, DailyCard (Dcard), PhotoAi, Consents, Uploads, Meta
   Domain/        Entities + tag catalog
   Data/          DbContext + migrations
-  Services/      JWT, Redis verification codes, R2 storage, email (SMTP, or Mailpit in dev)
+  Services/      JWT, Redis verification codes, R2 storage, email (SMTP, or Mailpit in dev), Claude
 ```

@@ -152,6 +152,45 @@ the API requires.
 - [x] **Real time:** connect SignalR to `/hubs/chat?access_token={jwt}` for `message`, `read` and
       `typing`. Call `Typing(conversationId)` for the "•••" indicator.
 
+## UCompass v4 (2026-09-27)
+
+The design moved to `UCompass Demo v4.dc.html` (in `~/Downloads/UCompass hackathon demo (2).zip`). The API
+now covers what it added (on the `dcard` branch). What the app still has to do:
+
+- [ ] **Dcard screen.** `GET /api/draw/today` on open, and `POST /api/draw` on "Draw a card". Play the
+      2.4-second flip while the request runs. All three clocks count down to `resetsAt`. "Send a message"
+      is `POST /api/chats { drawId, text }`.
+- [ ] **Dcard wording.** The design says a missed day pauses the deck "for 48 hours"; the rule is now
+      "until midnight", so change it to something like "You missed a day, so your deck opens again at
+      midnight." Rule 3 ("Miss a day and the deck locks for 48 hours") needs the same change. "You both drew
+      a card today" isn't always true: the student you drew may not have opened the app yet (they get you
+      when they do). Also, the card says "Only nickname, major & uni are shared", but the avatar is shared too.
+- [ ] **Search box on every tab:** send `search` to `GET /api/flats`, `/api/items` and `/api/events`.
+- [ ] **AI photo cards.** Send the picked photo to `POST /api/items/analyse-photo` (Sell) or
+      `POST /api/flats/analyse-photo` (List a room) as multipart field `photo`, resized to about 1500 px. Show
+      condition with the labels from `GET /api/items/options`.
+- [ ] **Sell needs category and condition inputs again.** In v4 only the AI sets them, but the API
+      requires both, and analysis can fail (503 without a server key, 502, 422). Keep manual pickers as
+      the fallback.
+- [ ] **Search by photo:** `POST /api/items/search-by-photo` returns `label` for "Looks like: …" and the
+      matching `items`.
+- [ ] **Avatar builder.** Send `avatarDesign` (style, initials, icon, shape, ring) with `avatarPreset` on
+      `PUT /api/me/profile`, and draw other people's avatars with their `avatarDesign`: chats, flat owners,
+      item sellers and the Dcard match.
+- [ ] **Room address is one box now**, geocoded in the app with Nominatim, but the API needs `suburb`.
+      Ask Nominatim for `addressdetails=1` and send `address.suburb` (or `city_district`/`city`) as `suburb`
+      and `address.road` as `street`. Nominatim's policy is at most 1 request a second with a real
+      User-Agent, so keep the design's 650 ms debounce.
+- [ ] **Minimum stay** is a free number box in v4 (up to 99). The API takes 1–24 months or null for
+      flexible, so clamp it, and send null when it's empty.
+- [ ] **Consent has 3 checkboxes in v4** (usage stats is gone). Send `usageStats: false`.
+- [ ] **Host form** has separate date (dd/mm/yyyy) and time boxes, and the design ends events 2 hours
+      after the start. Send `startsAt`, and `endsAt` if you want the "7:00–9:00 pm" range.
+- [ ] **Calendar links** ("Add to Google Calendar", .ics) are built in the app from `startsAt`/`endsAt` and
+      a flat's `availableFrom`; no API needed.
+- [ ] **Sign-in is still passwordless in v4** ("Welcome back" / "Create your account" → code). The app
+      keeps email + password (see Sign in above).
+
 ## People on the map (not built yet)
 
 - [ ] **Connect and Wave** on person pins have no API yet. Connect can already use
