@@ -99,6 +99,19 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
             PhotoKeys: [$"items/{ExampleItemId}/9c1e5a4b2f7d4e0c8a3b6d1f2e4c7a90.jpg"]),
         _ when type == typeof(ItemAvailabilityRequest) => new ItemAvailabilityRequest(
             ItemAvailability.From, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5))),
+        // Friday coffee & code (the Host form's placeholder), at a preset place with a detail in placeName.
+        _ when type == typeof(UpsertEventRequest) => new UpsertEventRequest(
+            Title: "Friday coffee & code",
+            Type: EventType.Casual,
+            StartsAt: InAdelaide(NextFriday(), new TimeOnly(8, 30)),
+            EndsAt: InAdelaide(NextFriday(), new TimeOnly(10, 0)),
+            Description: "Bring a laptop and whatever you're building. All levels welcome, no one checks your code.",
+            PlaceId: "barr-smith-library",
+            PlaceName: "Barr Smith Library, ground floor",
+            Lat: null,
+            Lng: null,
+            Capacity: MeetupCatalog.DefaultCapacity,
+            WalkInsWelcome: true),
         // Koala_Kai (the login example) messaging TomTheTutor about his seeded Calculus textbook.
         _ when type == typeof(StartChatRequest) => new StartChatRequest(
             UserId: null, FlatId: null, ItemId: SeedCalculusTextbookId,
@@ -106,6 +119,17 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
         _ when type == typeof(SendMessageRequest) => new SendMessageRequest("Great — see you at Barr Smith after 4pm!"),
         _ => null,
     };
+
+    private static DateOnly NextFriday()
+    {
+        var today = AdelaideTime.Today();
+        var days = ((int)DayOfWeek.Friday - (int)today.DayOfWeek + 7) % 7;
+        return today.AddDays(days == 0 ? 7 : days);
+    }
+
+    /// <summary>With Adelaide's UTC offset, e.g. 2026-10-02T08:30:00+09:30, so the example reads naturally.</summary>
+    private static DateTimeOffset InAdelaide(DateOnly date, TimeOnly time) =>
+        TimeZoneInfo.ConvertTime(AdelaideTime.ToUtc(date, time), AdelaideTime.Zone);
 
     private static readonly Guid ExampleItemId = Guid.Parse("5b0c3e2a-8f41-4d7e-9a26-1c7f0e9d4b83");
 

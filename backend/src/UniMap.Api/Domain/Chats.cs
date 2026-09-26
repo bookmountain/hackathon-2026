@@ -2,7 +2,10 @@ namespace UniMap.Api.Domain;
 
 public enum ChatMessageKind { Text, About }
 
-/// <summary>What an "About" message refers to. Meetups can be added later.</summary>
+/// <summary>
+/// What an "About" message refers to. Meetups have none on purpose: their hosts are anonymous, so there's
+/// nobody to message.
+/// </summary>
 public enum ChatAboutType { Flat, Item }
 
 /// <summary>

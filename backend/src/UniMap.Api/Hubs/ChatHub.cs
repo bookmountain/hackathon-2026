@@ -7,9 +7,11 @@ using UniMap.Api.Services;
 namespace UniMap.Api.Hubs;
 
 /// <summary>
-/// Real-time chat events. Connect to /hubs/chat with ?access_token={jwt}.
-/// Server → client events: "message" (ChatMessageDto), "read" ({conversationId, userId, at}),
+/// Real-time events. Connect to /hubs/chat with ?access_token={jwt}.
+/// Chat events: "message" (ChatMessageDto), "read" ({conversationId, userId, at}),
 /// "typing" ({conversationId, userId}). Messages are sent with POST /api/chats/{id}/messages.
+/// Meetup events: "eventGoing" ({eventId, goingCount}) to everyone when someone joins or leaves, and
+/// "eventUpdated" ({eventId}) and "eventCancelled" ({eventId, title}) to the people going.
 /// </summary>
 [Authorize]
 public class ChatHub(AppDbContext db) : Hub
