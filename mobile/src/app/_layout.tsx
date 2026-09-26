@@ -1,10 +1,11 @@
+import { BricolageGrotesque_800ExtraBold } from "@expo-google-fonts/bricolage-grotesque";
 import {
-  PlusJakartaSans_500Medium,
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold,
-  PlusJakartaSans_800ExtraBold,
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_600SemiBold,
+  DMSans_700Bold,
   useFonts,
-} from "@expo-google-fonts/plus-jakarta-sans";
+} from "@expo-google-fonts/dm-sans";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ToastProvider } from "@/components/feedback/Toast";
@@ -13,10 +14,11 @@ import { colors } from "@/theme";
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    PlusJakartaSans_500Medium,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    PlusJakartaSans_800ExtraBold,
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+    DMSans_700Bold,
+    BricolageGrotesque_800ExtraBold,
   });
 
   // Fall back to system fonts rather than a blank screen if loading fails

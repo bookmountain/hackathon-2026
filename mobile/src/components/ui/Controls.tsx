@@ -34,7 +34,7 @@ export function Checkbox({ checked, onPress, label, note }: {
 
 export function Switch({ on }: { on: boolean }) {
   return (
-    <View style={[styles.track, { backgroundColor: on ? colors.brand : colors.line }]}>
+    <View style={[styles.track, { backgroundColor: on ? colors.brand : colors.ink }]}>
       <View style={[styles.knob, { left: on ? 21 : 3 }]} />
     </View>
   );
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   },
   stepper: {
     height: 50,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.line,
     borderRadius: 14,
     flexDirection: "row",

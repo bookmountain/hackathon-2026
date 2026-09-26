@@ -12,14 +12,14 @@ type Props<T extends string> = {
   size?: "form" | "compact";
 };
 
-// Grey track with a white raised segment for the selected option
+// Grey track; the selected option is a yellow segment with a hard ink shadow
 export default function Segmented<T extends string>({ options, value, onChange, size = "form" }: Props<T>) {
   const compact = size === "compact";
   return (
     <View style={[styles.track, compact ? styles.trackCompact : styles.trackForm]}>
       {options.map((o) => {
         const active = o.value === value;
-        const fg = active ? colors.brand : colors.muted;
+        const fg = active ? colors.ink : colors.muted;
         return (
           <Pressable
             key={o.value}
@@ -49,11 +49,7 @@ const styles = StyleSheet.create({
   segmentForm: { height: 40, borderRadius: 11 },
   segmentCompact: { height: 32, borderRadius: 9 },
   active: {
-    backgroundColor: colors.surface,
-    shadowColor: colors.ink,
-    shadowOpacity: 0.12,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
+    backgroundColor: colors.yellow,
+    boxShadow: `2px 2px 0 ${colors.ink}`,
   },
 });

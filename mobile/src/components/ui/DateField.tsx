@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   group: { gap: 8 },
   field: {
     height: 50,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.line,
     borderRadius: 14,
     paddingHorizontal: 14,
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   value: { color: colors.ink, ...font(600, 14) },
-  backdrop: { flex: 1, backgroundColor: "rgba(10,26,63,0.3)" },
+  backdrop: { flex: 1, backgroundColor: colors.scrim },
   sheet: {
     backgroundColor: colors.surface,
     borderTopLeftRadius: 24,

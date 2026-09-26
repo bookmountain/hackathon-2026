@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   group: { gap: 8 },
   field: {
     height: 52,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.line,
     borderRadius: 14,
     paddingLeft: 16,
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   value: { color: colors.ink, ...font(600, 15) },
-  backdrop: { flex: 1, backgroundColor: "rgba(10,26,63,0.3)" },
+  backdrop: { flex: 1, backgroundColor: colors.scrim },
   sheet: {
     maxHeight: "60%",
     backgroundColor: colors.surface,

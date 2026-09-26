@@ -1,11 +1,11 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { colors, font, shadows } from "@/theme";
+import { brutal, colors, font } from "@/theme";
 
 type ChipProps = {
   label: string;
   active: boolean;
   onPress: () => void;
-  /** Floating chips sit on top of the map and get a shadow */
+  /** Floating chips sit on top of the map and get a hard shadow */
   floating?: boolean;
   height?: number;
 };
@@ -21,10 +21,10 @@ export function Chip({ label, active, onPress, floating, height = 36 }: ChipProp
         styles.chip,
         { height },
         active ? styles.active : styles.inactive,
-        floating && shadows.floating,
+        floating && styles.floating,
       ]}
     >
-      <Text style={[styles.label, { color: active ? colors.surface : colors.ink }]}>{label}</Text>
+      <Text style={[floating ? styles.floatingLabel : styles.label, { color: active ? colors.surface : floating ? colors.body : colors.ink }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -71,14 +71,16 @@ const styles = StyleSheet.create({
   chip: {
     paddingHorizontal: 14,
     borderRadius: 999,
-    borderWidth: 1.5,
+    borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",
   },
   active: { backgroundColor: colors.brand, borderColor: colors.brand },
-  inactive: { backgroundColor: colors.surface, borderColor: colors.line },
+  inactive: { backgroundColor: colors.surface, borderColor: colors.ink },
+  floating: { ...brutal(2), paddingHorizontal: 14 },
   label: { ...font(700, 13) },
+  floatingLabel: { ...font(600, 13) },
   row: { gap: 8 },
-  floatingRow: { paddingVertical: 8 },
+  floatingRow: { paddingTop: 2, paddingBottom: 8 },
   wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

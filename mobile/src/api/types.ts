@@ -277,3 +277,54 @@ export type PhotoUploadResponse = {
   /** Item photos */
   itemId?: string;
 };
+
+// Not built in the API yet (see FRONTEND-GAPS.md, "Endpoints the v4 design needs").
+// Until they exist the calls 404 and the app falls back (see isNotBuilt).
+
+export type AvatarMode = "initials" | "icon";
+export type AvatarShape = "circle" | "soft" | "square";
+export type AvatarRing = "none" | "gold" | "blue" | "navy" | "sky";
+export type AvatarIcon = "compass" | "book" | "coffee" | "music" | "code" | "leaf" | "camera" | "ball" | "paw" | "rocket";
+
+/** Extra look for your own avatar on top of avatarPreset (the colour) */
+export type AvatarStyle = { mode: AvatarMode; text: string; icon: AvatarIcon; shape: AvatarShape; ring: AvatarRing };
+
+export type PhotoAnalysisKind = "Item" | "Room";
+
+/** POST /api/ai/photo-analysis `{ kind, image }` (image = base64 JPEG, max side 640px) */
+export type ItemPhotoAnalysis = {
+  title: string;
+  category: ItemCategoryValue;
+  condition: ItemCondition;
+  colour: string;
+  texture: string;
+  suggestedPrice: number;
+  description: string;
+  benefits: string[];
+};
+
+export type RoomPhotoAnalysis = {
+  title: string;
+  style: string;
+  colours: string;
+  furnished: Furnishing;
+  /** Subset of the "List a room" feature options */
+  features: string[];
+  description: string;
+  benefits: string[];
+};
+
+/** POST /api/items/image-search `{ image }`: a guessed category and the closest items */
+export type ImageSearchResponse = { category: ItemCategoryValue | null; items: ItemSummaryDto[] };
+
+export type DailyCardStatus = "Ready" | "Matched" | "Missed";
+
+/** GET /api/daily-card, POST /api/daily-card/draw */
+export type DailyCardDto = {
+  status: DailyCardStatus;
+  match: PersonDto | null;
+  /** How many students have drawn today */
+  drawnToday: number;
+  /** Next local midnight (Ready / Matched) or when the lock ends (Missed), with a UTC offset */
+  nextChangeAt: string;
+};

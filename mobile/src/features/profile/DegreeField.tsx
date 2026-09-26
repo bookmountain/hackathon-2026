@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   value: { flex: 1, color: colors.ink, ...font(600, 15) },
-  backdrop: { flex: 1, backgroundColor: "rgba(10,26,63,0.3)" },
+  backdrop: { flex: 1, backgroundColor: colors.scrim },
   sheet: {
     height: "80%",
     backgroundColor: colors.surface,

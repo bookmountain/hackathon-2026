@@ -1,11 +1,13 @@
 import type { TextStyle } from "react-native";
 
-// Plus Jakarta Sans weights used by the design, loaded in src/app/_layout.tsx
+// Fonts loaded in src/app/_layout.tsx. The design sets all 800-weight display
+// text (titles, prices, CTAs) in Bricolage Grotesque and everything else in DM Sans.
 export const fontFamilies = {
-  500: "PlusJakartaSans_500Medium",
-  600: "PlusJakartaSans_600SemiBold",
-  700: "PlusJakartaSans_700Bold",
-  800: "PlusJakartaSans_800ExtraBold",
+  400: "DMSans_400Regular",
+  500: "DMSans_500Medium",
+  600: "DMSans_600SemiBold",
+  700: "DMSans_700Bold",
+  800: "BricolageGrotesque_800ExtraBold",
 } as const;
 
 export type FontWeight = keyof typeof fontFamilies;

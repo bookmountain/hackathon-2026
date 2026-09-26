@@ -3,14 +3,14 @@ import { colors, font } from "@/theme";
 
 // Avatar palette from the design: [background, text]
 export const AVATAR_COLORS: readonly (readonly [string, string])[] = [
-  ["#1F5BFF", "#fff"],
-  ["#FFC940", "#0A1A3F"],
-  ["#7FB2FF", "#0A1A3F"],
-  ["#0A1A3F", "#fff"],
-  ["#DCE6FF", "#1646CC"],
-  ["#3B7BFF", "#fff"],
-  ["#BFD4FF", "#0A1A3F"],
-  ["#FFE08A", "#0A1A3F"],
+  ["#2E5AA8", "#fff"],
+  ["#F4B740", "#14142B"],
+  ["#FF6B4A", "#fff"],
+  ["#14142B", "#fff"],
+  ["#9AE6C4", "#14142B"],
+  ["#C9B8FF", "#14142B"],
+  ["#FFB4C6", "#14142B"],
+  ["#EFF0FF", "#14142B"],
 ];
 
 /** -1 / null = no avatar chosen: grey "?" */

@@ -10,7 +10,7 @@ type Props = Omit<TextInputProps, "style"> & {
   height?: number;
 };
 
-// Bordered input from the design: 1.5px #DCE5FA, radius 14, brand border on focus
+// Bordered input from the design: 2px ink, radius 14, brand border on focus
 export default function TextField({ label, prefix, height = 50, multiline, ...input }: Props) {
   const [focused, setFocused] = useState(false);
   const field = (
@@ -53,7 +53,7 @@ export default function TextField({ label, prefix, height = 50, multiline, ...in
 const styles = StyleSheet.create({
   group: { gap: 8 },
   input: {
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.line,
     borderRadius: 14,
     paddingHorizontal: 16,
