@@ -1,4 +1,5 @@
 export { default as Avatar, AnonDots, AVATAR_COLORS, avatarLook } from "./Avatar";
+export { default as AvatarPicker } from "./AvatarPicker";
 export { default as Button } from "./Button";
 export { Chip, ChipRow, ChipWrap } from "./Chip";
 export { Checkbox, Stepper, Switch } from "./Controls";
