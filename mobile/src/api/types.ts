@@ -34,6 +34,8 @@ export type Profile = {
   avatarKey: string | null;
   /** Preset avatar colour (index into AVATAR_COLORS), null for none */
   avatarPreset: number | null;
+  /** Not in the API yet: shape, ring and initials/icon for the preset avatar */
+  avatarStyle?: AvatarStyle | null;
 };
 
 export type Me = {
@@ -55,6 +57,8 @@ export type ProfileRequest = {
   interests: string[];
   avatarKey: string | null;
   avatarPreset: number | null;
+  /** Not in the API yet; ignored until it is (the app also keeps it on the device) */
+  avatarStyle: AvatarStyle | null;
 };
 
 export type ConsentType = "Terms" | "Location" | "AgeAndEnrolment" | "UsageStats";

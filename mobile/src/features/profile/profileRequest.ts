@@ -1,6 +1,6 @@
-import type { Profile, ProfileRequest } from "@/api/types";
+import type { AvatarStyle, Profile, ProfileRequest } from "@/api/types";
 
-type Change = { displayName?: string; degreeId?: number; avatarPreset?: number | null };
+type Change = { displayName?: string; degreeId?: number; avatarPreset?: number | null; avatarStyle?: AvatarStyle | null };
 
 /**
  * A full PUT /api/me/profile body: the change on top of everything already saved,
@@ -20,6 +20,7 @@ export function profileRequest(current: Profile | null, change: Change): Profile
     // The API replaces the photo with whatever key is sent
     avatarKey: current?.avatarKey ?? null,
     avatarPreset: "avatarPreset" in change ? (change.avatarPreset ?? null) : (current?.avatarPreset ?? null),
+    avatarStyle: "avatarStyle" in change ? (change.avatarStyle ?? null) : (current?.avatarStyle ?? null),
   };
 }
 

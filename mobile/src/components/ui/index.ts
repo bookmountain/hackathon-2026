@@ -1,4 +1,13 @@
-export { default as Avatar, AnonDots, AVATAR_COLORS, avatarLook } from "./Avatar";
+export {
+  default as Avatar,
+  AnonDots,
+  AVATAR_COLORS,
+  AVATAR_ICONS,
+  AVATAR_RINGS,
+  AVATAR_SHAPES,
+  avatarLook,
+  DEFAULT_AVATAR_STYLE,
+} from "./Avatar";
 export { default as AvatarPicker } from "./AvatarPicker";
 export { default as Button } from "./Button";
 export { Chip, ChipRow, ChipWrap } from "./Chip";

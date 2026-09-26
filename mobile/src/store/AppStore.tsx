@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type
 import { setToken, setUnauthorizedHandler } from "@/api/client";
 import * as api from "@/api/endpoints";
 import { connectRealtime, type Realtime } from "@/api/realtime";
-import type { AuthResponse, ChatMessageDto, Me, StartChatRequest } from "@/api/types";
+import type { AuthResponse, AvatarStyle, ChatMessageDto, Me, StartChatRequest } from "@/api/types";
 import { previewOf, toEvent, toFlat, toItem, toMessage, toPickup, toThread } from "@/data/adapters";
 import type { MeetupEvent } from "@/data/types";
 import { reducer } from "./reducer";
@@ -14,6 +14,18 @@ import { initialState, type AppState } from "./state";
 export const TYPING_TIMEOUT_MS = 4000;
 
 const TOKEN_KEY = "ucompass.token";
+/** Per account: SecureStore keys allow only letters, digits, ".", "-" and "_" */
+const avatarStyleKey = (userId: string) => `ucompass.avatarStyle.${userId}`;
+
+async function readAvatarStyle(userId: string): Promise<AvatarStyle | null> {
+  const raw = await readStored(avatarStyleKey(userId));
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as AvatarStyle;
+  } catch {
+    return null;
+  }
+}
 
 // SecureStore can be unavailable (e.g. on web); the app then just forgets the session on reload
 async function readStored(key: string): Promise<string | null> {
@@ -48,6 +60,10 @@ function useStoreValue() {
       setToken(null);
       void writeStored(TOKEN_KEY, null);
       dispatch({ type: "signOut" });
+    };
+
+    const loadAvatarStyle = async (userId: string) => {
+      dispatch({ type: "setAvatarStyle", style: await readAvatarStyle(userId) });
     };
 
     const refreshMe = async (): Promise<Me> => {
@@ -89,7 +105,15 @@ function useStoreValue() {
         const me = await api.me.get();
         await writeStored(TOKEN_KEY, auth.accessToken);
         dispatch({ type: "setSession", session: { token: auth.accessToken, me, email: me.email, devCode: null } });
+        void loadAvatarStyle(me.userId);
         return me;
+      },
+
+      /** Your avatar's shape, ring and initials/icon, kept on the device until the API stores it */
+      saveAvatarStyle: async (style: AvatarStyle | null) => {
+        const userId = stateRef.current.session.me?.userId;
+        dispatch({ type: "setAvatarStyle", style });
+        if (userId) await writeStored(avatarStyleKey(userId), style ? JSON.stringify(style) : null);
       },
 
       /** Deletes the account and everything in it, then signs out */
@@ -179,7 +203,10 @@ function useStoreValue() {
       setToken(token);
       try {
         const me = await api.me.get();
-        if (!cancelled) dispatch({ type: "booted", session: { token, me, email: me.email } });
+        const style = await readAvatarStyle(me.userId);
+        if (cancelled) return;
+        dispatch({ type: "setAvatarStyle", style });
+        dispatch({ type: "booted", session: { token, me, email: me.email } });
       } catch {
         // Expired token or offline: start from the login screen
         setToken(null);

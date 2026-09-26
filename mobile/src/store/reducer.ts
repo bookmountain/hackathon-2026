@@ -1,4 +1,4 @@
-import type { Me } from "@/api/types";
+import type { AvatarStyle, Me } from "@/api/types";
 import type { ChatMessage, ChatThread, Flat, Item, MeetupEvent, Pickup } from "@/data/types";
 import { initialState, signedOutSession, type AppState, type Session } from "./state";
 
@@ -19,7 +19,8 @@ export type Action =
   | { type: "setMessages"; chatId: string; messages: ChatMessage[] }
   | { type: "addMessage"; chatId: string; message: ChatMessage; preview: string; unread: boolean }
   | { type: "markRead"; chatId: string }
-  | { type: "setTyping"; chatId: string | null };
+  | { type: "setTyping"; chatId: string | null }
+  | { type: "setAvatarStyle"; style: AvatarStyle | null };
 
 /** Replace the element with the same id, or put the new one first */
 function upsert<T extends { id: string }>(list: T[], value: T): T[] {
@@ -100,5 +101,8 @@ export function reducer(state: AppState, action: Action): AppState {
 
     case "setTyping":
       return { ...state, typingIn: action.chatId };
+
+    case "setAvatarStyle":
+      return { ...state, localAvatarStyle: action.style };
   }
 }
