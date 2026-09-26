@@ -86,6 +86,16 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **Scaling out:** with more than one API instance, SignalR needs a Redis backplane
       (`AddStackExchangeRedis`). Redis is already running.
 
+## Profile
+
+- [ ] **Saving the profile can remove the avatar.** `PUT /api/me/profile` sets the avatar to whatever
+      `avatarKey` is sent (null removes it), but `GET /api/me` only returns a presigned `avatarUrl`, not the
+      key. The app recovers the key from the URL (`mobile/src/features/profile/profileRequest.ts`) so an
+      edit keeps the photo. Return `avatarKey` from `/api/me`, like `photoKeys` on flats and items, or treat
+      a missing key as "keep"; then drop the workaround.
+- [ ] **Preset avatar colours aren't stored.** The app keeps the chosen colour on the device only, so other
+      students see "?" for anyone without a photo. Add an `avatarPreset` field (0–7) if the PM keeps presets.
+
 ## Removed profile fields
 
 - [ ] **Age range and Nationality** (removed by the PM on 2026-09-26). The API still accepts them, but
