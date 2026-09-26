@@ -1,83 +1,165 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 using UniMap.Api.Domain;
 
 namespace UniMap.Api.Data;
 
 /// <summary>
-/// Fills an empty database with fake students so there is realistic data to work with.
-/// Runs only in Development (or when Seed:Enabled=true). Every seeded user's password is "password123".
+/// Fills an empty database with realistic demo data from Data/Seed/*.json:
+/// 48 fictional students (real degrees, CC0 avatars in R2) and 20 room listings on real Adelaide
+/// streets (openly licensed photos in R2). Runs only in Development (or when Seed:Enabled=true).
+/// Every seeded user's password is "password123".
 /// </summary>
 public static class DevSeeder
 {
     public const string Password = "password123";
 
-    private static readonly string[] FirstNames =
-    [
-        "Olivia", "Liam", "Mia", "Noah", "Ava", "Jack", "Chloe", "William", "Zoe", "Lucas",
-        "Isla", "Ethan", "Ruby", "Leo", "Grace", "Oscar", "Wei", "Priya", "Minh", "Aisha",
-        "Hiroshi", "Sofia", "Arjun", "Mei", "Tom", "Hannah", "Ali", "Emma", "Kai", "Yuki",
-    ];
+    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
+    {
+        Converters = { new JsonStringEnumConverter() },
+    };
 
-    public static async Task SeedAsync(AppDbContext db, ILogger logger, int count = 40)
+    private static readonly GeometryFactory Geo = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
+    private record SeedStudent(
+        string Id, string Email, string DisplayName, University University, string Degree, Gender Gender,
+        string? Pronouns, int? YearOfStudy, string? Bio, List<string> Habits, List<string> Interests, string? AvatarKey);
+
+    private record SeedFlat(
+        string Id, string Owner, string Title, string Suburb, string? Street, double Lat, double Lng,
+        int RentPerWeek, int BillsPerWeek, int Bedrooms, int Flatmates, ToiletType Toilet, BathroomType Bathroom,
+        Furnishing Furnished, int? MinStayMonths, int AvailableInDays, List<string> Features, List<string> HouseRhythm,
+        string? PreferredFlatmate, string? Description, List<string> Housemates);
+
+    private record SeedPhoto(string Key, string Category);
+
+    public static async Task SeedAsync(AppDbContext db, ILogger logger)
+    {
+        var students = Read<List<SeedStudent>>("students.json") ?? [];
+        await SeedStudentsAsync(db, logger, students);
+        await SeedFlatsAsync(db, logger, students);
+    }
+
+    private static async Task SeedStudentsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
     {
         if (await db.Users.AnyAsync()) return;
 
-        var rng = new Random(42); // deterministic, so everyone on the team gets the same data
-        var hash = BCrypt.Net.BCrypt.HashPassword(Password); // bcrypt is slow; hash once and reuse
-        var genders = Enum.GetValues<Gender>();
-
-        // Real degrees from the reference table (DegreeSeeder runs first). Mostly undergrads.
         var degrees = await db.Degrees.AsNoTracking().ToListAsync();
-        Degree PickDegree(University uni)
-        {
-            var level = rng.Next(10) < 8 ? DegreeLevel.Undergraduate : DegreeLevel.Postgraduate;
-            var pool = degrees.Where(d => d.University == uni && d.Level == level).ToList();
-            return pool[rng.Next(pool.Count)];
-        }
+        var hash = BCrypt.Net.BCrypt.HashPassword(Password); // bcrypt is slow; hash once and reuse
 
-        for (var i = 0; i < count; i++)
+        foreach (var s in students)
         {
-            var gender = genders[rng.Next(genders.Length)];
-            var uni = i % 2 == 0 ? University.Adelaide : University.Flinders;
-            var degree = PickDegree(uni);
-            var email = uni == University.Adelaide
-                ? $"a{1_900_000 + i}@adelaide.edu.au"
-                : $"seed{i:D3}@flinders.edu.au";
+            var degree = degrees.FirstOrDefault(d => d.University == s.University && d.Name == s.Degree);
+            if (degree is null) logger.LogWarning("Seed student {Id}: degree '{Degree}' not found", s.Id, s.Degree);
 
             db.Users.Add(new User
             {
-                Email = email,
+                Email = s.Email,
                 PasswordHash = hash,
-                University = uni,
+                University = s.University,
                 EmailVerified = true,
                 Profile = new Profile
                 {
-                    DisplayName = FirstNames[i % FirstNames.Length],
-                    DegreeId = degree.Id,
-                    Department = degree.College,
-                    Gender = gender,
-                    Pronouns = PronounsFor(gender, rng),
-                    YearOfStudy = degree.Level == DegreeLevel.Undergraduate ? rng.Next(1, 5) : rng.Next(1, 3),
-                    Bio = "Seeded test user.",
-                    Habits = Pick(rng, Catalog.Habits, 3, 6),
-                    Interests = Pick(rng, Catalog.Interests, 2, 5),
+                    DisplayName = s.DisplayName,
+                    DegreeId = degree?.Id,
+                    Department = degree?.College ?? "Other",
+                    Gender = s.Gender,
+                    Pronouns = s.Pronouns,
+                    YearOfStudy = s.YearOfStudy,
+                    Bio = s.Bio,
+                    Habits = s.Habits,
+                    Interests = s.Interests,
+                    AvatarKey = s.AvatarKey,
                 },
             });
         }
 
         await db.SaveChangesAsync();
-        logger.LogWarning("Seeded {Count} dev users (password: {Password}), e.g. a1900000@adelaide.edu.au", count, Password);
+        logger.LogWarning("Seeded {Count} dev students (password: {Password}), e.g. {Email}",
+            students.Count, Password, students.FirstOrDefault()?.Email);
     }
 
-    private static string? PronounsFor(Gender gender, Random rng) => gender switch
+    private static async Task SeedFlatsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
     {
-        _ when rng.Next(4) == 0 => null, // lots of people leave it blank
-        Gender.Female => "she/her",
-        Gender.Male => "he/him",
-        Gender.NonBinary => "they/them",
-        _ => null,
-    };
+        if (await db.FlatListings.AnyAsync()) return;
 
-    private static List<string> Pick(Random rng, string[] source, int min, int max) =>
-        source.OrderBy(_ => rng.Next()).Take(rng.Next(min, max + 1)).ToList();
+        var flats = Read<List<SeedFlat>>("flats.json") ?? [];
+        var emailById = students.ToDictionary(s => s.Id, s => s.Email);
+        var userIdByEmail = await db.Users.ToDictionaryAsync(u => u.Email, u => u.Id);
+
+        // Photo pool (uploaded to R2 separately). Missing file = listings without photos.
+        var photos = (Read<List<SeedPhoto>>("flat-photos.json") ?? [])
+            .GroupBy(p => p.Category)
+            .ToDictionary(g => g.Key, g => g.Select(p => p.Key).OrderBy(k => k).ToList());
+        if (photos.Count == 0) logger.LogWarning("No flat-photos.json; seeded listings will have no photos");
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var added = 0;
+        for (var i = 0; i < flats.Count; i++)
+        {
+            var f = flats[i];
+            if (!emailById.TryGetValue(f.Owner, out var email) || !userIdByEmail.TryGetValue(email, out var ownerId))
+            {
+                logger.LogWarning("Seed flat {Id}: owner {Owner} not found (reset the database to reseed students)", f.Id, f.Owner);
+                continue;
+            }
+
+            db.FlatListings.Add(new FlatListing
+            {
+                OwnerId = ownerId,
+                Title = f.Title,
+                Description = f.Description,
+                Suburb = f.Suburb,
+                Street = f.Street,
+                Location = Geo.CreatePoint(new Coordinate(f.Lng, f.Lat)),
+                RentPerWeek = f.RentPerWeek,
+                BillsPerWeek = f.BillsPerWeek,
+                Bedrooms = f.Bedrooms,
+                Flatmates = f.Flatmates,
+                Toilet = f.Toilet,
+                Bathroom = f.Bathroom,
+                Furnished = f.Furnished,
+                MinStayMonths = f.MinStayMonths,
+                AvailableFrom = f.AvailableInDays > 0 ? today.AddDays(f.AvailableInDays) : null,
+                Features = f.Features,
+                HouseRhythm = f.HouseRhythm,
+                PreferredFlatmate = f.PreferredFlatmate,
+                Housemates = f.Housemates,
+                PhotoKeys = PickPhotos(photos, i),
+                // Stagger so "newest" ordering looks natural.
+                CreatedAt = DateTimeOffset.UtcNow.AddHours(-7 * i),
+                UpdatedAt = DateTimeOffset.UtcNow.AddHours(-7 * i),
+            });
+            added++;
+        }
+
+        await db.SaveChangesAsync();
+        logger.LogWarning("Seeded {Count} dev flat listings", added);
+    }
+
+    /// <summary>
+    /// A unique bedroom as the cover, then 2–4 other rooms. Deterministic, so every teammate's
+    /// database shows the same photos on the same listing.
+    /// </summary>
+    private static List<string> PickPhotos(Dictionary<string, List<string>> pool, int i)
+    {
+        string? Take(string category, int n) =>
+            pool.TryGetValue(category, out var keys) && keys.Count > 0 ? keys[n % keys.Count] : null;
+
+        var extras = new[] { "living", "kitchen", "bathroom", "exterior" }
+            .Take(2 + i % 3) // 2, 3 or 4 extra photos
+            .Select((category, j) => Take(category, i * 3 + j));
+
+        return new[] { Take("bedroom", i) }.Concat(extras)
+            .OfType<string>().Distinct().Take(FlatCatalog.MaxPhotos).ToList();
+    }
+
+    private static T? Read<T>(string file)
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "Data", "Seed", file);
+        return File.Exists(path) ? JsonSerializer.Deserialize<T>(File.ReadAllText(path), Json) : default;
+    }
 }

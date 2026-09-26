@@ -1,0 +1,1067 @@
+[
+ {
+  "id": "p01",
+  "email": "a1900000@adelaide.edu.au",
+  "displayName": "Koala_Kai",
+  "university": "Adelaide",
+  "degree": "Bachelor of Computer Science",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 2,
+  "bio": "Second-year CS. Usually in Barr Smith after 6pm, happy to pair on algorithms.",
+  "habits": [
+   "night-owl",
+   "coffee",
+   "studies-in-library",
+   "gamer"
+  ],
+  "interests": [
+   "coding",
+   "hackathons",
+   "board-games"
+  ],
+  "avatarKey": "seed/avatars/p01.png"
+ },
+ {
+  "id": "p02",
+  "email": "mrea0012@flinders.edu.au",
+  "displayName": "MiaReads",
+  "university": "Flinders",
+  "degree": "Bachelor of Nursing (Preregistration)",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 2,
+  "bio": "Nursing at Flinders, placements most weeks. Always have a novel on the go.",
+  "habits": [
+   "early-bird",
+   "tidy",
+   "tea",
+   "non-smoker"
+  ],
+  "interests": [
+   "reading",
+   "hiking",
+   "volunteering"
+  ],
+  "avatarKey": "seed/avatars/p02.png"
+ },
+ {
+  "id": "p03",
+  "email": "a1900001@adelaide.edu.au",
+  "displayName": "ArjunBuilds",
+  "university": "Adelaide",
+  "degree": "Master of Professional Engineering (Civil)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 1,
+  "bio": "Civil eng postgrad from Pune. Keen cook, will share leftovers.",
+  "habits": [
+   "cooks-at-home",
+   "gym",
+   "early-bird",
+   "non-smoker"
+  ],
+  "interests": [
+   "football",
+   "food",
+   "travel"
+  ],
+  "avatarKey": "seed/avatars/p03.png"
+ },
+ {
+  "id": "p04",
+  "email": "lluo0031@flinders.edu.au",
+  "displayName": "lena.l",
+  "university": "Flinders",
+  "degree": "Master of Professional Psychology",
+  "gender": "Female",
+  "pronouns": null,
+  "yearOfStudy": 1,
+  "bio": "Psych postgrad, quiet housemate, big on plants and podcasts.",
+  "habits": [
+   "quiet",
+   "tidy",
+   "studies-at-home",
+   "tea"
+  ],
+  "interests": [
+   "reading",
+   "art",
+   "hiking"
+  ],
+  "avatarKey": "seed/avatars/p04.png"
+ },
+ {
+  "id": "p05",
+  "email": "a1900002@adelaide.edu.au",
+  "displayName": "TomTheTutor",
+  "university": "Adelaide",
+  "degree": "Bachelor of Mathematics (Honours)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 4,
+  "bio": "Maths honours. I tutor first-year stats, ask me anything about MATHS 1011.",
+  "habits": [
+   "coffee",
+   "studies-in-library",
+   "running"
+  ],
+  "interests": [
+   "board-games",
+   "coding",
+   "reading"
+  ],
+  "avatarKey": "seed/avatars/p05.png"
+ },
+ {
+  "id": "p06",
+  "email": "a1900003@adelaide.edu.au",
+  "displayName": "ZoeDesigns",
+  "university": "Adelaide",
+  "degree": "Bachelor of Creative Arts",
+  "gender": "Female",
+  "pronouns": "she/they",
+  "yearOfStudy": 3,
+  "bio": "Creative Arts student, mostly illustration and UX side projects.",
+  "habits": [
+   "night-owl",
+   "coffee",
+   "relaxed-about-mess"
+  ],
+  "interests": [
+   "art",
+   "photography",
+   "live-gigs"
+  ],
+  "avatarKey": "seed/avatars/p06.png"
+ },
+ {
+  "id": "p07",
+  "email": "hkim0044@flinders.edu.au",
+  "displayName": "hana_k",
+  "university": "Flinders",
+  "degree": "Bachelor of Laws - Legal Practice Entry",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 3,
+  "bio": "Law at Flinders City. Mooting nerd, weekend brunch enthusiast.",
+  "habits": [
+   "early-bird",
+   "tidy",
+   "drinks-socially"
+  ],
+  "interests": [
+   "food",
+   "language-exchange",
+   "travel"
+  ],
+  "avatarKey": "seed/avatars/p07.png"
+ },
+ {
+  "id": "p08",
+  "email": "oali0058@flinders.edu.au",
+  "displayName": "OmarOnCampus",
+  "university": "Flinders",
+  "degree": "Bachelor of Business",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 3,
+  "bio": "Business student, part-time barista on Rundle Mall.",
+  "habits": [
+   "coffee",
+   "social",
+   "no-alcohol",
+   "gym"
+  ],
+  "interests": [
+   "basketball",
+   "food",
+   "movies"
+  ],
+  "avatarKey": "seed/avatars/p08.png"
+ },
+ {
+  "id": "p09",
+  "email": "a1900004@adelaide.edu.au",
+  "displayName": "PriyaCodes",
+  "university": "Adelaide",
+  "degree": "Master of Data Science",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 1,
+  "bio": "Data science postgrad from Chennai. Vegetarian, love a good dosa.",
+  "habits": [
+   "vegetarian",
+   "cooks-at-home",
+   "quiet",
+   "early-bird"
+  ],
+  "interests": [
+   "coding",
+   "language-exchange",
+   "dance"
+  ],
+  "avatarKey": "seed/avatars/p09.png"
+ },
+ {
+  "id": "p10",
+  "email": "lrob0067@flinders.edu.au",
+  "displayName": "liam.r",
+  "university": "Flinders",
+  "degree": "Bachelor of Engineering (Electrical and Electronic) (Honours)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 2,
+  "bio": "Electrical eng at Tonsley. Robotics club, sometimes solder at home (sorry).",
+  "habits": [
+   "night-owl",
+   "gamer",
+   "relaxed-about-mess"
+  ],
+  "interests": [
+   "coding",
+   "hackathons",
+   "movies"
+  ],
+  "avatarKey": "seed/avatars/p10.png"
+ },
+ {
+  "id": "p11",
+  "email": "sngu0071@flinders.edu.au",
+  "displayName": "SophieSurfs",
+  "university": "Flinders",
+  "degree": "Bachelor of Paramedicine",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 1,
+  "bio": "First-year paramedicine, grew up in Victor Harbor. Beach every weekend.",
+  "habits": [
+   "early-bird",
+   "running",
+   "non-smoker"
+  ],
+  "interests": [
+   "beach",
+   "hiking",
+   "volunteering"
+  ],
+  "avatarKey": "seed/avatars/p11.png"
+ },
+ {
+  "id": "p12",
+  "email": "a1900005@adelaide.edu.au",
+  "displayName": "minh.t",
+  "university": "Adelaide",
+  "degree": "Bachelor of Information Technology",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 2,
+  "bio": "IT from Ho Chi Minh City. Pho on Gouger St is my comfort food.",
+  "habits": [
+   "coffee",
+   "gamer",
+   "night-owl"
+  ],
+  "interests": [
+   "anime",
+   "coding",
+   "food"
+  ],
+  "avatarKey": "seed/avatars/p12.png"
+ },
+ {
+  "id": "p13",
+  "email": "a1900006@adelaide.edu.au",
+  "displayName": "GraceOnKeys",
+  "university": "Adelaide",
+  "degree": "Bachelor of Music",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 2,
+  "bio": "Piano at the Elder Con. I practise on a digital piano with headphones, promise.",
+  "habits": [
+   "quiet",
+   "tea",
+   "tidy"
+  ],
+  "interests": [
+   "music",
+   "live-gigs",
+   "reading"
+  ],
+  "avatarKey": "seed/avatars/p13.png"
+ },
+ {
+  "id": "p14",
+  "email": "jbro0083@flinders.edu.au",
+  "displayName": "jackfromMurray",
+  "university": "Flinders",
+  "degree": "Bachelor of Criminology",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 1,
+  "bio": "Moved down from Murray Bridge. Footy on Saturdays, study on Sundays.",
+  "habits": [
+   "drinks-socially",
+   "social",
+   "gym"
+  ],
+  "interests": [
+   "football",
+   "movies",
+   "beach"
+  ],
+  "avatarKey": "seed/avatars/p14.png"
+ },
+ {
+  "id": "p15",
+  "email": "akha0091@flinders.edu.au",
+  "displayName": "AishaMed",
+  "university": "Flinders",
+  "degree": "Bachelor of Medical Science (Laboratory Medicine)",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 3,
+  "bio": "Lab med student. Halal cook, happy to teach biryani.",
+  "habits": [
+   "no-alcohol",
+   "cooks-at-home",
+   "tidy",
+   "early-bird"
+  ],
+  "interests": [
+   "food",
+   "volunteering",
+   "reading"
+  ],
+  "avatarKey": "seed/avatars/p15.png"
+ },
+ {
+  "id": "p16",
+  "email": "a1900007@adelaide.edu.au",
+  "displayName": "wei.chen",
+  "university": "Adelaide",
+  "degree": "Master of Professional Accounting",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 2,
+  "bio": "Accounting postgrad. Quiet, clean, badminton twice a week.",
+  "habits": [
+   "quiet",
+   "tidy",
+   "studies-in-library",
+   "tea"
+  ],
+  "interests": [
+   "badminton",
+   "travel",
+   "food"
+  ],
+  "avatarKey": "seed/avatars/p16.png"
+ },
+ {
+  "id": "p17",
+  "email": "a1900008@adelaide.edu.au",
+  "displayName": "NoahNorwood",
+  "university": "Adelaide",
+  "degree": "Bachelor of Laws (Honours)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 4,
+  "bio": "Final-year law. Looking for a calm house near the city for my last year.",
+  "habits": [
+   "quiet",
+   "coffee",
+   "tidy"
+  ],
+  "interests": [
+   "reading",
+   "running",
+   "live-gigs"
+  ],
+  "avatarKey": "seed/avatars/p17.png"
+ },
+ {
+  "id": "p18",
+  "email": "imcd0104@flinders.edu.au",
+  "displayName": "isla.m",
+  "university": "Flinders",
+  "degree": "Bachelor of Education (Primary)",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 2,
+  "bio": "Future primary teacher. Crafty, loud laugh, great at chore charts.",
+  "habits": [
+   "social",
+   "tidy",
+   "early-bird"
+  ],
+  "interests": [
+   "art",
+   "volunteering",
+   "board-games"
+  ],
+  "avatarKey": "seed/avatars/p18.png"
+ },
+ {
+  "id": "p19",
+  "email": "a1900009@adelaide.edu.au",
+  "displayName": "Rafa_Physio",
+  "university": "Adelaide",
+  "degree": "Bachelor of Physiotherapy (Honours)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 3,
+  "bio": "Physio student from Brazil. Gym at 6am, asleep by 10.",
+  "habits": [
+   "early-bird",
+   "gym",
+   "non-smoker"
+  ],
+  "interests": [
+   "football",
+   "beach",
+   "dance"
+  ],
+  "avatarKey": "seed/avatars/p19.png"
+ },
+ {
+  "id": "p20",
+  "email": "ysat0116@flinders.edu.au",
+  "displayName": "yuki.s",
+  "university": "Flinders",
+  "degree": "Bachelor of Creative Arts (Visual Arts)",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 2,
+  "bio": "Visual arts, mostly ceramics. Exchange student from Osaka until mid-2027.",
+  "habits": [
+   "quiet",
+   "tea",
+   "studies-at-home"
+  ],
+  "interests": [
+   "art",
+   "photography",
+   "language-exchange"
+  ],
+  "avatarKey": "seed/avatars/p20.png"
+ },
+ {
+  "id": "p21",
+  "email": "dlee0128@flinders.edu.au",
+  "displayName": "DanTheDev",
+  "university": "Flinders",
+  "degree": "Bachelor of Computer Science (Artificial Intelligence)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 3,
+  "bio": "AI major at Flinders. Mechanical keyboard, but I use O-rings.",
+  "habits": [
+   "night-owl",
+   "gamer",
+   "coffee"
+  ],
+  "interests": [
+   "coding",
+   "hackathons",
+   "anime"
+  ],
+  "avatarKey": "seed/avatars/p21.png"
+ },
+ {
+  "id": "p22",
+  "email": "a1900010@adelaide.edu.au",
+  "displayName": "chloe.p",
+  "university": "Adelaide",
+  "degree": "Bachelor of Psychology",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 1,
+  "bio": "First-year psych, just moved from Mount Gambier. Looking for friendly flatmates.",
+  "habits": [
+   "social",
+   "drinks-socially",
+   "relaxed-about-mess"
+  ],
+  "interests": [
+   "movies",
+   "music",
+   "beach"
+  ],
+  "avatarKey": "seed/avatars/p22.png"
+ },
+ {
+  "id": "p23",
+  "email": "a1900011@adelaide.edu.au",
+  "displayName": "KofiEng",
+  "university": "Adelaide",
+  "degree": "Bachelor of Software Engineering (Honours)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 2,
+  "bio": "Software eng from Accra. Church choir and FIFA.",
+  "habits": [
+   "no-alcohol",
+   "gamer",
+   "tidy"
+  ],
+  "interests": [
+   "football",
+   "music",
+   "coding"
+  ],
+  "avatarKey": "seed/avatars/p23.png"
+ },
+ {
+  "id": "p24",
+  "email": "sjon0133@flinders.edu.au",
+  "displayName": "sarah.nutrition",
+  "university": "Flinders",
+  "degree": "Bachelor of Nutrition and Dietetics",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 3,
+  "bio": "Nutrition and dietetics. Meal-prep Sundays, the fridge will be organised.",
+  "habits": [
+   "cooks-at-home",
+   "running",
+   "tidy",
+   "early-bird"
+  ],
+  "interests": [
+   "food",
+   "hiking",
+   "running"
+  ],
+  "avatarKey": "seed/avatars/p24.png"
+ },
+ {
+  "id": "p25",
+  "email": "a1900012@adelaide.edu.au",
+  "displayName": "OliverMakes",
+  "university": "Adelaide",
+  "degree": "Bachelor of Interior Architecture (Honours)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 3,
+  "bio": "Interior architecture. Studio nights are long, but I'm quiet about it.",
+  "habits": [
+   "night-owl",
+   "coffee",
+   "relaxed-about-mess"
+  ],
+  "interests": [
+   "art",
+   "photography",
+   "live-gigs"
+  ],
+  "avatarKey": "seed/avatars/p25.png"
+ },
+ {
+  "id": "p26",
+  "email": "abha0140@flinders.edu.au",
+  "displayName": "ananya.b",
+  "university": "Flinders",
+  "degree": "Master of Computer Science",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 2,
+  "bio": "Comp sci postgrad from Bengaluru. Weekend baker.",
+  "habits": [
+   "vegetarian",
+   "cooks-at-home",
+   "quiet"
+  ],
+  "interests": [
+   "coding",
+   "reading",
+   "dance"
+  ],
+  "avatarKey": "seed/avatars/p26.png"
+ },
+ {
+  "id": "p27",
+  "email": "mwil0152@flinders.edu.au",
+  "displayName": "MaxSocialWork",
+  "university": "Flinders",
+  "degree": "Bachelor of Social Work",
+  "gender": "Male",
+  "pronouns": "he/they",
+  "yearOfStudy": 2,
+  "bio": "Social work student, volunteer at a youth drop-in centre.",
+  "habits": [
+   "social",
+   "vegan",
+   "non-smoker"
+  ],
+  "interests": [
+   "volunteering",
+   "live-gigs",
+   "hiking"
+  ],
+  "avatarKey": "seed/avatars/p27.png"
+ },
+ {
+  "id": "p28",
+  "email": "a1900013@adelaide.edu.au",
+  "displayName": "ruby.health",
+  "university": "Adelaide",
+  "degree": "Bachelor of Health Science",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 1,
+  "bio": "Health sci first-year from Port Lincoln. Keen for a sporty house.",
+  "habits": [
+   "early-bird",
+   "gym",
+   "social"
+  ],
+  "interests": [
+   "basketball",
+   "beach",
+   "travel"
+  ],
+  "avatarKey": "seed/avatars/p28.png"
+ },
+ {
+  "id": "p29",
+  "email": "a1900014@adelaide.edu.au",
+  "displayName": "TuanPharm",
+  "university": "Adelaide",
+  "degree": "Bachelor of Pharmacy (Honours)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 4,
+  "bio": "Pharmacy final year. Mostly in the library, home to sleep.",
+  "habits": [
+   "studies-in-library",
+   "quiet",
+   "coffee"
+  ],
+  "interests": [
+   "badminton",
+   "food",
+   "movies"
+  ],
+  "avatarKey": "seed/avatars/p29.png"
+ },
+ {
+  "id": "p30",
+  "email": "ehar0163@flinders.edu.au",
+  "displayName": "EmmaMidwife",
+  "university": "Flinders",
+  "degree": "Bachelor of Midwifery (Preregistration)",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 2,
+  "bio": "Midwifery student. On-call shifts sometimes, so I value a quiet house.",
+  "habits": [
+   "quiet",
+   "tea",
+   "early-bird"
+  ],
+  "interests": [
+   "reading",
+   "hiking",
+   "music"
+  ],
+  "avatarKey": "seed/avatars/p30.png"
+ },
+ {
+  "id": "p31",
+  "email": "stay0171@flinders.edu.au",
+  "displayName": "sam.cyber",
+  "university": "Flinders",
+  "degree": "Bachelor of Cybersecurity",
+  "gender": "NonBinary",
+  "pronouns": "they/them",
+  "yearOfStudy": 2,
+  "bio": "Cybersecurity at Tonsley. CTF team, lots of tea, very tidy.",
+  "habits": [
+   "tidy",
+   "tea",
+   "night-owl"
+  ],
+  "interests": [
+   "coding",
+   "hackathons",
+   "board-games"
+  ],
+  "avatarKey": "seed/avatars/p31.png"
+ },
+ {
+  "id": "p32",
+  "email": "a1900015@adelaide.edu.au",
+  "displayName": "LucasEcon",
+  "university": "Adelaide",
+  "degree": "Bachelor of Economics",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 2,
+  "bio": "Econ from Singapore. Always up for a hawker-style cook-off.",
+  "habits": [
+   "cooks-at-home",
+   "social",
+   "drinks-socially"
+  ],
+  "interests": [
+   "food",
+   "travel",
+   "basketball"
+  ],
+  "avatarKey": "seed/avatars/p32.png"
+ },
+ {
+  "id": "p33",
+  "email": "a1900016@adelaide.edu.au",
+  "displayName": "hannah.teach",
+  "university": "Adelaide",
+  "degree": "Bachelor of Teaching (Early Childhood Education)",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 3,
+  "bio": "Early childhood ed at Magill. Cat mum (the cat stays with my parents).",
+  "habits": [
+   "tidy",
+   "early-bird",
+   "non-smoker"
+  ],
+  "interests": [
+   "art",
+   "volunteering",
+   "movies"
+  ],
+  "avatarKey": "seed/avatars/p33.png"
+ },
+ {
+  "id": "p34",
+  "email": "bgre0186@flinders.edu.au",
+  "displayName": "Ben_Paramedic",
+  "university": "Flinders",
+  "degree": "Bachelor of Paramedicine (Honours)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 4,
+  "bio": "Paramedicine honours. Shift work, so I'm around at odd hours but quiet.",
+  "habits": [
+   "gym",
+   "quiet",
+   "no-alcohol"
+  ],
+  "interests": [
+   "hiking",
+   "running",
+   "movies"
+  ],
+  "avatarKey": "seed/avatars/p34.png"
+ },
+ {
+  "id": "p35",
+  "email": "a1900017@adelaide.edu.au",
+  "displayName": "leila.arch",
+  "university": "Adelaide",
+  "degree": "Master of Architecture",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 1,
+  "bio": "M.Arch from Tehran. Loves Adelaide's old sandstone buildings.",
+  "habits": [
+   "coffee",
+   "night-owl",
+   "tidy"
+  ],
+  "interests": [
+   "art",
+   "photography",
+   "travel"
+  ],
+  "avatarKey": "seed/avatars/p35.png"
+ },
+ {
+  "id": "p36",
+  "email": "gmar0197@flinders.edu.au",
+  "displayName": "GabeGames",
+  "university": "Flinders",
+  "degree": "Bachelor of Game Design",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 1,
+  "bio": "Game design first-year from Darwin. Friendly, loud when Carlton wins.",
+  "habits": [
+   "gamer",
+   "night-owl",
+   "social"
+  ],
+  "interests": [
+   "anime",
+   "board-games",
+   "football"
+  ],
+  "avatarKey": "seed/avatars/p36.png"
+ },
+ {
+  "id": "p37",
+  "email": "a1900018@adelaide.edu.au",
+  "displayName": "mei.ling",
+  "university": "Adelaide",
+  "degree": "Bachelor of Commerce",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 2,
+  "bio": "Commerce from Kuala Lumpur. Bubble tea on Gouger St is a weekly ritual.",
+  "habits": [
+   "social",
+   "eats-out",
+   "tidy"
+  ],
+  "interests": [
+   "food",
+   "language-exchange",
+   "dance"
+  ],
+  "avatarKey": "seed/avatars/p37.png"
+ },
+ {
+  "id": "p38",
+  "email": "a1900019@adelaide.edu.au",
+  "displayName": "ethan.bio",
+  "university": "Adelaide",
+  "degree": "Bachelor of Biomedical and Health Sciences",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 2,
+  "bio": "Biomed, aiming for med. Morning runs along the Torrens.",
+  "habits": [
+   "running",
+   "early-bird",
+   "non-smoker"
+  ],
+  "interests": [
+   "running",
+   "hiking",
+   "reading"
+  ],
+  "avatarKey": "seed/avatars/p38.png"
+ },
+ {
+  "id": "p39",
+  "email": "nabd0205@flinders.edu.au",
+  "displayName": "NadiaWrites",
+  "university": "Flinders",
+  "degree": "Bachelor of Creative Writing",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 3,
+  "bio": "Creative writing, working on a novel set in Port Adelaide.",
+  "habits": [
+   "quiet",
+   "tea",
+   "night-owl"
+  ],
+  "interests": [
+   "reading",
+   "live-gigs",
+   "art"
+  ],
+  "avatarKey": "seed/avatars/p39.png"
+ },
+ {
+  "id": "p40",
+  "email": "a1900020@adelaide.edu.au",
+  "displayName": "will.ag",
+  "university": "Adelaide",
+  "degree": "Bachelor of Agricultural Sciences",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 1,
+  "bio": "Ag science from the Clare Valley. Waite campus most days.",
+  "habits": [
+   "early-bird",
+   "drinks-socially",
+   "relaxed-about-mess"
+  ],
+  "interests": [
+   "football",
+   "hiking",
+   "food"
+  ],
+  "avatarKey": "seed/avatars/p40.png"
+ },
+ {
+  "id": "p41",
+  "email": "zhus0214@flinders.edu.au",
+  "displayName": "zara.speech",
+  "university": "Flinders",
+  "degree": "Bachelor of Human Nutrition",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 1,
+  "bio": "Human nutrition first-year, dancer since I was five.",
+  "habits": [
+   "vegetarian",
+   "early-bird",
+   "tidy"
+  ],
+  "interests": [
+   "dance",
+   "music",
+   "food"
+  ],
+  "avatarKey": "seed/avatars/p41.png"
+ },
+ {
+  "id": "p42",
+  "email": "a1900021@adelaide.edu.au",
+  "displayName": "ChrisOnTheBass",
+  "university": "Adelaide",
+  "degree": "Bachelor of Music Theatre",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 2,
+  "bio": "Music theatre. I sing in the shower, you've been warned.",
+  "habits": [
+   "social",
+   "night-owl",
+   "drinks-socially"
+  ],
+  "interests": [
+   "music",
+   "live-gigs",
+   "dance"
+  ],
+  "avatarKey": "seed/avatars/p42.png"
+ },
+ {
+  "id": "p43",
+  "email": "fqur0226@flinders.edu.au",
+  "displayName": "farah.it",
+  "university": "Flinders",
+  "degree": "Bachelor of Information Technology (Data Analytics)",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 2,
+  "bio": "Data analytics from Lahore. Cricket fan, chai always on the stove.",
+  "habits": [
+   "no-alcohol",
+   "tea",
+   "cooks-at-home"
+  ],
+  "interests": [
+   "coding",
+   "food",
+   "language-exchange"
+  ],
+  "avatarKey": "seed/avatars/p43.png"
+ },
+ {
+  "id": "p44",
+  "email": "jwhi0238@flinders.edu.au",
+  "displayName": "JoshEnviro",
+  "university": "Flinders",
+  "degree": "Bachelor of Engineering (Environmental) (Honours)",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 3,
+  "bio": "Environmental eng. Bike commuter, composting evangelist.",
+  "habits": [
+   "vegan",
+   "early-bird",
+   "tidy"
+  ],
+  "interests": [
+   "hiking",
+   "volunteering",
+   "beach"
+  ],
+  "avatarKey": "seed/avatars/p44.png"
+ },
+ {
+  "id": "p45",
+  "email": "a1900022@adelaide.edu.au",
+  "displayName": "olivia.media",
+  "university": "Adelaide",
+  "degree": "Bachelor of Media and Communication",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 2,
+  "bio": "Media and comms, run the student radio breakfast slot.",
+  "habits": [
+   "early-bird",
+   "coffee",
+   "social"
+  ],
+  "interests": [
+   "music",
+   "photography",
+   "live-gigs"
+  ],
+  "avatarKey": "seed/avatars/p45.png"
+ },
+ {
+  "id": "p46",
+  "email": "a1900023@adelaide.edu.au",
+  "displayName": "SiddharthMBA",
+  "university": "Adelaide",
+  "degree": "Master of Business Administration",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 1,
+  "bio": "MBA after 5 years in consulting. Clean, organised, early to bed.",
+  "habits": [
+   "tidy",
+   "gym",
+   "early-bird"
+  ],
+  "interests": [
+   "travel",
+   "running",
+   "food"
+  ],
+  "avatarKey": "seed/avatars/p46.png"
+ },
+ {
+  "id": "p47",
+  "email": "kmor0247@flinders.edu.au",
+  "displayName": "kate.forensics",
+  "university": "Flinders",
+  "degree": "Bachelor of Information Technology (Digital Forensics)",
+  "gender": "Female",
+  "pronouns": "she/her",
+  "yearOfStudy": 3,
+  "bio": "Digital forensics. True crime podcasts and board games.",
+  "habits": [
+   "quiet",
+   "coffee",
+   "studies-at-home"
+  ],
+  "interests": [
+   "board-games",
+   "movies",
+   "reading"
+  ],
+  "avatarKey": "seed/avatars/p47.png"
+ },
+ {
+  "id": "p48",
+  "email": "a1900024@adelaide.edu.au",
+  "displayName": "HenryHistory",
+  "university": "Adelaide",
+  "degree": "Bachelor of Arts",
+  "gender": "Male",
+  "pronouns": "he/him",
+  "yearOfStudy": 2,
+  "bio": "Arts, majoring in History. Adelaide Central Market regular.",
+  "habits": [
+   "coffee",
+   "social",
+   "cooks-at-home"
+  ],
+  "interests": [
+   "reading",
+   "food",
+   "board-games"
+  ],
+  "avatarKey": "seed/avatars/p48.png"
+ }
+]
