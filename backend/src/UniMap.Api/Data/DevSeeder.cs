@@ -34,7 +34,8 @@ public static class DevSeeder
         Furnishing Furnished, int? MinStayMonths, int AvailableInDays, List<string> Features, List<string> HouseRhythm,
         string? PreferredFlatmate, string? Description, List<string> Housemates);
 
-    private record SeedPhoto(string Key, string Category);
+    /// <param name="Empty">An unfurnished room, used for listings that aren't fully furnished.</param>
+    private record SeedPhoto(string Key, string Category, bool Empty);
 
     public static async Task SeedAsync(AppDbContext db, ILogger logger)
     {
@@ -90,7 +91,7 @@ public static class DevSeeder
 
         // Photo pool (uploaded to R2 separately). Missing file = listings without photos.
         var photos = (Read<List<SeedPhoto>>("flat-photos.json") ?? [])
-            .GroupBy(p => p.Category)
+            .GroupBy(p => (p.Category, p.Empty))
             .ToDictionary(g => g.Key, g => g.Select(p => p.Key).OrderBy(k => k).ToList());
         if (photos.Count == 0) logger.LogWarning("No flat-photos.json; seeded listings will have no photos");
 
@@ -132,7 +133,7 @@ public static class DevSeeder
                 HouseRhythm = f.HouseRhythm,
                 PreferredFlatmate = f.PreferredFlatmate,
                 Housemates = f.Housemates,
-                PhotoKeys = PickPhotos(photos, i),
+                PhotoKeys = PickPhotos(photos, flats, i),
                 // Stagger so "newest" ordering looks natural.
                 CreatedAt = DateTimeOffset.UtcNow.AddHours(-7 * i),
                 UpdatedAt = DateTimeOffset.UtcNow.AddHours(-7 * i),
@@ -149,7 +150,7 @@ public static class DevSeeder
     /// so nobody has to wipe their database.
     /// </summary>
     private static async Task BackfillPhotosAsync(
-        AppDbContext db, ILogger logger, List<SeedFlat> flats, Dictionary<string, List<string>> photos,
+        AppDbContext db, ILogger logger, List<SeedFlat> flats, Dictionary<(string, bool), List<string>> photos,
         Dictionary<string, string> emailById, Dictionary<string, Guid> userIdByEmail)
     {
         if (photos.Count == 0) return;
@@ -160,7 +161,7 @@ public static class DevSeeder
             if (!emailById.TryGetValue(f.Owner, out var email) || !userIdByEmail.TryGetValue(email, out var ownerId)) continue;
             var listing = await db.FlatListings.FirstOrDefaultAsync(x => x.OwnerId == ownerId && x.Title == f.Title);
             if (listing is null || listing.PhotoKeys.Count > 0) continue;
-            listing.PhotoKeys = PickPhotos(photos, i);
+            listing.PhotoKeys = PickPhotos(photos, flats, i);
             filled++;
         }
         if (filled == 0) return;
@@ -169,19 +170,26 @@ public static class DevSeeder
     }
 
     /// <summary>
-    /// A unique bedroom as the cover, then 2–4 other rooms. Deterministic, so every teammate's
-    /// database shows the same photos on the same listing.
+    /// A bedroom cover that matches the furnishing (furnished photo for fully furnished rooms, empty
+    /// room otherwise), then 2–4 other rooms. Covers are unique while the pool lasts, and the choice is
+    /// deterministic, so every teammate's database shows the same photos on the same listing.
     /// </summary>
-    private static List<string> PickPhotos(Dictionary<string, List<string>> pool, int i)
+    private static List<string> PickPhotos(Dictionary<(string, bool), List<string>> pool, List<SeedFlat> flats, int i)
     {
-        string? Take(string category, int n) =>
-            pool.TryGetValue(category, out var keys) && keys.Count > 0 ? keys[n % keys.Count] : null;
+        var empty = flats[i].Furnished != Furnishing.Fully;
+        // Position among listings that draw from the same (furnished/empty) bedroom pool.
+        var coverIndex = flats.Take(i).Count(f => (f.Furnished != Furnishing.Fully) == empty);
+
+        string? Take(string category, bool wantEmpty, int n) =>
+            pool.TryGetValue((category, wantEmpty), out var keys) && keys.Count > 0 ? keys[n % keys.Count]
+            : pool.TryGetValue((category, !wantEmpty), out var other) && other.Count > 0 ? other[n % other.Count]
+            : null;
 
         var extras = new[] { "living", "kitchen", "bathroom", "exterior" }
             .Take(2 + i % 3) // 2, 3 or 4 extra photos
-            .Select((category, j) => Take(category, i * 3 + j));
+            .Select((category, j) => Take(category, category == "living" && flats[i].Furnished == Furnishing.Unfurnished, i * 3 + j));
 
-        return new[] { Take("bedroom", i) }.Concat(extras)
+        return new[] { Take("bedroom", empty, coverIndex) }.Concat(extras)
             .OfType<string>().Distinct().Take(FlatCatalog.MaxPhotos).ToList();
     }
 
