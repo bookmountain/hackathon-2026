@@ -84,8 +84,6 @@ public static class DevSeeder
 
     private static async Task SeedFlatsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
     {
-        if (await db.FlatListings.AnyAsync()) return;
-
         var flats = Read<List<SeedFlat>>("flats.json") ?? [];
         var emailById = students.ToDictionary(s => s.Id, s => s.Email);
         var userIdByEmail = await db.Users.ToDictionaryAsync(u => u.Email, u => u.Id);
@@ -95,6 +93,12 @@ public static class DevSeeder
             .GroupBy(p => p.Category)
             .ToDictionary(g => g.Key, g => g.Select(p => p.Key).OrderBy(k => k).ToList());
         if (photos.Count == 0) logger.LogWarning("No flat-photos.json; seeded listings will have no photos");
+
+        if (await db.FlatListings.AnyAsync())
+        {
+            await BackfillPhotosAsync(db, logger, flats, photos, emailById, userIdByEmail);
+            return;
+        }
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var added = 0;
@@ -138,6 +142,30 @@ public static class DevSeeder
 
         await db.SaveChangesAsync();
         logger.LogWarning("Seeded {Count} dev flat listings", added);
+    }
+
+    /// <summary>
+    /// Seeded listings created before the photos existed get them on the next startup,
+    /// so nobody has to wipe their database.
+    /// </summary>
+    private static async Task BackfillPhotosAsync(
+        AppDbContext db, ILogger logger, List<SeedFlat> flats, Dictionary<string, List<string>> photos,
+        Dictionary<string, string> emailById, Dictionary<string, Guid> userIdByEmail)
+    {
+        if (photos.Count == 0) return;
+        var filled = 0;
+        for (var i = 0; i < flats.Count; i++)
+        {
+            var f = flats[i];
+            if (!emailById.TryGetValue(f.Owner, out var email) || !userIdByEmail.TryGetValue(email, out var ownerId)) continue;
+            var listing = await db.FlatListings.FirstOrDefaultAsync(x => x.OwnerId == ownerId && x.Title == f.Title);
+            if (listing is null || listing.PhotoKeys.Count > 0) continue;
+            listing.PhotoKeys = PickPhotos(photos, i);
+            filled++;
+        }
+        if (filled == 0) return;
+        await db.SaveChangesAsync();
+        logger.LogWarning("Added photos to {Count} seeded flat listings", filled);
     }
 
     /// <summary>
