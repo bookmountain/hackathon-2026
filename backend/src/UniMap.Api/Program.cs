@@ -9,6 +9,7 @@ using StackExchange.Redis;
 using UniMap.Api.Data;
 using UniMap.Api.Options;
 using UniMap.Api.Services;
+using UniMap.Api.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -65,6 +66,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>
 {
     o.SwaggerDoc("v1", new OpenApiInfo { Title = "UniMap API", Version = "v1" });
+    o.SchemaFilter<RequestExamplesFilter>();
     o.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
     o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
