@@ -48,7 +48,7 @@ public record ConnectionDto(Guid Id, ProfileDto Other, ConnectionStatus Status, 
 
 public record UploadUrlRequest([Required] string ContentType);
 
-public record UploadUrlResponse(string UploadUrl, string Key, string? PublicUrl, DateTimeOffset ExpiresAt);
+public record UploadUrlResponse(string UploadUrl, string Key, string? ReadUrl, DateTimeOffset ExpiresAt);
 
 public record OptionsResponse(
     IEnumerable<string> Universities,

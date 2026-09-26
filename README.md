@@ -17,6 +17,7 @@ docker compose up --build   # first run restores NuGet packages, ~1 min
 | Health      | http://localhost:8080/health                                |
 | Postgres    | `localhost:5432`, db/user/password `unimap` (use DBeaver)   |
 | Redis       | `localhost:6379`                                            |
+| Mailpit     | http://localhost:8025 (catches all outgoing email in dev)   |
 
 Code in `backend/` is bind-mounted, and `dotnet watch` hot-reloads on save. It restarts
 automatically when an edit can't be hot-applied.
@@ -49,10 +50,18 @@ docker compose exec api dotnet ef migrations add <Name> --project src/UniMap.Api
 
 To start again from an empty database, run `docker compose down -v`.
 
+### Email
+
+By default, verification emails go to the local Mailpit container, where you can read them at
+http://localhost:8025. To send real email, set `SMTP_*` in `.env`. `.env.example` has settings for
+Resend and Gmail.
+
 ### Images (Cloudflare R2)
 
-Fill the `R2_*` values in `.env`. The client calls `POST /api/uploads/avatar` to get a presigned
-URL, sends the image to that URL with `PUT`, then saves the returned `key` as `avatarKey` on the profile.
+Put your R2 API token keys in `.env` as `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY`. The account
+ID and bucket are already filled in. The client calls `POST /api/uploads/avatar` to get a presigned
+URL, sends the image to that URL with `PUT`, then saves the returned `key` as `avatarKey` on the
+profile. If the bucket isn't public, avatar URLs are presigned GET links that last 24 hours.
 
 ### Layout
 

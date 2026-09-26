@@ -17,6 +17,7 @@ var config = builder.Configuration;
 builder.Services.Configure<JwtOptions>(config.GetSection("Jwt"));
 builder.Services.Configure<UniversityOptions>(config.GetSection("Universities"));
 builder.Services.Configure<R2Options>(config.GetSection("R2"));
+builder.Services.Configure<EmailOptions>(config.GetSection("Email"));
 
 // --- Infrastructure ---
 builder.Services.AddDbContext<AppDbContext>(o => o
@@ -30,7 +31,10 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddSingleton<VerificationCodeStore>();
 builder.Services.AddSingleton<StorageService>();
-builder.Services.AddSingleton<IEmailSender, LoggingEmailSender>();
+if (config.GetSection("Email").Get<EmailOptions>()?.IsConfigured == true)
+    builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+else
+    builder.Services.AddSingleton<IEmailSender, LoggingEmailSender>();
 builder.Services.AddScoped<MatchingService>();
 
 // --- Auth ---

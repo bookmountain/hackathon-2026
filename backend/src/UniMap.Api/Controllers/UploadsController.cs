@@ -29,6 +29,6 @@ public class UploadsController(StorageService storage) : ControllerBase
 
         var key = $"avatars/{User.UserId()}/{Guid.NewGuid():N}.{ext}";
         var (url, exp) = storage.PresignPut(key, req.ContentType);
-        return new UploadUrlResponse(url, key, storage.PublicUrl(key), exp);
+        return new UploadUrlResponse(url, key, storage.ReadUrl(key), exp);
     }
 }

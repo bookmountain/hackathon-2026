@@ -47,6 +47,21 @@ public class StorageService
         return (url, expires);
     }
 
-    public string? PublicUrl(string? key) =>
-        key is null || string.IsNullOrWhiteSpace(_opt.PublicBaseUrl) ? null : $"{_opt.PublicBaseUrl.TrimEnd('/')}/{key}";
+    /// <summary>
+    /// URL clients can load the object from. Uses PublicBaseUrl if the bucket is public
+    /// (r2.dev or custom domain); otherwise a presigned GET valid for 24h, so private buckets work too.
+    /// </summary>
+    public string? ReadUrl(string? key)
+    {
+        if (string.IsNullOrEmpty(key)) return null;
+        if (!string.IsNullOrWhiteSpace(_opt.PublicBaseUrl)) return $"{_opt.PublicBaseUrl.TrimEnd('/')}/{key}";
+        if (_s3 is null) return null;
+        return _s3.GetPreSignedURL(new GetPreSignedUrlRequest
+        {
+            BucketName = _opt.Bucket,
+            Key = key,
+            Verb = HttpVerb.GET,
+            Expires = DateTime.UtcNow.AddHours(24),
+        });
+    }
 }

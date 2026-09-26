@@ -42,3 +42,17 @@ public class R2Options
         !string.IsNullOrWhiteSpace(AccountId) && !string.IsNullOrWhiteSpace(AccessKeyId) &&
         !string.IsNullOrWhiteSpace(SecretAccessKey) && !string.IsNullOrWhiteSpace(Bucket);
 }
+
+public class EmailOptions
+{
+    /// <summary>SMTP host. Leave empty to just log codes instead of sending.</summary>
+    public string? Host { get; set; }
+    public int Port { get; set; } = 587;
+    public string? Username { get; set; }
+    public string? Password { get; set; }
+    /// <summary>"auto" (STARTTLS on 587, TLS on 465), "none" for local Mailpit.</summary>
+    public string Security { get; set; } = "auto";
+    public string From { get; set; } = "UniMap <no-reply@example.com>";
+
+    public bool IsConfigured => !string.IsNullOrWhiteSpace(Host);
+}

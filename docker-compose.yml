@@ -31,6 +31,12 @@ services:
       timeout: 3s
       retries: 20
 
+  mailpit:
+    # Catches all outgoing email locally. Inbox UI: http://localhost:8025
+    image: axllent/mailpit
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+
   api:
     build:
       context: ./backend
@@ -46,6 +52,13 @@ services:
       R2__SecretAccessKey: ${R2_SECRET_ACCESS_KEY:-}
       R2__Bucket: ${R2_BUCKET:-}
       R2__PublicBaseUrl: ${R2_PUBLIC_BASE_URL:-}
+      # Email: defaults to Mailpit. Point SMTP_* at Resend/Brevo/Gmail in .env to send for real.
+      Email__Host: ${SMTP_HOST:-mailpit}
+      Email__Port: ${SMTP_PORT:-1025}
+      Email__Username: ${SMTP_USERNAME:-}
+      Email__Password: ${SMTP_PASSWORD:-}
+      Email__Security: ${SMTP_SECURITY:-none}
+      Email__From: ${EMAIL_FROM:-UniMap <no-reply@unimap.local>}
       # Uncomment if file changes aren't picked up (some Windows/macOS setups):
       # DOTNET_USE_POLLING_FILE_WATCHER: "true"
     ports:
@@ -61,6 +74,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
 volumes:
   pgdata:
