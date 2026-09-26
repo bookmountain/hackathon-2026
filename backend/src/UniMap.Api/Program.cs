@@ -80,7 +80,10 @@ var app = builder.Build();
 // Apply EF migrations on startup — fine for a hackathon, do it in CI/CD for anything real.
 using (var scope = app.Services.CreateScope())
 {
-    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+    if (app.Environment.IsDevelopment() || config.GetValue<bool>("Seed:Enabled"))
+        await DevSeeder.SeedAsync(db, app.Logger);
 }
 
 app.UseExceptionHandler();

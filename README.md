@@ -33,6 +33,10 @@ automatically when an edit can't be hot-applied.
 5. `GET /api/buddies/suggestions` returns ranked matches. `POST /api/buddies/{userId}/request`,
    then the other user accepts via `/api/buddies/connections/{id}/accept`.
 
+In Development, an empty database is seeded with 40 verified fake students, split between the
+two unis (e.g. `a1900000@adelaide.edu.au`, `seed001@flinders.edu.au`, password `password123`).
+Run `docker compose down -v && docker compose up` to reseed.
+
 Allowed email domains are in `appsettings.json` → `Universities:Domains`.
 
 ### Database migrations (EF Core)
