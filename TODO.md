@@ -37,7 +37,6 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **Walk times are estimates:** straight-line distance × 1.25 at 4.8 km/h. A routing service
       (OSRM, or Mapbox/Google) would give real walking times, plus public transport, which matters more
       for suburbs like Glenelg or Prospect.
-- [ ] **Messaging.** The prototype's "Message tenant" needs a chat API. Market and meetups need it too.
 - [ ] **Profile mismatch with the prototype.** UCompass shows only nickname, major, uni and an optional
       preset avatar. Our profile still has gender, pronouns, bio, habits and interests. The PM or designer
       should pick one.
@@ -55,6 +54,21 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **The prototype's Sell form has no category or condition inputs** (it hardcodes "Study gear" and
       "Good"). The API requires both, so the frontend needs to add them.
 
+## Meetups
+
+- [ ] **No report or block** for events, like the market. An anonymous host makes this matter more: the
+      server knows the host (`host_id`), so a report could still reach them.
+- [ ] **No reminders.** Nothing tells people going that an event starts soon. Push notifications (see Chats)
+      would cover it.
+- [ ] **Capacity is also enforced for walk-in events.** The API refuses Join at capacity, but the prototype
+      says walk-ins need no RSVP. The PM should say whether a full walk-in event should still accept Join.
+- [ ] **Cancelled and old events.** Cancelling deletes the event, and finished events are kept forever
+      (they only drop out of search). Archive or delete old ones eventually.
+- [ ] **`eventGoing` goes to every connected client.** Fine at hackathon scale; with many users, send it
+      only to people viewing the Meetups tab (a SignalR group).
+- [ ] **The prototype's Host form has an optional time** (it defaults to 2 days ahead). The API requires
+      `startsAt`, so the form needs to make it required.
+
 ## Privacy
 
 - [ ] **Account deletion.** The consent screen promises "Delete your account and data anytime". There's no
@@ -71,7 +85,6 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **Push notifications** (Expo, FCM or APNs) for when the app is closed. SignalR only reaches open apps.
 - [ ] **Scaling out:** with more than one API instance, SignalR needs a Redis backplane
       (`AddStackExchangeRedis`). Redis is already running.
-- [ ] Chats about meetups. `ChatAboutType` has `Flat` and `Item` so far.
 
 ## Removed profile fields
 

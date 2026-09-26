@@ -1,10 +1,10 @@
 # Handoff: UCompass backend, next features
 
 For the next Claude Code session. Read this first, then `README.md` (API and setup) and `TODO.md`
-(known gaps). Written 2026-09-26; updated the same day after the marketplace was built.
+(known gaps). Written 2026-09-26; updated the same day after the marketplace and meetups were built.
 
-**Your job, in order:** 1. ~~Marketplace~~ (done on the `marketplace` branch) → 2. Meetups → 3. People on
-the map. One feature branch each, built on `main`.
+**Your job, in order:** 1. ~~Marketplace~~ (done on the `marketplace` branch) → 2. ~~Meetups~~ (done on the
+`meetups` branch) → 3. People on the map. One feature branch each.
 
 ---
 
@@ -18,7 +18,7 @@ the map. One feature branch each, built on `main`.
   The specs in section 5 were extracted from it; check the prototype when something's unclear.
 - **The prototype's 8-step demo script:** 1 verified uni login ✅ · 2 consent first ✅ · 3 every feature
   has its own map ⚠️ · 4 message a tenant ✅ · 5 flats by students ✅ · 6 list a room ✅ · 7 marketplace ✅ (branch `marketplace`) ·
-  8 walk-in meetups ❌. "People" pins with Connect and Wave appear on the maps too ❌.
+  8 walk-in meetups ✅ (branch `meetups`). "People" pins with Connect and Wave appear on the maps too ❌.
 
 ## 2. Current state
 
@@ -26,8 +26,10 @@ the map. One feature branch each, built on `main`.
   It's pushed. **Don't push `main` without asking the user:** every push to `main` or `deploy` that
   touches `backend/` redeploys the hosted API (`.github/workflows/deploy-api.yml`).
 - **`marketplace`** (local, not pushed or merged) adds the Market tab. See README "Market" and
-  `deliverable/market-fields.txt`. Build meetups on `main` after it's merged, or on top of it: meetups
-  reuse its `PickupPoints` and `LocationPrivacy`.
+  `deliverable/market-fields.txt`.
+- **`meetups`** (local, not pushed or merged) is built on top of `marketplace`, because meetups reuse its
+  `PickupPoints`. It adds the Meetups tab. See README "Meetups" and `deliverable/meetup-fields.txt`.
+  Merging `meetups` into `main` brings the marketplace with it. Build people-on-the-map on top of it.
 - **Branches:** `flatmate`, `messaging` and `consent` are already merged into `main`. `backend-setup` is
   old. A `deploy` branch and `origin/flatmate` were created by **someone else**.
 - The deploy files (`.github/workflows/deploy-api.yml`, `docker-compose.prod.yml`) are committed now.
@@ -94,8 +96,8 @@ feature before creating anything, and state it in one line to the user if it isn
 - **Location privacy:** listings show pins to others rounded to ~100 m (`LocationPrivacy.Blur`). People on
   the map must be **snapped to a campus zone, never an exact spot**, and only for users whose
   **`Location` consent** is granted.
-- **Chats:** "Message seller" and "Connect" reuse `POST /api/chats`. Add `Item` and `Event` to
-  `ChatAboutType` and an `AddAbout…` method on `ChatService`, like `AddAboutFlatAsync`.
+- **Chats:** "Message seller" and "Connect" reuse `POST /api/chats` (`ChatAboutType.Item` and
+  `ChatService.AddAboutItemAsync` exist). Events have no "About" chat on purpose: the host is anonymous.
 - **API style:**
   - Enums as strings (integers are rejected).
   - A `ProblemDetails` body for every 4xx.
@@ -143,7 +145,7 @@ feature before creating anything, and state it in one line to the user if it isn
 - The prototype's seeded chat is TomTheTutor → Kai about the Calculus textbook. Seed that as an Item
   chat once items exist.
 
-### 5.2 Meetups (tab "Meetups", button "Host")
+### 5.2 Meetups (tab "Meetups", button "Host") ✅ built on the `meetups` branch
 
 - **Event:** title, type **Study · Casual · Social · Food**, date and time (the samples show an end time
   too, e.g. "7:00–9:30 pm"), description, place, **capacity**, going count.

@@ -1,0 +1,110 @@
+UCOMPASS: MEETUP FIELDS FOR PM REVIEW
+Last updated: 2026-09-26
+
+HOW TO USE
+- Each card below is one Trello card.
+- CHECKLIST: in the card, add a checklist, click "Add an item", and paste all the lines under CHECKLIST. Trello creates one checkbox per line.
+- DESCRIPTION: paste the bullets under DESCRIPTION into the card description.
+- The PM ticks the fields to keep. Unticked fields get dropped.
+- [BUILT] = already in the API and tested. [IDEA] = suggestion, not built yet.
+- MVP = build for the demo. Nice = only if there's time.
+
+
+========================================
+CARD 1: HOST FORM
+========================================
+
+CHECKLIST:
+[BUILT] MVP · Event name (required, text, max 80, e.g. "Friday coffee & code")
+[BUILT] MVP · Type (required: Study / Casual / Social / Food)
+[BUILT] MVP · Start date and time (required, in the future, up to 180 days ahead)
+[BUILT] Nice · End time (optional, up to 12 hours after the start, e.g. "7:00–9:30 pm")
+[BUILT] MVP · Where (required: one of 3 preset places, or drop a pin on the map)
+[BUILT] Nice · Place detail for a preset place (optional, max 64, e.g. "Barr Smith Library, Level 2")
+[BUILT] MVP · Name for a dropped pin (optional, max 64, e.g. "Rymill Park lake"; default "Pinned location")
+[BUILT] MVP · Capacity (4 to 60, default 20, the slider)
+[BUILT] MVP · Walk-ins welcome (on/off, default on)
+[BUILT] Nice · Description (optional, max 1000 characters)
+
+DESCRIPTION:
+- "Host anonymously" is always on, as in the prototype. There is nothing to fill in for it.
+- The host is counted as going, as in the prototype, so a new event shows 1 going.
+- The prototype's Host form lets you skip the time (it quietly picks 2 days ahead). The API needs a start time, so the form should make it required.
+- The prototype's Host form has no Description input: every new event gets "Hosted anonymously. Walk-ins welcome." The API accepts a real description, so the form could add one.
+- The host can edit or cancel their event later. Capacity can't go below the number of people already going.
+
+
+========================================
+CARD 2: PRIVACY
+========================================
+
+CHECKLIST:
+[BUILT] MVP · Host is never shown to anyone ("Hosted anonymously · Verified student host")
+[BUILT] MVP · Guests are never shown, only the headcount ("14 going · names hidden")
+[BUILT] MVP · Each person only sees whether they themselves are hosting or going
+[IDEA] Nice · Report an event
+[IDEA] Nice · Block an event's host
+
+DESCRIPTION:
+- No part of the API returns who hosts an event or who's going. The server stores it only so the host can edit or cancel, and so the headcount is real.
+- There is no "Message host" button, because that would reveal the host.
+- The event's place is shown exactly, so people can find it. Nothing links the place to the host.
+- Report and block are promised on the consent screen but not built yet (in TODO.md).
+
+
+========================================
+CARD 3: JOIN, LIST AND MAP
+========================================
+
+CHECKLIST:
+[BUILT] MVP · Join / "Going ✓" toggle (toast: "You're in. Just walk in — no one sees your name.")
+[BUILT] MVP · List card: day, date, type, title, start time, place, going/capacity
+[BUILT] MVP · Detail page: type, title, when (e.g. "Tue 29 Sep · 7:00–9:30 pm"), where, description, going and spots left
+[BUILT] MVP · Map pins for each event with the going count ("Walk-in events · host & guests hidden")
+[BUILT] MVP · Past events hidden
+[BUILT] Nice · "Happening now" flag for events that have started
+[BUILT] Nice · Filter by type (Study / Casual / Social / Food)
+[BUILT] Nice · My events (ones I host, past ones included) and Going (upcoming ones I joined)
+[BUILT] Nice · Live headcount: the going count updates on everyone's screen when someone joins or leaves
+[BUILT] Nice · People going are told when the host changes or cancels the event (if their app is open)
+[IDEA] Nice · Reminder before an event starts (needs push notifications)
+
+DESCRIPTION:
+- A full event refuses Join. A finished event refuses Join.
+- An event with no end time counts as finished 2 hours after it starts.
+- All dates and times are shown in Adelaide time, including the change to daylight saving on the first Sunday of October.
+
+
+========================================
+CARD 4: PLACES
+========================================
+
+CHECKLIST:
+[BUILT] MVP · Adelaide Railway Station (North Tce concourse · staffed, CCTV)
+[BUILT] MVP · Flinders City Campus (Festival Plaza entrance)
+[BUILT] MVP · Barr Smith Library (Main entrance, Adelaide Uni)
+[BUILT] MVP · Drop a pin anywhere in greater Adelaide
+
+DESCRIPTION:
+- The preset places are the same three safe pickup points as the Market.
+
+
+========================================
+DEMO DATA
+========================================
+
+- 16 events: the prototype's 4 (Stats cram, Torrens riverbank walk + coffee, Board games & pizza night, International students cook-off) and 12 more, across all 4 types.
+- Places are real, located with OpenStreetMap: the 3 preset places, Hub Central, the State Library, Rymill Park, the Botanic Garden, Rundle Mall, Elder Park, Central Market, Veale Gardens, Gouger St, and the libraries at Flinders Bedford Park and Mawson Lakes.
+- Every event is always in the coming week, on the same weekday as in the prototype (e.g. Stats cram is always a Tuesday, 7:00–9:30 pm). Once an event finishes, it moves to the next week.
+- Headcounts are real sign-ups from the fictional demo students, e.g. Stats cram 14/30.
+- Koala_Kai (the demo login) hosts "Algorithms pair-programming night" and is going to "Picnic in Elder Park". He can join the prototype's 4 events during the demo.
+
+
+========================================
+PM DECISIONS
+========================================
+
+STILL OPEN:
+- Walk-ins welcome and capacity: when a walk-in event is full, should Join still be refused? The prototype says no RSVP is needed. See Card 3.
+- Start time on the Host form: make it required? See Card 1.
+- Description on the Host form: add an input? See Card 1.

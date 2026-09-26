@@ -11,8 +11,8 @@ Base URL: **https://hackathon-2026-map.bookmountain.work**, with Swagger at
   `password123`) or any student in `students.json`.
 - There's no real email yet, so `POST /api/auth/register` returns the verification code as `devCode`. Pass
   it straight to `/api/auth/verify`.
-- Send `Authorization: Bearer {accessToken}` on every call. For chat, connect SignalR to
-  `wss://hackathon-2026-map.bookmountain.work/hubs/chat?access_token={jwt}`.
+- Send `Authorization: Bearer {accessToken}` on every call. For chat and live meetup headcounts, connect
+  SignalR to `wss://hackathon-2026-map.bookmountain.work/hubs/chat?access_token={jwt}`.
 - Images come back as full URLs that last 24 hours, so load them as they are.
 
 Every push to `main` or `deploy` that touches `backend/` redeploys it
@@ -102,6 +102,36 @@ All of these need a login token, except `options`.
   is ready to show, e.g. "Good — some highlighting".
 - "Message seller" is `POST /api/chats` with `{ itemId, text }` (see below).
 
+### Meetups (walk-in events)
+
+All of these need a login token, except `options`. **Hosts and guests are anonymous:** no endpoint says
+who hosts an event or who's going, only the headcount (`goingCount`) and whether *you* are hosting
+(`isHost`) or going (`isGoing`).
+
+- `GET /api/events/options`: the four types (`Study`, `Casual`, `Social`, `Food`), the preset places (the
+  three safe pickup points) and the capacity slider's range (4 to 60, default 20).
+- `GET /api/events`: upcoming events, soonest first, for both the map and the list. Filters are `type` and a
+  map viewport (`minLat`…`maxLng`). Events that have ended are left out: after `endsAt`, or 2 hours after
+  the start when there's no end time. Events happening now are included (`isHappeningNow`).
+- `GET /api/events/{id}`: event detail. Show the host as "Hosted anonymously · Verified student host".
+- `POST /api/events` ("Publish event"): `title`, `type`, `startsAt` (with a UTC offset, e.g.
+  `2026-09-29T19:00:00+09:30`; convert the datetime-local input first), optional `endsAt`, `description`,
+  `capacity` and `walkInsWelcome` (default true). The place is either `placeId` (a preset, with an optional
+  `placeName` like "Barr Smith Library, Level 2") or `lat`/`lng` with `placeName` ("Name this spot",
+  default "Pinned location"). The host is counted as going.
+- `POST /api/events/{id}/join` and `DELETE /api/events/{id}/join`: the Join / "Going ✓" toggle. Both return
+  the updated card and do nothing if you're already in (or out). Joining a full or finished event returns 409.
+  The prototype's toast is "You're in. Just walk in — no one sees your name."
+- `GET /api/events/mine` (events you host, past ones too), `GET /api/events/going` (upcoming events
+  you've joined), `PUT /api/events/{id}` and `DELETE /api/events/{id}` (host only; capacity can't go below
+  the number already going).
+- Labels are ready to show, in Adelaide time: `dayLabel` "TUE", `dateLabel` "29", `timeLabel` "7:00 pm" for
+  the list card, and `whenLabel` "Tue 29 Sep · 7:00–9:30 pm" for the detail page.
+- Event places are exact, so people can find them. Nothing links a place to its host.
+- Real time on `/hubs/chat`: `eventGoing` (`{eventId, goingCount}`) goes to everyone when someone joins or
+  leaves; `eventUpdated` (`{eventId}`) and `eventCancelled` (`{eventId, title}`) go to the people going.
+- There's no "Message host" button, since the host is anonymous.
+
 ### Chats (messaging)
 
 One chat per pair of students. Other people only see your nickname, major, uni and avatar.
@@ -115,7 +145,7 @@ One chat per pair of students. Other people only see your nickname, major, uni a
 - `GET /api/chats/{id}/messages` (page back with `before`), `POST /api/chats/{id}/messages`,
   `POST /api/chats/{id}/read`.
 - Real time: connect SignalR to `/hubs/chat?access_token={jwt}`. The server sends `message`, `read` and
-  `typing` events. Call the hub method `Typing(conversationId)` to show "•••" to the other person.
+  `typing` events (and the meetup events above). Call the hub method `Typing(conversationId)` to show "•••" to the other person.
 
 Koala_Kai (`a1900000@adelaide.edu.au`) has 3 seeded chats, 2 with unread replies. One of them is the
 prototype's: TomTheTutor messaging about his Calculus textbook.
@@ -130,6 +160,10 @@ In Development, an empty database is seeded from `backend/src/UniMap.Api/Data/Se
   OpenStreetMap, then moved slightly so they don't point at a specific house.
 - `items.json`: 21 market items: the prototype's 6 plus 15 more, at the three pickup points or on real
   streets. "Available from" dates and posted times are relative to when the database is seeded.
+- `events.json`: 16 walk-in meetups, the prototype's 4 plus 12 more at real places in the city and at
+  Bedford Park and Mawson Lakes. Each is set on a weekday and time (Adelaide), always within the coming
+  week: once one finishes, it moves to next week with its seeded headcount (checked on startup and
+  hourly). Koala_Kai hosts one and is going to another.
 - Images are already in R2, in the same layout as real data. Every folder is named after a database id:
   - `avatars/{userId}/avatar.png`: CC0 avatars
   - `flats/{listingId}/01-bedroom.jpg` and so on: openly licensed room photos
@@ -137,7 +171,8 @@ In Development, an empty database is seeded from `backend/src/UniMap.Api/Data/Se
 
   Seeded students, listings and items have fixed ids (in `students.json`, `flats.json` and
   `items.json`), so a row's id in DBeaver is its R2 folder name. Credits are in `avatars.json`,
-  `flat-photos.json` and `item-photos.json`.
+  `flat-photos.json` and `item-photos.json`. Seeded meetups have fixed ids too (`events.json`), but no
+  images.
 
 Run `docker compose down -v && docker compose up` to reseed.
 
@@ -174,8 +209,8 @@ profile. If the bucket isn't public, avatar URLs are presigned GET links that la
 
 ```
 backend/src/UniMap.Api/
-  Controllers/   Auth, Me (profile), Degrees (dropdowns), Flats (listings), Items (market), Chats,
-                 Consents, Uploads, Meta
+  Controllers/   Auth, Me (profile), Degrees (dropdowns), Flats (listings), Items (market),
+                 Events (meetups), Chats, Consents, Uploads, Meta
   Domain/        Entities + tag catalog
   Data/          DbContext + migrations
   Services/      JWT, Redis verification codes, R2 storage, email (SMTP, or Mailpit in dev)
