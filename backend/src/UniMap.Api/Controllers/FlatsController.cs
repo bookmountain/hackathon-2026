@@ -117,16 +117,22 @@ public class FlatsController(AppDbContext db, StorageService storage) : Controll
         return FlatMapper.ToDetail(f, me, storage);
     }
 
-    /// <summary>List a room. Upload photos first with POST /api/uploads/flat-photo.</summary>
+    /// <summary>
+    /// List a room. Upload photos first with POST /api/uploads/flat-photo and send its listingId as "id",
+    /// so the photos are already in this listing's R2 folder.
+    /// </summary>
     [HttpPost]
     public async Task<ActionResult<FlatDetail>> Create(UpsertFlatRequest req)
     {
         var me = User.UserId();
         if (!await db.Profiles.AnyAsync(p => p.UserId == me))
             return Problem("Complete your profile first.", statusCode: StatusCodes.Status409Conflict);
-        if (Validate(req, me, existingKeys: []) is { } error) return error;
+        var id = req.Id ?? Guid.NewGuid();
+        if (await db.FlatListings.AnyAsync(x => x.Id == id))
+            return Problem("A listing with this id already exists. Use PUT to edit it.", statusCode: StatusCodes.Status409Conflict);
+        if (Validate(req, id, existingKeys: []) is { } error) return error;
 
-        var f = new FlatListing { OwnerId = me, Title = "", Suburb = "", Location = Geo.CreatePoint(new Coordinate(0, 0)) };
+        var f = new FlatListing { Id = id, OwnerId = me, Title = "", Suburb = "", Location = Geo.CreatePoint(new Coordinate(0, 0)) };
         Apply(f, req);
         db.FlatListings.Add(f);
         await db.SaveChangesAsync();
@@ -141,7 +147,7 @@ public class FlatsController(AppDbContext db, StorageService storage) : Controll
         var me = User.UserId();
         var f = await db.FlatListings.FirstOrDefaultAsync(x => x.Id == id && x.OwnerId == me);
         if (f is null) return NotFound();
-        if (Validate(req, me, existingKeys: f.PhotoKeys) is { } error) return error;
+        if (Validate(req, id, existingKeys: f.PhotoKeys) is { } error) return error;
 
         Apply(f, req);
         await db.SaveChangesAsync();
@@ -175,7 +181,7 @@ public class FlatsController(AppDbContext db, StorageService storage) : Controll
             .Include(f => f.Owner).ThenInclude(u => u.Profile).ThenInclude(p => p!.Degree)
             .FirstOrDefaultAsync(f => f.Id == id);
 
-    private ObjectResult? Validate(UpsertFlatRequest req, Guid me, List<string> existingKeys)
+    private ObjectResult? Validate(UpsertFlatRequest req, Guid listingId, List<string> existingKeys)
     {
         var badFeature = (req.Features ?? []).FirstOrDefault(x => !FlatCatalog.Features.Contains(x));
         if (badFeature is not null)
@@ -185,10 +191,11 @@ public class FlatsController(AppDbContext db, StorageService storage) : Controll
         if (badRhythm is not null)
             return Problem($"Unknown house rhythm '{badRhythm}'. See GET /api/flats/options.", statusCode: StatusCodes.Status400BadRequest);
 
-        // Photos must be ones this user uploaded (or already on the listing).
-        var badKey = (req.PhotoKeys ?? []).FirstOrDefault(k => !k.StartsWith($"flats/{me}/") && !existingKeys.Contains(k));
+        // Photos must be uploaded for this listing (its own R2 folder), or already be on it.
+        var badKey = (req.PhotoKeys ?? []).FirstOrDefault(k => !k.StartsWith($"flats/{listingId}/") && !existingKeys.Contains(k));
         if (badKey is not null)
-            return Problem($"Photo '{badKey}' wasn't uploaded by you. Use POST /api/uploads/flat-photo.", statusCode: StatusCodes.Status400BadRequest);
+            return Problem($"Photo '{badKey}' wasn't uploaded for this listing. Use POST /api/uploads/flat-photo with listingId {listingId}.",
+                statusCode: StatusCodes.Status400BadRequest);
 
         if ((req.Housemates ?? []).Any(h => h.Length > 60))
             return Problem("Each housemate entry must be 60 characters or fewer.", statusCode: StatusCodes.Status400BadRequest);

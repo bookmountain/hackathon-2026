@@ -54,6 +54,7 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
             AvatarKey: null),
         _ when type == typeof(UploadUrlRequest) => new UploadUrlRequest("image/jpeg"),
         _ when type == typeof(UpsertFlatRequest) => new UpsertFlatRequest(
+            Id: null,
             Title: "Sunny room, 6 min to North Tce",
             Description: "Bright front room in a renovated sandstone cottage. Ensuite, big desk by the window.",
             Suburb: "Adelaide",
@@ -74,6 +75,7 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
             PreferredFlatmate: "Quiet, non-smoker, late study OK",
             Housemates: ["Adelaide · Computer Science", "Flinders · Law"],
             PhotoKeys: []),
+        _ when type == typeof(FlatPhotoUploadRequest) => new FlatPhotoUploadRequest("image/jpeg", null),
         _ when type == typeof(FlatStatusRequest) => new FlatStatusRequest(ListingStatus.Taken),
         _ => null,
     };

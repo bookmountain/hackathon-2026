@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using UniMap.Api.Contracts;
+using UniMap.Api.Data;
 using UniMap.Api.Services;
 
 namespace UniMap.Api.Controllers;
@@ -8,7 +10,7 @@ namespace UniMap.Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/uploads")]
-public class UploadsController(StorageService storage) : ControllerBase
+public class UploadsController(StorageService storage, AppDbContext db) : ControllerBase
 {
     private static readonly Dictionary<string, string> AllowedTypes = new()
     {
@@ -20,15 +22,27 @@ public class UploadsController(StorageService storage) : ControllerBase
     /// the returned key via PUT /api/me/profile { avatarKey }.
     /// </summary>
     [HttpPost("avatar")]
-    public ActionResult<UploadUrlResponse> Avatar(UploadUrlRequest req) => Presign(req, "avatars");
+    public ActionResult<UploadUrlResponse> Avatar(UploadUrlRequest req) => Presign(req, $"avatars/{User.UserId()}");
 
     /// <summary>
-    /// Same flow for room photos: upload each one (up to 5), then send the keys in photoKeys on
-    /// POST /api/flats or PUT /api/flats/{id}.
+    /// Room photos, stored one folder per listing: flats/{listingId}/. For a new listing, leave
+    /// listingId null on the first photo; reuse the returned listingId for the other photos and as
+    /// "id" on POST /api/flats. Then send all the keys in photoKeys.
     /// </summary>
     [HttpPost("flat-photo")]
-    public ActionResult<UploadUrlResponse> FlatPhoto(UploadUrlRequest req) => Presign(req, "flats");
+    public async Task<ActionResult<FlatPhotoUploadResponse>> FlatPhoto(FlatPhotoUploadRequest req)
+    {
+        var listingId = req.ListingId ?? Guid.NewGuid();
+        // An existing listing must be yours; an unknown id is a listing that's still being written.
+        var ownerId = await db.FlatListings.Where(f => f.Id == listingId).Select(f => (Guid?)f.OwnerId).FirstOrDefaultAsync();
+        if (ownerId is not null && ownerId != User.UserId()) return NotFound();
 
+        var result = Presign(new UploadUrlRequest(req.ContentType), $"flats/{listingId}");
+        if (result.Value is not { } up) return result.Result!;
+        return new FlatPhotoUploadResponse(listingId, up.UploadUrl, up.Key, up.ReadUrl, up.ExpiresAt);
+    }
+
+    /// <param name="folder">Full folder, e.g. "avatars/{userId}" or "flats/{listingId}".</param>
     private ActionResult<UploadUrlResponse> Presign(UploadUrlRequest req, string folder)
     {
         if (!storage.IsConfigured)
@@ -36,7 +50,7 @@ public class UploadsController(StorageService storage) : ControllerBase
         if (!AllowedTypes.TryGetValue(req.ContentType, out var ext))
             return Problem("Only JPEG, PNG or WebP.", statusCode: StatusCodes.Status400BadRequest);
 
-        var key = $"{folder}/{User.UserId()}/{Guid.NewGuid():N}.{ext}";
+        var key = $"{folder}/{Guid.NewGuid():N}.{ext}";
         var (url, exp) = storage.PresignPut(key, req.ContentType);
         return new UploadUrlResponse(url, key, storage.ReadUrl(key), exp);
     }

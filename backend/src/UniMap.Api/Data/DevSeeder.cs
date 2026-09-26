@@ -32,10 +32,8 @@ public static class DevSeeder
         string Id, string Owner, string Title, string Suburb, string? Street, double Lat, double Lng,
         int RentPerWeek, int BillsPerWeek, int Bedrooms, int Flatmates, ToiletType Toilet, BathroomType Bathroom,
         Furnishing Furnished, int? MinStayMonths, int AvailableInDays, List<string> Features, List<string> HouseRhythm,
-        string? PreferredFlatmate, string? Description, List<string> Housemates);
+        string? PreferredFlatmate, string? Description, List<string> Housemates, List<string> Photos);
 
-    /// <param name="Empty">An unfurnished room, used for listings that aren't fully furnished.</param>
-    private record SeedPhoto(string Key, string Category, bool Empty);
 
     public static async Task SeedAsync(AppDbContext db, ILogger logger)
     {
@@ -89,15 +87,10 @@ public static class DevSeeder
         var emailById = students.ToDictionary(s => s.Id, s => s.Email);
         var userIdByEmail = await db.Users.ToDictionaryAsync(u => u.Email, u => u.Id);
 
-        // Photo pool (uploaded to R2 separately). Missing file = listings without photos.
-        var photos = (Read<List<SeedPhoto>>("flat-photos.json") ?? [])
-            .GroupBy(p => (p.Category, p.Empty))
-            .ToDictionary(g => g.Key, g => g.Select(p => p.Key).OrderBy(k => k).ToList());
-        if (photos.Count == 0) logger.LogWarning("No flat-photos.json; seeded listings will have no photos");
 
         if (await db.FlatListings.AnyAsync())
         {
-            await BackfillPhotosAsync(db, logger, flats, photos, emailById, userIdByEmail);
+            await SyncPhotosAsync(db, logger, flats, emailById, userIdByEmail);
             return;
         }
 
@@ -133,7 +126,8 @@ public static class DevSeeder
                 HouseRhythm = f.HouseRhythm,
                 PreferredFlatmate = f.PreferredFlatmate,
                 Housemates = f.Housemates,
-                PhotoKeys = PickPhotos(photos, flats, i),
+                // Already in R2, one folder per listing: seed/flats/{id}/01-bedroom.jpg, ...
+                PhotoKeys = f.Photos,
                 // Stagger so "newest" ordering looks natural.
                 CreatedAt = DateTimeOffset.UtcNow.AddHours(-7 * i),
                 UpdatedAt = DateTimeOffset.UtcNow.AddHours(-7 * i),
@@ -146,51 +140,27 @@ public static class DevSeeder
     }
 
     /// <summary>
-    /// Seeded listings created before the photos existed get them on the next startup,
-    /// so nobody has to wipe their database.
+    /// Keeps already-seeded listings in step with flats.json photos (e.g. after the photos moved to
+    /// one R2 folder per listing), so nobody has to wipe their database. Photos a user uploaded
+    /// themselves (keys not under seed/) are never touched.
     /// </summary>
-    private static async Task BackfillPhotosAsync(
-        AppDbContext db, ILogger logger, List<SeedFlat> flats, Dictionary<(string, bool), List<string>> photos,
+    private static async Task SyncPhotosAsync(
+        AppDbContext db, ILogger logger, List<SeedFlat> flats,
         Dictionary<string, string> emailById, Dictionary<string, Guid> userIdByEmail)
     {
-        if (photos.Count == 0) return;
-        var filled = 0;
-        for (var i = 0; i < flats.Count; i++)
+        var updated = 0;
+        foreach (var f in flats)
         {
-            var f = flats[i];
             if (!emailById.TryGetValue(f.Owner, out var email) || !userIdByEmail.TryGetValue(email, out var ownerId)) continue;
             var listing = await db.FlatListings.FirstOrDefaultAsync(x => x.OwnerId == ownerId && x.Title == f.Title);
-            if (listing is null || listing.PhotoKeys.Count > 0) continue;
-            listing.PhotoKeys = PickPhotos(photos, flats, i);
-            filled++;
+            if (listing is null || listing.PhotoKeys.SequenceEqual(f.Photos)) continue;
+            if (listing.PhotoKeys.Any(k => !k.StartsWith("seed/"))) continue;
+            listing.PhotoKeys = f.Photos;
+            updated++;
         }
-        if (filled == 0) return;
+        if (updated == 0) return;
         await db.SaveChangesAsync();
-        logger.LogWarning("Added photos to {Count} seeded flat listings", filled);
-    }
-
-    /// <summary>
-    /// A bedroom cover that matches the furnishing (furnished photo for fully furnished rooms, empty
-    /// room otherwise), then 2–4 other rooms. Covers are unique while the pool lasts, and the choice is
-    /// deterministic, so every teammate's database shows the same photos on the same listing.
-    /// </summary>
-    private static List<string> PickPhotos(Dictionary<(string, bool), List<string>> pool, List<SeedFlat> flats, int i)
-    {
-        var empty = flats[i].Furnished != Furnishing.Fully;
-        // Position among listings that draw from the same (furnished/empty) bedroom pool.
-        var coverIndex = flats.Take(i).Count(f => (f.Furnished != Furnishing.Fully) == empty);
-
-        string? Take(string category, bool wantEmpty, int n) =>
-            pool.TryGetValue((category, wantEmpty), out var keys) && keys.Count > 0 ? keys[n % keys.Count]
-            : pool.TryGetValue((category, !wantEmpty), out var other) && other.Count > 0 ? other[n % other.Count]
-            : null;
-
-        var extras = new[] { "living", "kitchen", "bathroom", "exterior" }
-            .Take(2 + i % 3) // 2, 3 or 4 extra photos
-            .Select((category, j) => Take(category, category == "living" && flats[i].Furnished == Furnishing.Unfurnished, i * 3 + j));
-
-        return new[] { Take("bedroom", empty, coverIndex) }.Concat(extras)
-            .OfType<string>().Distinct().Take(FlatCatalog.MaxPhotos).ToList();
+        logger.LogWarning("Updated photos on {Count} seeded flat listings", updated);
     }
 
     private static T? Read<T>(string file)

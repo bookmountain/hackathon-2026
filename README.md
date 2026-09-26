@@ -44,7 +44,9 @@ All of these need a login token, except `options`.
   `campus` + `maxWalkMinutes`. `sort` is `newest`, `cheapest` or `nearest`.
 - `GET /api/flats/{id}`: room detail, with walk times to every campus and the owner's nickname, major
   and avatar.
-- `POST /api/uploads/flat-photo`, then `POST /api/flats`: upload up to 5 photos to R2, then list the room.
+- `POST /api/uploads/flat-photo`, then `POST /api/flats`: upload up to 5 photos, then list the room.
+  Photos are stored one R2 folder per listing, `flats/{listingId}/`. The first upload returns a new
+  `listingId`. Send it with the remaining photos, and as `id` when creating the listing.
 - `PUT /api/flats/{id}`, `PUT /api/flats/{id}/status` (`Active` or `Taken`), `DELETE /api/flats/{id}`,
   `GET /api/flats/mine`.
 
@@ -58,8 +60,9 @@ In Development, an empty database is seeded from `backend/src/UniMap.Api/Data/Se
   The password is `password123` for everyone.
 - `flats.json`: 20 room listings on real Adelaide streets near each campus. Pins were placed with
   OpenStreetMap, then moved slightly so they don't point at a specific house.
-- Images are already in R2 under `seed/`: CC0 avatars (`avatars.json`) and openly licensed room photos
-  (`flat-photos.json`). Credits are in those files.
+- Images are already in R2 under `seed/`: CC0 avatars in `seed/avatars/`, and openly licensed room
+  photos in one folder per listing, `seed/flats/f01/01-bedroom.jpg` and so on. Credits are in
+  `avatars.json` and `flat-photos.json`.
 
 Run `docker compose down -v && docker compose up` to reseed.
 

@@ -45,6 +45,8 @@ public record FlatDetail(
     List<CampusWalk> Campuses,
     FlatOwner Owner);
 
+/// <param name="Id">Create only: the listingId returned by POST /api/uploads/flat-photo, so the listing
+/// and its photos share the R2 folder flats/{id}/. Leave null if you have no photos yet.</param>
 /// <param name="Lat">Where the owner pinned the flat. Must be in greater Adelaide.</param>
 /// <param name="MinStayMonths">Null = flexible.</param>
 /// <param name="AvailableFrom">Null = available now.</param>
@@ -53,6 +55,7 @@ public record FlatDetail(
 /// <param name="Housemates">"Who lives here", including you, e.g. "Flinders · Law". No names.</param>
 /// <param name="PhotoKeys">Up to 5 keys from POST /api/uploads/flat-photo. The first is the cover.</param>
 public record UpsertFlatRequest(
+    Guid? Id,
     [Required, MaxLength(80)] string Title,
     [MaxLength(1000)] string? Description,
     [Required, MaxLength(64)] string Suburb,
@@ -73,6 +76,13 @@ public record UpsertFlatRequest(
     [MaxLength(200)] string? PreferredFlatmate,
     [MaxLength(8)] List<string>? Housemates,
     [MaxLength(FlatCatalog.MaxPhotos)] List<string>? PhotoKeys);
+
+/// <param name="ListingId">The listing these photos belong to. Null on the first photo of a new
+/// listing: the server issues an id; send it with the next photos and as "id" on POST /api/flats.</param>
+public record FlatPhotoUploadRequest([Required] string ContentType, Guid? ListingId);
+
+/// <param name="ListingId">Photos are stored under flats/{listingId}/.</param>
+public record FlatPhotoUploadResponse(Guid ListingId, string UploadUrl, string Key, string? ReadUrl, DateTimeOffset ExpiresAt);
 
 public record FlatStatusRequest([Required] ListingStatus Status);
 

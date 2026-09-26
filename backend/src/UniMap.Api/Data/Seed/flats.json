@@ -31,6 +31,12 @@
   "housemates": [
    "Flinders · Law",
    "Adelaide · Music"
+  ],
+  "photos": [
+   "seed/flats/f01/01-bedroom.jpg",
+   "seed/flats/f01/02-living.jpg",
+   "seed/flats/f01/03-kitchen.jpg",
+   "seed/flats/f01/04-bathroom.jpg"
   ]
  },
  {
@@ -66,6 +72,13 @@
    "Adelaide · Engineering",
    "Adelaide · Medicine",
    "Flinders · IT"
+  ],
+  "photos": [
+   "seed/flats/f02/01-bedroom.jpg",
+   "seed/flats/f02/02-living.jpg",
+   "seed/flats/f02/03-kitchen.jpg",
+   "seed/flats/f02/04-bathroom.jpg",
+   "seed/flats/f02/05-exterior.jpg"
   ]
  },
  {
@@ -100,6 +113,13 @@
    "Flinders · Business",
    "Adelaide · Commerce",
    "Adelaide · Arts"
+  ],
+  "photos": [
+   "seed/flats/f03/01-bedroom.jpg",
+   "seed/flats/f03/02-living.jpg",
+   "seed/flats/f03/03-kitchen.jpg",
+   "seed/flats/f03/04-bathroom.jpg",
+   "seed/flats/f03/05-exterior.jpg"
   ]
  },
  {
@@ -133,6 +153,13 @@
   "description": "Two-bedroom townhouse with a courtyard full of plants. Your room has an ensuite and off-street parking.",
   "housemates": [
    "Flinders · Nursing"
+  ],
+  "photos": [
+   "seed/flats/f04/01-bedroom.jpg",
+   "seed/flats/f04/02-living.jpg",
+   "seed/flats/f04/03-kitchen.jpg",
+   "seed/flats/f04/04-bathroom.jpg",
+   "seed/flats/f04/05-exterior.jpg"
   ]
  },
  {
@@ -167,6 +194,12 @@
   "housemates": [
    "Adelaide · IT",
    "Adelaide · Economics"
+  ],
+  "photos": [
+   "seed/flats/f05/01-bedroom.jpg",
+   "seed/flats/f05/02-living.jpg",
+   "seed/flats/f05/03-bathroom.jpg",
+   "seed/flats/f05/04-exterior.jpg"
   ]
  },
  {
@@ -200,6 +233,12 @@
   "housemates": [
    "Adelaide · Law",
    "Adelaide · Pharmacy"
+  ],
+  "photos": [
+   "seed/flats/f06/01-bedroom.jpg",
+   "seed/flats/f06/02-living.jpg",
+   "seed/flats/f06/03-bathroom.jpg",
+   "seed/flats/f06/04-exterior.jpg"
   ]
  },
  {
@@ -235,6 +274,12 @@
    "Adelaide · Music Theatre",
    "Adelaide · Media",
    "Flinders · Creative Writing"
+  ],
+  "photos": [
+   "seed/flats/f07/01-bedroom.jpg",
+   "seed/flats/f07/02-living.jpg",
+   "seed/flats/f07/03-bathroom.jpg",
+   "seed/flats/f07/04-exterior.jpg"
   ]
  },
  {
@@ -268,6 +313,13 @@
   "housemates": [
    "Flinders · Criminology",
    "Adelaide · Agricultural Sciences"
+  ],
+  "photos": [
+   "seed/flats/f08/01-bedroom.jpg",
+   "seed/flats/f08/02-living.jpg",
+   "seed/flats/f08/03-kitchen.jpg",
+   "seed/flats/f08/04-bathroom.jpg",
+   "seed/flats/f08/05-exterior.jpg"
   ]
  },
  {
@@ -302,6 +354,13 @@
   "housemates": [
    "Adelaide · Music",
    "Flinders · Psychology"
+  ],
+  "photos": [
+   "seed/flats/f09/01-bedroom.jpg",
+   "seed/flats/f09/02-living.jpg",
+   "seed/flats/f09/03-kitchen.jpg",
+   "seed/flats/f09/04-bathroom.jpg",
+   "seed/flats/f09/05-exterior.jpg"
   ]
  },
  {
@@ -336,6 +395,13 @@
   "housemates": [
    "Adelaide · Creative Arts",
    "Adelaide · Architecture"
+  ],
+  "photos": [
+   "seed/flats/f10/01-bedroom.jpg",
+   "seed/flats/f10/02-living.jpg",
+   "seed/flats/f10/03-kitchen.jpg",
+   "seed/flats/f10/04-bathroom.jpg",
+   "seed/flats/f10/05-exterior.jpg"
   ]
  },
  {
@@ -369,6 +435,12 @@
   "housemates": [
    "Adelaide · Accounting",
    "Adelaide · Data Science"
+  ],
+  "photos": [
+   "seed/flats/f11/01-bedroom.jpg",
+   "seed/flats/f11/02-living.jpg",
+   "seed/flats/f11/03-kitchen.jpg",
+   "seed/flats/f11/04-exterior.jpg"
   ]
  },
  {
@@ -402,6 +474,12 @@
   "description": "New-build apartment in Bowden with a balcony. Train to Adelaide Railway Station in 5 minutes.",
   "housemates": [
    "Adelaide · Media and Communication"
+  ],
+  "photos": [
+   "seed/flats/f12/01-bedroom.jpg",
+   "seed/flats/f12/02-living.jpg",
+   "seed/flats/f12/03-kitchen.jpg",
+   "seed/flats/f12/04-exterior.jpg"
   ]
  },
  {
@@ -436,6 +514,12 @@
    "Flinders · Paramedicine",
    "Flinders · Nursing",
    "Flinders · Nutrition"
+  ],
+  "photos": [
+   "seed/flats/f13/01-bedroom.jpg",
+   "seed/flats/f13/02-living.jpg",
+   "seed/flats/f13/03-kitchen.jpg",
+   "seed/flats/f13/04-exterior.jpg"
   ]
  },
  {
@@ -469,6 +553,12 @@
   "housemates": [
    "Flinders · Midwifery",
    "Flinders · Medicine"
+  ],
+  "photos": [
+   "seed/flats/f14/01-bedroom.jpg",
+   "seed/flats/f14/02-living.jpg",
+   "seed/flats/f14/03-kitchen.jpg",
+   "seed/flats/f14/04-exterior.jpg"
   ]
  },
  {
@@ -502,6 +592,12 @@
   "housemates": [
    "Flinders · Computer Science",
    "Flinders · Cybersecurity"
+  ],
+  "photos": [
+   "seed/flats/f15/01-bedroom.jpg",
+   "seed/flats/f15/02-kitchen.jpg",
+   "seed/flats/f15/03-bathroom.jpg",
+   "seed/flats/f15/04-exterior.jpg"
   ]
  },
  {
@@ -535,6 +631,11 @@
   "housemates": [
    "Flinders · Paramedicine",
    "Flinders · Social Work"
+  ],
+  "photos": [
+   "seed/flats/f16/01-bedroom.jpg",
+   "seed/flats/f16/02-kitchen.jpg",
+   "seed/flats/f16/03-bathroom.jpg"
   ]
  },
  {
@@ -568,6 +669,11 @@
   "housemates": [
    "Flinders · Digital Forensics",
    "Adelaide · Arts"
+  ],
+  "photos": [
+   "seed/flats/f17/01-bedroom.jpg",
+   "seed/flats/f17/02-kitchen.jpg",
+   "seed/flats/f17/03-bathroom.jpg"
   ]
  },
  {
@@ -602,6 +708,11 @@
   "housemates": [
    "Adelaide · Software Engineering",
    "Adelaide · IT"
+  ],
+  "photos": [
+   "seed/flats/f18/01-bedroom.jpg",
+   "seed/flats/f18/02-kitchen.jpg",
+   "seed/flats/f18/03-bathroom.jpg"
   ]
  },
  {
@@ -635,6 +746,11 @@
   "housemates": [
    "Adelaide · Education",
    "Adelaide · Psychology"
+  ],
+  "photos": [
+   "seed/flats/f19/01-bedroom.jpg",
+   "seed/flats/f19/02-kitchen.jpg",
+   "seed/flats/f19/03-bathroom.jpg"
   ]
  },
  {
@@ -669,6 +785,11 @@
   "housemates": [
    "Adelaide · Physiotherapy",
    "Adelaide · Health Science"
+  ],
+  "photos": [
+   "seed/flats/f20/01-bedroom.jpg",
+   "seed/flats/f20/02-kitchen.jpg",
+   "seed/flats/f20/03-bathroom.jpg"
   ]
  }
 ]
