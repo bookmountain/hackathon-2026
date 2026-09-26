@@ -4,13 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
 using UniMap.Api.Domain;
+using UniMap.Api.Services;
 
 namespace UniMap.Api.Data;
 
 /// <summary>
 /// Fills an empty database with realistic demo data from Data/Seed/*.json:
-/// 48 fictional students (real degrees, CC0 avatars in R2) and 20 room listings on real Adelaide
-/// streets (openly licensed photos in R2). Runs only in Development (or when Seed:Enabled=true).
+/// 48 fictional students (real degrees, CC0 avatars in R2), 20 room listings on real Adelaide
+/// streets and 21 market items (openly licensed photos in R2). Runs only in Development (or when
+/// Seed:Enabled=true).
 /// Every seeded user's password is "password123".
 /// </summary>
 public static class DevSeeder
@@ -36,6 +38,12 @@ public static class DevSeeder
         Furnishing Furnished, int? MinStayMonths, int AvailableInDays, List<string> Features, List<string> HouseRhythm,
         string? PreferredFlatmate, string? Description, List<string> Housemates, List<string> Photos);
 
+    /// <param name="Id">Fixed item id; its photos live in R2 under items/{Id}/, like real items.</param>
+    /// <param name="AvailableInDays">For availability From, so the date never goes stale.</param>
+    private record SeedItem(
+        Guid Id, string Label, string Seller, string Title, int Price, ItemCategory Category, ItemCondition Condition,
+        string? ConditionNote, ItemAvailability Availability, int AvailableInDays, string? PickupPointId, string? PlaceName,
+        double? Lat, double? Lng, int PostedHoursAgo, string? Description, List<string> Photos);
 
     public static async Task SeedAsync(AppDbContext db, ILogger logger)
     {
@@ -43,7 +51,9 @@ public static class DevSeeder
         await SeedStudentsAsync(db, logger, students);
         await SeedConsentsAsync(db, logger, students);
         await SeedFlatsAsync(db, logger, students);
+        await SeedItemsAsync(db, logger, students);
         await SeedChatsAsync(db, logger, students);
+        await SeedItemChatAsync(db, logger, students);
     }
 
     private static async Task SeedStudentsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
@@ -245,6 +255,90 @@ public static class DevSeeder
         logger.LogWarning("Synced ids/photos on {Count} seeded flat listings", updated);
     }
 
+    private static async Task SeedItemsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
+    {
+        var items = Read<List<SeedItem>>("items.json") ?? [];
+        if (await db.MarketItems.AnyAsync())
+        {
+            await SyncItemPhotosAsync(db, logger, items);
+            return;
+        }
+
+        var emailById = students.ToDictionary(s => s.Id, s => s.Email);
+        var userIdByEmail = await db.Users.ToDictionaryAsync(u => u.Email, u => u.Id);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var added = 0;
+        foreach (var i in items)
+        {
+            if (!emailById.TryGetValue(i.Seller, out var email) || !userIdByEmail.TryGetValue(email, out var sellerId))
+            {
+                logger.LogWarning("Seed item {Label}: seller {Seller} not found (reset the database to reseed students)", i.Label, i.Seller);
+                continue;
+            }
+
+            var point = i.PickupPointId is { } pp ? PickupPoints.Find(pp) : null;
+            if (i.PickupPointId is not null && point is null)
+            {
+                logger.LogWarning("Seed item {Label}: unknown pickup point {Point}", i.Label, i.PickupPointId);
+                continue;
+            }
+
+            var posted = DateTimeOffset.UtcNow.AddHours(-i.PostedHoursAgo);
+            db.MarketItems.Add(new MarketItem
+            {
+                Id = i.Id,
+                SellerId = sellerId,
+                Title = i.Title,
+                Description = i.Description,
+                Price = i.Price,
+                Category = i.Category,
+                Condition = i.Condition,
+                ConditionNote = i.ConditionNote,
+                Availability = i.Availability,
+                AvailableFrom = i.Availability == ItemAvailability.From ? today.AddDays(i.AvailableInDays) : null,
+                PickupPointId = point?.Id,
+                PlaceName = point is null ? i.PlaceName : null,
+                Location = point is not null
+                    ? Geo.CreatePoint(new Coordinate(point.Lng, point.Lat))
+                    : Geo.CreatePoint(new Coordinate(i.Lng!.Value, i.Lat!.Value)),
+                // Already in R2, one folder per item: items/{id}/01.jpg, ...
+                PhotoKeys = i.Photos,
+                CreatedAt = posted,
+                UpdatedAt = posted,
+            });
+            added++;
+        }
+
+        await db.SaveChangesAsync();
+        logger.LogWarning("Seeded {Count} dev market items", added);
+    }
+
+    /// <summary>
+    /// Keeps already-seeded items' photos in step with items.json, so nobody has to wipe their database.
+    /// Photos a user uploaded themselves (items/{id}/{guid}.jpg) are never touched.
+    /// </summary>
+    private static async Task SyncItemPhotosAsync(AppDbContext db, ILogger logger, List<SeedItem> items)
+    {
+        var byId = items.ToDictionary(i => i.Id);
+        var rows = await db.MarketItems.Where(x => byId.Keys.Contains(x.Id)).ToListAsync();
+        var updated = 0;
+        foreach (var row in rows)
+        {
+            var photos = byId[row.Id].Photos;
+            var ownPhotos = row.PhotoKeys.Any(k => !IsSeedItemPhoto(k, row.Id));
+            if (ownPhotos || row.PhotoKeys.SequenceEqual(photos)) continue;
+            row.PhotoKeys = photos;
+            updated++;
+        }
+        if (updated == 0) return;
+        await db.SaveChangesAsync();
+        logger.LogWarning("Synced photos on {Count} seeded market items", updated);
+    }
+
+    /// <summary>Seed photos are numbered (items/{id}/01.jpg); uploads are named by a random guid.</summary>
+    private static bool IsSeedItemPhoto(string key, Guid itemId) =>
+        System.Text.RegularExpressions.Regex.IsMatch(key, $@"^items/{itemId}/\d{{2}}\.jpg$");
+
     /// <summary>
     /// A few chats for Koala_Kai (the Swagger login) so the Messages screen isn't empty in the demo:
     /// one per chat type, with unread replies. Replies are from the UCompass prototype.
@@ -310,6 +404,49 @@ public static class DevSeeder
 
         await db.SaveChangesAsync();
         logger.LogWarning("Seeded {Count} demo chats for a1900000@adelaide.edu.au (Koala_Kai)", added);
+    }
+
+    /// <summary>
+    /// The prototype's seeded chat: TomTheTutor messages Koala_Kai about his Calculus textbook. They already
+    /// have a chat (one per pair), so this adds to it. Also runs on databases seeded before items existed.
+    /// </summary>
+    private static async Task SeedItemChatAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
+    {
+        var item = (Read<List<SeedItem>>("items.json") ?? []).FirstOrDefault(i => i.Label == "m01");
+        if (item is null || !await db.MarketItems.AnyAsync(i => i.Id == item.Id)) return;
+        if (await db.ChatMessages.AnyAsync(m => m.AboutType == ChatAboutType.Item && m.AboutId == item.Id)) return;
+
+        var emails = students.Where(s => s.Id is "p01" or "p05").ToDictionary(s => s.Id, s => s.Email);
+        var users = await db.Users.Where(u => emails.Values.Contains(u.Email)).ToDictionaryAsync(u => u.Email, u => u.Id);
+        if (!users.TryGetValue(emails["p01"], out var kai) || !users.TryGetValue(emails["p05"], out var tom)) return;
+
+        var (a, b) = Conversation.Order(kai, tom);
+        var now = DateTimeOffset.UtcNow;
+        var conv = await db.Conversations.FirstOrDefaultAsync(c => c.UserAId == a && c.UserBId == b);
+        var existing = conv is not null;
+        if (conv is null)
+        {
+            conv = new Conversation { UserAId = a, UserBId = b, CreatedAt = now.AddMinutes(-9) };
+            db.Conversations.Add(conv);
+        }
+
+        db.ChatMessages.Add(new ChatMessage
+        {
+            ConversationId = conv.Id, Kind = ChatMessageKind.About, AboutType = ChatAboutType.Item, AboutId = item.Id,
+            Body = ChatService.AboutItem(item.Title, item.Price), CreatedAt = now.AddMinutes(-9),
+        });
+        var at = now.AddMinutes(-8);
+        db.ChatMessages.Add(new ChatMessage
+        {
+            ConversationId = conv.Id, SenderId = tom, Kind = ChatMessageKind.Text, CreatedAt = at,
+            Body = (existing ? "Also, saw" : "Hey! Saw") +
+                " you looking at my Calculus textbook — still available if you want it. Barr Smith works for me.",
+        });
+        conv.LastMessageAt = at;
+        conv.MarkRead(tom, at);
+
+        await db.SaveChangesAsync();
+        logger.LogWarning("Seeded the Calculus textbook chat (TomTheTutor → Koala_Kai)");
     }
 
     private static T? Read<T>(string file)
