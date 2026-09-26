@@ -1,0 +1,47 @@
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Icon, Striped } from "@/components/ui";
+import type { Item } from "@/data/types";
+import { resolvePlace } from "@/store";
+import { colors, font, shadows } from "@/theme";
+import { availabilityColors, availabilityShort, isSold } from "./logic";
+
+// Square card in the Market grid; sold items are faded
+export default function ItemCard({ item, onPress }: { item: Item; onPress: () => void }) {
+  const badge = availabilityColors(item.avail);
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.card, isSold(item) && styles.sold]}>
+      <Striped tone={item.tone} stripe={10} label={item.cat} style={styles.photo}>
+        {item.avail !== "Available now" && (
+          <View style={[styles.badge, { backgroundColor: badge.bg }]}>
+            <Text style={[styles.badgeText, { color: badge.fg }]}>{availabilityShort(item.avail)}</Text>
+          </View>
+        )}
+      </Striped>
+      <View style={styles.body}>
+        <Text style={styles.price}>${item.price}</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          {item.title}
+        </Text>
+        <View style={styles.place}>
+          <Icon name="pin" size={11} color={colors.muted} />
+          <Text style={styles.placeText} numberOfLines={1}>
+            {resolvePlace(item.loc).short}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: { flex: 1, minWidth: 0, backgroundColor: colors.surface, borderRadius: 18, overflow: "hidden", ...shadows.card },
+  sold: { opacity: 0.55 },
+  photo: { aspectRatio: 1 },
+  badge: { position: "absolute", left: 8, top: 8, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4 },
+  badgeText: { ...font(800, 10.5) },
+  body: { paddingHorizontal: 12, paddingTop: 10, paddingBottom: 12, gap: 3 },
+  price: { color: colors.ink, ...font(800, 16) },
+  title: { color: colors.ink, ...font(600, 13, 1.3) },
+  place: { flexDirection: "row", alignItems: "center", gap: 3 },
+  placeText: { flex: 1, color: colors.muted, ...font(600, 11.5) },
+});
