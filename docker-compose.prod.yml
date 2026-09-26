@@ -1,0 +1,70 @@
+# Hosted demo API for the mobile team: https://hackathon-2026-map.bookmountain.work
+# Deployed by .github/workflows/deploy-api.yml on vm100 (secrets live in /work/hackathon-2026/.env there).
+# Not for local dev; use docker-compose.yml for that.
+name: hackathon-2026-map
+
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: unimap
+      POSTGRES_USER: unimap
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unimap -d unimap"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Postgres: Host=db;Port=5432;Database=unimap;Username=unimap;Password=${POSTGRES_PASSWORD}
+      ConnectionStrings__Redis: redis:6379
+      Jwt__Key: ${JWT_KEY:?set in .env}
+      R2__AccountId: ${R2_ACCOUNT_ID:-}
+      R2__AccessKeyId: ${R2_ACCESS_KEY_ID:-}
+      R2__SecretAccessKey: ${R2_SECRET_ACCESS_KEY:-}
+      R2__Bucket: ${R2_BUCKET:-}
+      R2__PublicBaseUrl: ${R2_PUBLIC_BASE_URL:-}
+      # Empty SMTP_HOST = codes are only logged, so ReturnDevCode puts them in the register response.
+      Email__Host: ${SMTP_HOST:-}
+      Email__Port: ${SMTP_PORT:-587}
+      Email__Username: ${SMTP_USERNAME:-}
+      Email__Password: ${SMTP_PASSWORD:-}
+      Email__Security: ${SMTP_SECURITY:-auto}
+      Email__From: ${EMAIL_FROM:-UniMap <no-reply@example.com>}
+      # Demo server: Swagger on, demo students/listings seeded, verification code returned by /register.
+      EnableSwagger: "true"
+      Seed__Enabled: "true"
+      Auth__ReturnDevCode: ${RETURN_DEV_CODE:-true}
+    ports:
+      - "127.0.0.1:5090:8080"   # cloudflared: hackathon-2026-map.bookmountain.work -> 127.0.0.1:5090
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  redisdata:

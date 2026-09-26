@@ -1,0 +1,87 @@
+name: API CI and deploy
+
+on:
+  push:
+    branches: [main, deploy]
+    paths:
+      - backend/**
+      - docker-compose.prod.yml
+      - .github/workflows/deploy-api.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-api
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build API
+        run: dotnet build backend/src/UniMap.Api -c Release
+
+  deploy:
+    needs: verify
+    runs-on: [self-hosted, linux, x64, hackathon-2026]
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://hackathon-2026-map.bookmountain.work/swagger
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Sync release to VPS
+        run: |
+          rsync -az --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.env' \
+            ./ /work/hackathon-2026/
+
+      - name: Deploy and verify
+        run: |
+          set -eu
+          cd /work/hackathon-2026
+          compose() { docker compose -f docker-compose.prod.yml "$@"; }
+          show_diagnostics() {
+            compose ps
+            compose logs --tail=100 api
+          }
+          trap show_diagnostics ERR
+
+          compose up -d --build --remove-orphans
+          # Migrations and seeding run before the API listens, so the first boot takes a while.
+          ready=false
+          for attempt in $(seq 1 36); do
+            if curl --fail --silent http://127.0.0.1:5090/health >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 5
+          done
+          if [ "$ready" != true ]; then
+            false
+          fi
+
+          curl --fail --silent http://127.0.0.1:5090/swagger/v1/swagger.json >/dev/null
+          curl --fail --silent http://127.0.0.1:5090/api/flats/options >/dev/null
+          curl --fail --silent -H 'Content-Type: application/json' \
+            -d '{"email":"a1900000@adelaide.edu.au","password":"password123"}' \
+            http://127.0.0.1:5090/api/auth/login \
+            | grep --quiet '"accessToken"'
+
+          trap - ERR
+          docker image prune -f >/dev/null

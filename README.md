@@ -2,6 +2,23 @@
 
 Uni buddy-finder for University of Adelaide and Flinders students.
 
+## Hosted API (for the mobile app)
+
+Base URL: **https://hackathon-2026-map.bookmountain.work**, with Swagger at
+[/swagger](https://hackathon-2026-map.bookmountain.work/swagger).
+
+- It has the same demo data as local dev. Log in as Koala_Kai (`a1900000@adelaide.edu.au`,
+  `password123`) or any student in `students.json`.
+- There's no real email yet, so `POST /api/auth/register` returns the verification code as `devCode`. Pass
+  it straight to `/api/auth/verify`.
+- Send `Authorization: Bearer {accessToken}` on every call. For chat, connect SignalR to
+  `wss://hackathon-2026-map.bookmountain.work/hubs/chat?access_token={jwt}`.
+- Images come back as full URLs that last 24 hours, so load them as they are.
+
+Every push to `main` or `deploy` that touches `backend/` redeploys it
+(`.github/workflows/deploy-api.yml`). The workflow builds on GitHub, then a self-hosted runner on the
+server runs `docker-compose.prod.yml`. Secrets are in `/work/hackathon-2026/.env` on the server, not in git.
+
 ## Backend quick start
 
 Requires Docker (with Compose v2). No local .NET SDK needed.
