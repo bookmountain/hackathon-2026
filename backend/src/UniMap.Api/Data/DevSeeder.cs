@@ -9,9 +9,9 @@ using UniMap.Api.Services;
 namespace UniMap.Api.Data;
 
 /// <summary>
-/// Fills an empty database with realistic demo data from Data/Seed/*.json:
-/// 48 fictional students (real degrees, CC0 avatars in R2), 20 room listings on real Adelaide
-/// streets, 21 market items (openly licensed photos in R2) and 16 walk-in meetups at real places. Runs
+/// Adds missing demo data from Data/Seed/*.json to the development database:
+/// 48 fictional students (real degrees, CC0 avatars in R2), 40 room listings on real Adelaide
+/// streets, 60 market items (real listing photos in R2) and 16 walk-in meetups at real places. Runs
 /// only in Development (or when Seed:Enabled=true).
 /// Every seeded user's password is "password123".
 /// </summary>
@@ -174,18 +174,17 @@ public static class DevSeeder
         var emailById = students.ToDictionary(s => s.Id, s => s.Email);
         var userIdByEmail = await db.Users.ToDictionaryAsync(u => u.Email, u => u.Id);
 
-
         if (await db.FlatListings.AnyAsync())
-        {
             await SyncPhotosAsync(db, logger, flats, emailById, userIdByEmail);
-            return;
-        }
+
+        var existingIds = (await db.FlatListings.Select(x => x.Id).ToListAsync()).ToHashSet();
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var added = 0;
         for (var i = 0; i < flats.Count; i++)
         {
             var f = flats[i];
+            if (existingIds.Contains(f.Id)) continue;
             if (!emailById.TryGetValue(f.Owner, out var email) || !userIdByEmail.TryGetValue(email, out var ownerId))
             {
                 logger.LogWarning("Seed flat {Id}: owner {Owner} not found (reset the database to reseed students)", f.Id, f.Owner);
@@ -223,8 +222,11 @@ public static class DevSeeder
             added++;
         }
 
-        await db.SaveChangesAsync();
-        logger.LogWarning("Seeded {Count} dev flat listings", added);
+        if (added > 0)
+        {
+            await db.SaveChangesAsync();
+            logger.LogWarning("Seeded {Count} dev flat listings", added);
+        }
     }
 
     /// <summary>
@@ -271,10 +273,9 @@ public static class DevSeeder
     {
         var items = Read<List<SeedItem>>("items.json") ?? [];
         if (await db.MarketItems.AnyAsync())
-        {
             await SyncItemPhotosAsync(db, logger, items);
-            return;
-        }
+
+        var existingIds = (await db.MarketItems.Select(x => x.Id).ToListAsync()).ToHashSet();
 
         var emailById = students.ToDictionary(s => s.Id, s => s.Email);
         var userIdByEmail = await db.Users.ToDictionaryAsync(u => u.Email, u => u.Id);
@@ -282,6 +283,7 @@ public static class DevSeeder
         var added = 0;
         foreach (var i in items)
         {
+            if (existingIds.Contains(i.Id)) continue;
             if (!emailById.TryGetValue(i.Seller, out var email) || !userIdByEmail.TryGetValue(email, out var sellerId))
             {
                 logger.LogWarning("Seed item {Label}: seller {Seller} not found (reset the database to reseed students)", i.Label, i.Seller);
@@ -321,8 +323,11 @@ public static class DevSeeder
             added++;
         }
 
-        await db.SaveChangesAsync();
-        logger.LogWarning("Seeded {Count} dev market items", added);
+        if (added > 0)
+        {
+            await db.SaveChangesAsync();
+            logger.LogWarning("Seeded {Count} dev market items", added);
+        }
     }
 
     /// <summary>

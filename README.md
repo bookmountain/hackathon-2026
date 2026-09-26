@@ -165,25 +165,28 @@ In Development, an empty database is seeded from `backend/src/UniMap.Api/Data/Se
 - `students.json`: 48 fictional students with real degrees, including the 8 characters from the
   UCompass prototype, e.g. Koala_Kai = `a1900000@adelaide.edu.au`, hana_k = `hkim0044@flinders.edu.au`.
   The password is `password123` for everyone.
-- `flats.json`: 20 room listings on real Adelaide streets near each campus. Pins were placed with
-  OpenStreetMap, then moved slightly so they don't point at a specific house.
-- `items.json`: 21 market items: the prototype's 6 plus 15 more, at the three pickup points or on real
-  streets. "Available from" dates and posted times are relative to when the database is seeded.
+- `flats.json`: 40 room listings on Adelaide streets near each campus. Pins are offset so they do
+  not point at a specific house.
+- `items.json`: 60 market items, at campus pickup points or on local streets. "Available from"
+  dates and posted times are relative to when the database is seeded.
 - `events.json`: 16 walk-in meetups, the prototype's 4 plus 12 more at real places in the city and at
   Bedford Park and Mawson Lakes. Each is set on a weekday and time (Adelaide), always within the coming
   week: once one finishes, it moves to next week with its seeded headcount (checked on startup and
   hourly). Koala_Kai hosts one and is going to another.
 - Images are already in R2, in the same layout as real data. Every folder is named after a database id:
   - `avatars/{userId}/avatar.png`: CC0 avatars
-  - `flats/{listingId}/01-bedroom.jpg` and so on: openly licensed room photos
-  - `items/{itemId}/01.jpg` and so on: openly licensed item photos
+  - `flats/{listingId}/01-bedroom.jpg` and so on: real room photos from Gumtree, Wikimedia Commons
+    and the original openly licensed collection. Gumtree photo reuse rights have not been verified.
+  - `items/{itemId}/01.jpg` and so on: three real item photos per listing from eBay or Gumtree.
+    Reuse rights for these photos have not been verified.
 
   Seeded students, listings and items have fixed ids (in `students.json`, `flats.json` and
   `items.json`), so a row's id in DBeaver is its R2 folder name. Credits are in `avatars.json`,
   `flat-photos.json` and `item-photos.json`. Seeded meetups have fixed ids too (`events.json`), but no
   images.
 
-Run `docker compose down -v && docker compose up` to reseed.
+Run `docker compose up -d --build api` to add missing seeded listings to an existing development
+database. A fresh database also receives all 100 listings on startup.
 
 Allowed email domains are in `appsettings.json` → `Universities:Domains`.
 

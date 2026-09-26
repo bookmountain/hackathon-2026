@@ -1,795 +1,1527 @@
 [
- {
-  "id": "f6047039-555a-5623-b2b0-8fec42aa34b0",
-  "owner": "p07",
-  "title": "Sunny room, 6 min to North Tce",
-  "suburb": "Adelaide",
-  "street": "Frome St",
-  "lat": -34.921693,
-  "lng": 138.607305,
-  "rentPerWeek": 245,
-  "billsPerWeek": 25,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "PrivateEnsuite",
-  "bathroom": "Ensuite",
-  "furnished": "Fully",
-  "minStayMonths": 3,
-  "availableInDays": 18,
-  "features": [
-   "Air con",
-   "Double bed",
-   "Desk",
-   "Wi-Fi included"
-  ],
-  "houseRhythm": [
-   "Quiet weeknights",
-   "Shared dinners"
-  ],
-  "preferredFlatmate": "Quiet, non-smoker, late study OK",
-  "description": "Bright front room in a renovated sandstone cottage. Ensuite, big desk by the window, 6-minute walk to Barr Smith.",
-  "housemates": [
-   "Flinders · Law",
-   "Adelaide · Music"
-  ],
-  "photos": [
-   "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/01-bedroom.jpg",
-   "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/02-living.jpg",
-   "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/03-kitchen.jpg",
-   "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/04-bathroom.jpg"
-  ]
- },
- {
-  "id": "a55aec15-36b1-5174-a5cb-06b6587073fd",
-  "owner": "p03",
-  "title": "Studio-style room with kitchenette",
-  "suburb": "North Adelaide",
-  "street": "Melbourne St",
-  "lat": -34.906291,
-  "lng": 138.607765,
-  "rentPerWeek": 280,
-  "billsPerWeek": 20,
-  "bedrooms": 4,
-  "flatmates": 3,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Partly",
-  "minStayMonths": 6,
-  "availableInDays": 0,
-  "features": [
-   "Kitchenette",
-   "Double bed",
-   "Air con",
-   "Laundry"
-  ],
-  "houseRhythm": [
-   "Early birds",
-   "Gym crew"
-  ],
-  "preferredFlatmate": "Postgrad or mature undergrad",
-  "description": "Large room with its own kitchenette in a townhouse off Melbourne St. Cafés downstairs, about 20 minutes' walk to North Tce.",
-  "housemates": [
-   "Adelaide · Engineering",
-   "Adelaide · Medicine",
-   "Flinders · IT"
-  ],
-  "photos": [
-   "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/01-bedroom.jpg",
-   "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/02-living.jpg",
-   "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/03-kitchen.jpg",
-   "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/04-bathroom.jpg",
-   "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/05-exterior.jpg"
-  ]
- },
- {
-  "id": "c8289b06-e144-5eac-8109-edcc423bd518",
-  "owner": "p08",
-  "title": "Budget room near Central Market",
-  "suburb": "Adelaide",
-  "street": "Gouger St",
-  "lat": -34.930524,
-  "lng": 138.591089,
-  "rentPerWeek": 185,
-  "billsPerWeek": 30,
-  "bedrooms": 4,
-  "flatmates": 3,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Unfurnished",
-  "minStayMonths": 1,
-  "availableInDays": 4,
-  "features": [
-   "Balcony",
-   "Laundry",
-   "Wi-Fi included"
-  ],
-  "houseRhythm": [
-   "Social house",
-   "Shared dinners"
-  ],
-  "preferredFlatmate": "Any student, pets considered",
-  "description": "Simple, cheap room above the Gouger St strip. Central Market is 2 minutes away, trams on King William St a short walk away.",
-  "housemates": [
-   "Flinders · Business",
-   "Adelaide · Commerce",
-   "Adelaide · Arts"
-  ],
-  "photos": [
-   "flats/c8289b06-e144-5eac-8109-edcc423bd518/01-bedroom.jpg",
-   "flats/c8289b06-e144-5eac-8109-edcc423bd518/02-living.jpg",
-   "flats/c8289b06-e144-5eac-8109-edcc423bd518/03-kitchen.jpg",
-   "flats/c8289b06-e144-5eac-8109-edcc423bd518/04-bathroom.jpg",
-   "flats/c8289b06-e144-5eac-8109-edcc423bd518/05-exterior.jpg"
-  ]
- },
- {
-  "id": "9c38f282-9433-5241-bb17-baa9e4ae46b2",
-  "owner": "p02",
-  "title": "Ensuite in townhouse, Hutt St",
-  "suburb": "Adelaide",
-  "street": "Hutt St",
-  "lat": -34.931441,
-  "lng": 138.612181,
-  "rentPerWeek": 230,
-  "billsPerWeek": 22,
-  "bedrooms": 2,
-  "flatmates": 1,
-  "toilet": "PrivateEnsuite",
-  "bathroom": "Ensuite",
-  "furnished": "Fully",
-  "minStayMonths": 6,
-  "availableInDays": 24,
-  "features": [
-   "Air con",
-   "Double bed",
-   "Kitchenette",
-   "Parking"
-  ],
-  "houseRhythm": [
-   "Quiet weeknights",
-   "Plant parents"
-  ],
-  "preferredFlatmate": "Female student preferred",
-  "description": "Two-bedroom townhouse with a courtyard full of plants. Your room has an ensuite and off-street parking.",
-  "housemates": [
-   "Flinders · Nursing"
-  ],
-  "photos": [
-   "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/01-bedroom.jpg",
-   "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/02-living.jpg",
-   "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/03-kitchen.jpg",
-   "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/04-bathroom.jpg",
-   "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/05-exterior.jpg"
-  ]
- },
- {
-  "id": "5a36fca1-5e37-5552-8bab-dac7a5c9b797",
-  "owner": "p12",
-  "title": "Furnished room in CBD apartment",
-  "suburb": "Adelaide",
-  "street": "Grote St",
-  "lat": -34.929837,
-  "lng": 138.58888,
-  "rentPerWeek": 255,
-  "billsPerWeek": 25,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Fully",
-  "minStayMonths": 3,
-  "availableInDays": 10,
-  "features": [
-   "Air con",
-   "Desk",
-   "Wi-Fi included",
-   "Laundry"
-  ],
-  "houseRhythm": [
-   "Quiet weeknights",
-   "Gym crew"
-  ],
-  "preferredFlatmate": "Tidy student, happy to share cleaning roster",
-  "description": "Level 6 apartment with city views, gym in the building. 20 minutes' walk to Flinders City Campus, or a quick tram ride.",
-  "housemates": [
-   "Adelaide · IT",
-   "Adelaide · Economics"
-  ],
-  "photos": [
-   "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/01-bedroom.jpg",
-   "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/02-living.jpg",
-   "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/03-bathroom.jpg",
-   "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/04-exterior.jpg"
-  ]
- },
- {
-  "id": "6c5ace63-3681-56a3-8e2d-79d12e8a9db7",
-  "owner": "p17",
-  "title": "Quiet room in Kent Town villa",
-  "suburb": "Kent Town",
-  "street": "Rundle St",
-  "lat": -34.921725,
-  "lng": 138.616419,
-  "rentPerWeek": 240,
-  "billsPerWeek": 28,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Partly",
-  "minStayMonths": 6,
-  "availableInDays": 14,
-  "features": [
-   "Double bed",
-   "Laundry",
-   "Parking"
-  ],
-  "houseRhythm": [
-   "Quiet weeknights",
-   "Early birds"
-  ],
-  "preferredFlatmate": "Final-year or postgrad, quiet",
-  "description": "Old stone villa on a leafy street. Two quiet housemates, under 20 minutes' walk to North Tce.",
-  "housemates": [
-   "Adelaide · Law",
-   "Adelaide · Pharmacy"
-  ],
-  "photos": [
-   "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/01-bedroom.jpg",
-   "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/02-living.jpg",
-   "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/03-bathroom.jpg",
-   "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/04-exterior.jpg"
-  ]
- },
- {
-  "id": "e368b447-68ed-5f61-8441-d2ec7c9e5be7",
-  "owner": "p42",
-  "title": "Social share house off The Parade",
-  "suburb": "Norwood",
-  "street": "The Parade",
-  "lat": -34.921139,
-  "lng": 138.63929,
-  "rentPerWeek": 235,
-  "billsPerWeek": 30,
-  "bedrooms": 4,
-  "flatmates": 3,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Fully",
-  "minStayMonths": 3,
-  "availableInDays": 7,
-  "features": [
-   "Air con",
-   "Double bed",
-   "Balcony",
-   "Wi-Fi included"
-  ],
-  "houseRhythm": [
-   "Social house",
-   "Shared dinners"
-  ],
-  "preferredFlatmate": "Social and easy-going",
-  "description": "Big social house, Friday dinners and the odd open-mic night. Bus to the city every 10 minutes.",
-  "housemates": [
-   "Adelaide · Music Theatre",
-   "Adelaide · Media",
-   "Flinders · Creative Writing"
-  ],
-  "photos": [
-   "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/01-bedroom.jpg",
-   "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/02-living.jpg",
-   "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/03-bathroom.jpg",
-   "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/04-exterior.jpg"
-  ]
- },
- {
-  "id": "5704c8b8-dbbf-5501-9209-546ea8dd2679",
-  "owner": "p14",
-  "title": "Room near Thebarton oval",
-  "suburb": "Torrensville",
-  "street": "Henley Beach Rd",
-  "lat": -34.924766,
-  "lng": 138.556338,
-  "rentPerWeek": 205,
-  "billsPerWeek": 25,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Partly",
-  "minStayMonths": 3,
-  "availableInDays": 0,
-  "features": [
-   "Laundry",
-   "Parking",
-   "Wi-Fi included"
-  ],
-  "houseRhythm": [
-   "Social house",
-   "Gym crew"
-  ],
-  "preferredFlatmate": "Footy fans welcome",
-  "description": "Friendly house near the Thebarton oval. Bus straight down Henley Beach Rd to the city in 10 minutes.",
-  "housemates": [
-   "Flinders · Criminology",
-   "Adelaide · Agricultural Sciences"
-  ],
-  "photos": [
-   "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/01-bedroom.jpg",
-   "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/02-living.jpg",
-   "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/03-kitchen.jpg",
-   "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/04-bathroom.jpg",
-   "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/05-exterior.jpg"
-  ]
- },
- {
-  "id": "351db218-f869-53bc-bad0-1dd4322b8732",
-  "owner": "p13",
-  "title": "Calm room in Prospect bungalow",
-  "suburb": "Prospect",
-  "street": "Prospect Rd",
-  "lat": -34.895123,
-  "lng": 138.595207,
-  "rentPerWeek": 220,
-  "billsPerWeek": 24,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Fully",
-  "minStayMonths": 6,
-  "availableInDays": 21,
-  "features": [
-   "Air con",
-   "Desk",
-   "Double bed",
-   "Laundry"
-  ],
-  "houseRhythm": [
-   "Quiet weeknights",
-   "Plant parents"
-  ],
-  "preferredFlatmate": "Quiet musician-friendly household",
-  "description": "Character bungalow a block from the Prospect Rd cafés. Quiet house, soundproofed practice nook.",
-  "housemates": [
-   "Adelaide · Music",
-   "Flinders · Psychology"
-  ],
-  "photos": [
-   "flats/351db218-f869-53bc-bad0-1dd4322b8732/01-bedroom.jpg",
-   "flats/351db218-f869-53bc-bad0-1dd4322b8732/02-living.jpg",
-   "flats/351db218-f869-53bc-bad0-1dd4322b8732/03-kitchen.jpg",
-   "flats/351db218-f869-53bc-bad0-1dd4322b8732/04-bathroom.jpg",
-   "flats/351db218-f869-53bc-bad0-1dd4322b8732/05-exterior.jpg"
-  ]
- },
- {
-  "id": "9a7c76e6-f15f-5781-a11d-cbe2bd882a3f",
-  "owner": "p06",
-  "title": "Ensuite room in Unley townhouse",
-  "suburb": "Unley",
-  "street": "King William Rd",
-  "lat": -34.951396,
-  "lng": 138.59967,
-  "rentPerWeek": 265,
-  "billsPerWeek": 25,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "PrivateEnsuite",
-  "bathroom": "Ensuite",
-  "furnished": "Fully",
-  "minStayMonths": 6,
-  "availableInDays": 30,
-  "features": [
-   "Air con",
-   "Double bed",
-   "Desk",
-   "Parking"
-  ],
-  "houseRhythm": [
-   "Plant parents",
-   "Quiet weeknights"
-  ],
-  "preferredFlatmate": "Creative, tidy, non-smoker",
-  "description": "Modern townhouse off King William Rd with a small garden. Tram to the city from Greenhill Rd.",
-  "housemates": [
-   "Adelaide · Creative Arts",
-   "Adelaide · Architecture"
-  ],
-  "photos": [
-   "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/01-bedroom.jpg",
-   "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/02-living.jpg",
-   "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/03-kitchen.jpg",
-   "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/04-bathroom.jpg",
-   "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/05-exterior.jpg"
-  ]
- },
- {
-  "id": "bebd471e-3a1b-593d-834f-d4bbf0bb9f4f",
-  "owner": "p16",
-  "title": "Tidy room close to the parklands",
-  "suburb": "Parkside",
-  "street": "Glen Osmond Rd",
-  "lat": -34.941894,
-  "lng": 138.618135,
-  "rentPerWeek": 215,
-  "billsPerWeek": 22,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Partly",
-  "minStayMonths": 3,
-  "availableInDays": 5,
-  "features": [
-   "Wi-Fi included",
-   "Laundry",
-   "Desk"
-  ],
-  "houseRhythm": [
-   "Quiet weeknights",
-   "Early birds"
-  ],
-  "preferredFlatmate": "Postgrad preferred, badminton a bonus",
-  "description": "Clean, quiet unit near the south parklands. A short bus up Glen Osmond Rd to the city.",
-  "housemates": [
-   "Adelaide · Accounting",
-   "Adelaide · Data Science"
-  ],
-  "photos": [
-   "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/01-bedroom.jpg",
-   "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/02-living.jpg",
-   "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/03-kitchen.jpg",
-   "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/04-exterior.jpg"
-  ]
- },
- {
-  "id": "2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4",
-  "owner": "p45",
-  "title": "New apartment room in Bowden",
-  "suburb": "Bowden",
-  "street": "Park Tce",
-  "lat": -34.904833,
-  "lng": 138.580549,
-  "rentPerWeek": 275,
-  "billsPerWeek": 25,
-  "bedrooms": 2,
-  "flatmates": 1,
-  "toilet": "PrivateEnsuite",
-  "bathroom": "Ensuite",
-  "furnished": "Fully",
-  "minStayMonths": 6,
-  "availableInDays": 12,
-  "features": [
-   "Air con",
-   "Balcony",
-   "Double bed",
-   "Wi-Fi included"
-  ],
-  "houseRhythm": [
-   "Early birds",
-   "Gym crew"
-  ],
-  "preferredFlatmate": "Early riser, clean and organised",
-  "description": "New-build apartment in Bowden with a balcony. Train to Adelaide Railway Station in 5 minutes.",
-  "housemates": [
-   "Adelaide · Media and Communication"
-  ],
-  "photos": [
-   "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/01-bedroom.jpg",
-   "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/02-living.jpg",
-   "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/03-kitchen.jpg",
-   "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/04-exterior.jpg"
-  ]
- },
- {
-  "id": "850452bf-9825-55f6-9252-48b1a6ce3617",
-  "owner": "p11",
-  "title": "Room 15 min walk from Flinders Uni",
-  "suburb": "Bedford Park",
-  "street": "Sturt Rd",
-  "lat": -35.01711,
-  "lng": 138.570188,
-  "rentPerWeek": 185,
-  "billsPerWeek": 25,
-  "bedrooms": 4,
-  "flatmates": 3,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Partly",
-  "minStayMonths": 3,
-  "availableInDays": 0,
-  "features": [
-   "Laundry",
-   "Parking",
-   "Wi-Fi included"
-  ],
-  "houseRhythm": [
-   "Early birds",
-   "Social house"
-  ],
-  "preferredFlatmate": "Flinders student, beach lover",
-  "description": "Big share house on Sturt Rd, a 15-minute walk to the Flinders campus. Walk to lectures, bus to Glenelg for the beach.",
-  "housemates": [
-   "Flinders · Paramedicine",
-   "Flinders · Nursing",
-   "Flinders · Nutrition"
-  ],
-  "photos": [
-   "flats/850452bf-9825-55f6-9252-48b1a6ce3617/01-bedroom.jpg",
-   "flats/850452bf-9825-55f6-9252-48b1a6ce3617/02-living.jpg",
-   "flats/850452bf-9825-55f6-9252-48b1a6ce3617/03-kitchen.jpg",
-   "flats/850452bf-9825-55f6-9252-48b1a6ce3617/04-exterior.jpg"
-  ]
- },
- {
-  "id": "0f496ac1-f647-588d-988b-04e21c572b0d",
-  "owner": "p30",
-  "title": "Quiet room in St Marys, suits placements",
-  "suburb": "St Marys",
-  "street": "Daws Rd",
-  "lat": -34.993007,
-  "lng": 138.577217,
-  "rentPerWeek": 175,
-  "billsPerWeek": 22,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Fully",
-  "minStayMonths": 3,
-  "availableInDays": 9,
-  "features": [
-   "Double bed",
-   "Desk",
-   "Laundry"
-  ],
-  "houseRhythm": [
-   "Quiet weeknights",
-   "Plant parents"
-  ],
-  "preferredFlatmate": "Quiet, suits shift workers",
-  "description": "Quiet home in St Marys, a short bus to Flinders Medical Centre. Suits placements and shift work.",
-  "housemates": [
-   "Flinders · Midwifery",
-   "Flinders · Medicine"
-  ],
-  "photos": [
-   "flats/0f496ac1-f647-588d-988b-04e21c572b0d/01-bedroom.jpg",
-   "flats/0f496ac1-f647-588d-988b-04e21c572b0d/02-living.jpg",
-   "flats/0f496ac1-f647-588d-988b-04e21c572b0d/03-kitchen.jpg",
-   "flats/0f496ac1-f647-588d-988b-04e21c572b0d/04-exterior.jpg"
-  ]
- },
- {
-  "id": "260c3047-9ad8-50f2-8baa-fb7845036309",
-  "owner": "p21",
-  "title": "Room next to Tonsley campus",
-  "suburb": "Mitchell Park",
-  "street": "Alawoona Ave",
-  "lat": -35.008642,
-  "lng": 138.563239,
-  "rentPerWeek": 170,
-  "billsPerWeek": 25,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Partly",
-  "minStayMonths": 3,
-  "availableInDays": 3,
-  "features": [
-   "Wi-Fi included",
-   "Desk",
-   "Parking"
-  ],
-  "houseRhythm": [
-   "Quiet weeknights",
-   "Gym crew"
-  ],
-  "preferredFlatmate": "Tech-minded, OK with late nights",
-  "description": "About 13 minutes' walk to Tonsley. Fast NBN and a shared study room with a whiteboard.",
-  "housemates": [
-   "Flinders · Computer Science",
-   "Flinders · Cybersecurity"
-  ],
-  "photos": [
-   "flats/260c3047-9ad8-50f2-8baa-fb7845036309/01-bedroom.jpg",
-   "flats/260c3047-9ad8-50f2-8baa-fb7845036309/02-kitchen.jpg",
-   "flats/260c3047-9ad8-50f2-8baa-fb7845036309/03-bathroom.jpg",
-   "flats/260c3047-9ad8-50f2-8baa-fb7845036309/04-exterior.jpg"
-  ]
- },
- {
-  "id": "05e4e863-f39d-5964-9a24-6cf963e1de1e",
-  "owner": "p34",
-  "title": "Unfurnished room near Westfield Marion",
-  "suburb": "Marion",
-  "street": "Marion Rd",
-  "lat": -35.003902,
-  "lng": 138.557554,
-  "rentPerWeek": 190,
-  "billsPerWeek": 25,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Unfurnished",
-  "minStayMonths": 6,
-  "availableInDays": 16,
-  "features": [
-   "Parking",
-   "Laundry",
-   "Air con"
-  ],
-  "houseRhythm": [
-   "Early birds",
-   "Gym crew"
-  ],
-  "preferredFlatmate": "Early to bed, gym-goer",
-  "description": "Spacious unfurnished room, close to Westfield Marion with buses to Flinders.",
-  "housemates": [
-   "Flinders · Paramedicine",
-   "Flinders · Social Work"
-  ],
-  "photos": [
-   "flats/05e4e863-f39d-5964-9a24-6cf963e1de1e/01-bedroom.jpg",
-   "flats/05e4e863-f39d-5964-9a24-6cf963e1de1e/02-kitchen.jpg",
-   "flats/05e4e863-f39d-5964-9a24-6cf963e1de1e/03-bathroom.jpg"
-  ]
- },
- {
-  "id": "316f3b11-c4fc-5e16-a052-6a38832b31f6",
-  "owner": "p47",
-  "title": "Beachside room, tram to the city",
-  "suburb": "Glenelg",
-  "street": "Jetty Rd",
-  "lat": -34.980043,
-  "lng": 138.517957,
-  "rentPerWeek": 250,
-  "billsPerWeek": 30,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Fully",
-  "minStayMonths": 3,
-  "availableInDays": 20,
-  "features": [
-   "Balcony",
-   "Air con",
-   "Wi-Fi included"
-  ],
-  "houseRhythm": [
-   "Social house",
-   "Shared dinners"
-  ],
-  "preferredFlatmate": "Beachy, social, clean",
-  "description": "Two minutes from the beach. The tram goes straight up to Victoria Square and Flinders City.",
-  "housemates": [
-   "Flinders · Digital Forensics",
-   "Adelaide · Arts"
-  ],
-  "photos": [
-   "flats/316f3b11-c4fc-5e16-a052-6a38832b31f6/01-bedroom.jpg",
-   "flats/316f3b11-c4fc-5e16-a052-6a38832b31f6/02-kitchen.jpg",
-   "flats/316f3b11-c4fc-5e16-a052-6a38832b31f6/03-bathroom.jpg"
-  ]
- },
- {
-  "id": "a28e23fa-e787-5189-bd1b-8d9d4f0a481b",
-  "owner": "p23",
-  "title": "Room by the lake, walk to campus",
-  "suburb": "Mawson Lakes",
-  "street": "Main St",
-  "lat": -34.806764,
-  "lng": 138.616671,
-  "rentPerWeek": 195,
-  "billsPerWeek": 22,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Fully",
-  "minStayMonths": 6,
-  "availableInDays": 6,
-  "features": [
-   "Desk",
-   "Wi-Fi included",
-   "Laundry",
-   "Parking"
-  ],
-  "houseRhythm": [
-   "Quiet weeknights",
-   "Early birds"
-  ],
-  "preferredFlatmate": "STEM student, quiet on weeknights",
-  "description": "Townhouse by the lake. 6 minutes' walk to the Mawson Lakes campus, train to the city from the interchange.",
-  "housemates": [
-   "Adelaide · Software Engineering",
-   "Adelaide · IT"
-  ],
-  "photos": [
-   "flats/a28e23fa-e787-5189-bd1b-8d9d4f0a481b/01-bedroom.jpg",
-   "flats/a28e23fa-e787-5189-bd1b-8d9d4f0a481b/02-kitchen.jpg",
-   "flats/a28e23fa-e787-5189-bd1b-8d9d4f0a481b/03-bathroom.jpg"
-  ]
- },
- {
-  "id": "63f4ae66-305f-5475-b8ff-e107f7a09c5a",
-  "owner": "p33",
-  "title": "Garden room near Magill campus",
-  "suburb": "Magill",
-  "street": "Magill Rd",
-  "lat": -34.91306,
-  "lng": 138.670663,
-  "rentPerWeek": 200,
-  "billsPerWeek": 24,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Partly",
-  "minStayMonths": 3,
-  "availableInDays": 11,
-  "features": [
-   "Double bed",
-   "Laundry",
-   "Parking"
-  ],
-  "houseRhythm": [
-   "Plant parents",
-   "Quiet weeknights"
-  ],
-  "preferredFlatmate": "Education or social sciences student",
-  "description": "Cosy room with a garden view, 7 minutes' walk to the Magill campus.",
-  "housemates": [
-   "Adelaide · Education",
-   "Adelaide · Psychology"
-  ],
-  "photos": [
-   "flats/63f4ae66-305f-5475-b8ff-e107f7a09c5a/01-bedroom.jpg",
-   "flats/63f4ae66-305f-5475-b8ff-e107f7a09c5a/02-kitchen.jpg",
-   "flats/63f4ae66-305f-5475-b8ff-e107f7a09c5a/03-bathroom.jpg"
-  ]
- },
- {
-  "id": "15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4",
-  "owner": "p19",
-  "title": "Furnished room near Victoria Square",
-  "suburb": "Adelaide",
-  "street": "Wakefield St",
-  "lat": -34.928449,
-  "lng": 138.607291,
-  "rentPerWeek": 260,
-  "billsPerWeek": 25,
-  "bedrooms": 3,
-  "flatmates": 2,
-  "toilet": "Shared",
-  "bathroom": "Shared",
-  "furnished": "Fully",
-  "minStayMonths": 6,
-  "availableInDays": 27,
-  "features": [
-   "Air con",
-   "Double bed",
-   "Desk",
-   "Laundry"
-  ],
-  "houseRhythm": [
-   "Early birds",
-   "Gym crew"
-  ],
-  "preferredFlatmate": "Sporty, early riser",
-  "description": "Furnished CBD apartment near Victoria Square. Trams from Victoria Square, gym 3 minutes away.",
-  "housemates": [
-   "Adelaide · Physiotherapy",
-   "Adelaide · Health Science"
-  ],
-  "photos": [
-   "flats/15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4/01-bedroom.jpg",
-   "flats/15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4/02-kitchen.jpg",
-   "flats/15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4/03-bathroom.jpg"
-  ]
- }
+  {
+    "id": "f6047039-555a-5623-b2b0-8fec42aa34b0",
+    "owner": "p07",
+    "title": "Sunny room, 6 min to North Tce",
+    "suburb": "Adelaide",
+    "street": "Frome St",
+    "lat": -34.921693,
+    "lng": 138.607305,
+    "rentPerWeek": 245,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "PrivateEnsuite",
+    "bathroom": "Ensuite",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 18,
+    "features": [
+      "Air con",
+      "Double bed",
+      "Desk",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Shared dinners"
+    ],
+    "preferredFlatmate": "Quiet, non-smoker, late study OK",
+    "description": "Bright front room in a renovated sandstone cottage. Ensuite, big desk by the window, 6-minute walk to Barr Smith.",
+    "housemates": [
+      "Flinders · Law",
+      "Adelaide · Music"
+    ],
+    "photos": [
+      "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/01-bedroom.jpg",
+      "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/02-living.jpg",
+      "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/03-kitchen.jpg",
+      "flats/f6047039-555a-5623-b2b0-8fec42aa34b0/04-bathroom.jpg"
+    ]
+  },
+  {
+    "id": "a55aec15-36b1-5174-a5cb-06b6587073fd",
+    "owner": "p03",
+    "title": "Studio-style room with kitchenette",
+    "suburb": "North Adelaide",
+    "street": "Melbourne St",
+    "lat": -34.906291,
+    "lng": 138.607765,
+    "rentPerWeek": 280,
+    "billsPerWeek": 20,
+    "bedrooms": 4,
+    "flatmates": 3,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 6,
+    "availableInDays": 0,
+    "features": [
+      "Kitchenette",
+      "Double bed",
+      "Air con",
+      "Laundry"
+    ],
+    "houseRhythm": [
+      "Early birds",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Postgrad or mature undergrad",
+    "description": "Large room with its own kitchenette in a townhouse off Melbourne St. Cafés downstairs, about 20 minutes' walk to North Tce.",
+    "housemates": [
+      "Adelaide · Engineering",
+      "Adelaide · Medicine",
+      "Flinders · IT"
+    ],
+    "photos": [
+      "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/01-bedroom.jpg",
+      "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/02-living.jpg",
+      "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/03-kitchen.jpg",
+      "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/04-bathroom.jpg",
+      "flats/a55aec15-36b1-5174-a5cb-06b6587073fd/05-exterior.jpg"
+    ]
+  },
+  {
+    "id": "c8289b06-e144-5eac-8109-edcc423bd518",
+    "owner": "p08",
+    "title": "Budget room near Central Market",
+    "suburb": "Adelaide",
+    "street": "Gouger St",
+    "lat": -34.930524,
+    "lng": 138.591089,
+    "rentPerWeek": 185,
+    "billsPerWeek": 30,
+    "bedrooms": 4,
+    "flatmates": 3,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Unfurnished",
+    "minStayMonths": 1,
+    "availableInDays": 4,
+    "features": [
+      "Balcony",
+      "Laundry",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Social house",
+      "Shared dinners"
+    ],
+    "preferredFlatmate": "Any student, pets considered",
+    "description": "Simple, cheap room above the Gouger St strip. Central Market is 2 minutes away, trams on King William St a short walk away.",
+    "housemates": [
+      "Flinders · Business",
+      "Adelaide · Commerce",
+      "Adelaide · Arts"
+    ],
+    "photos": [
+      "flats/c8289b06-e144-5eac-8109-edcc423bd518/01-bedroom.jpg",
+      "flats/c8289b06-e144-5eac-8109-edcc423bd518/02-living.jpg",
+      "flats/c8289b06-e144-5eac-8109-edcc423bd518/03-kitchen.jpg",
+      "flats/c8289b06-e144-5eac-8109-edcc423bd518/04-bathroom.jpg",
+      "flats/c8289b06-e144-5eac-8109-edcc423bd518/05-exterior.jpg"
+    ]
+  },
+  {
+    "id": "9c38f282-9433-5241-bb17-baa9e4ae46b2",
+    "owner": "p02",
+    "title": "Ensuite in townhouse, Hutt St",
+    "suburb": "Adelaide",
+    "street": "Hutt St",
+    "lat": -34.931441,
+    "lng": 138.612181,
+    "rentPerWeek": 230,
+    "billsPerWeek": 22,
+    "bedrooms": 2,
+    "flatmates": 1,
+    "toilet": "PrivateEnsuite",
+    "bathroom": "Ensuite",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 24,
+    "features": [
+      "Air con",
+      "Double bed",
+      "Kitchenette",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Plant parents"
+    ],
+    "preferredFlatmate": "Female student preferred",
+    "description": "Two-bedroom townhouse with a courtyard full of plants. Your room has an ensuite and off-street parking.",
+    "housemates": [
+      "Flinders · Nursing"
+    ],
+    "photos": [
+      "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/01-bedroom.jpg",
+      "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/02-living.jpg",
+      "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/03-kitchen.jpg",
+      "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/04-bathroom.jpg",
+      "flats/9c38f282-9433-5241-bb17-baa9e4ae46b2/05-exterior.jpg"
+    ]
+  },
+  {
+    "id": "5a36fca1-5e37-5552-8bab-dac7a5c9b797",
+    "owner": "p12",
+    "title": "Furnished room in CBD apartment",
+    "suburb": "Adelaide",
+    "street": "Grote St",
+    "lat": -34.929837,
+    "lng": 138.58888,
+    "rentPerWeek": 255,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 10,
+    "features": [
+      "Air con",
+      "Desk",
+      "Wi-Fi included",
+      "Laundry"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Tidy student, happy to share cleaning roster",
+    "description": "Level 6 apartment with city views, gym in the building. 20 minutes' walk to Flinders City Campus, or a quick tram ride.",
+    "housemates": [
+      "Adelaide · IT",
+      "Adelaide · Economics"
+    ],
+    "photos": [
+      "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/01-bedroom.jpg",
+      "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/02-living.jpg",
+      "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/03-bathroom.jpg",
+      "flats/5a36fca1-5e37-5552-8bab-dac7a5c9b797/04-exterior.jpg"
+    ]
+  },
+  {
+    "id": "6c5ace63-3681-56a3-8e2d-79d12e8a9db7",
+    "owner": "p17",
+    "title": "Quiet room in Kent Town villa",
+    "suburb": "Kent Town",
+    "street": "Rundle St",
+    "lat": -34.921725,
+    "lng": 138.616419,
+    "rentPerWeek": 240,
+    "billsPerWeek": 28,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 6,
+    "availableInDays": 14,
+    "features": [
+      "Double bed",
+      "Laundry",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Early birds"
+    ],
+    "preferredFlatmate": "Final-year or postgrad, quiet",
+    "description": "Old stone villa on a leafy street. Two quiet housemates, under 20 minutes' walk to North Tce.",
+    "housemates": [
+      "Adelaide · Law",
+      "Adelaide · Pharmacy"
+    ],
+    "photos": [
+      "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/01-bedroom.jpg",
+      "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/02-living.jpg",
+      "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/03-bathroom.jpg",
+      "flats/6c5ace63-3681-56a3-8e2d-79d12e8a9db7/04-exterior.jpg"
+    ]
+  },
+  {
+    "id": "e368b447-68ed-5f61-8441-d2ec7c9e5be7",
+    "owner": "p42",
+    "title": "Social share house off The Parade",
+    "suburb": "Norwood",
+    "street": "The Parade",
+    "lat": -34.921139,
+    "lng": 138.63929,
+    "rentPerWeek": 235,
+    "billsPerWeek": 30,
+    "bedrooms": 4,
+    "flatmates": 3,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 7,
+    "features": [
+      "Air con",
+      "Double bed",
+      "Balcony",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Social house",
+      "Shared dinners"
+    ],
+    "preferredFlatmate": "Social and easy-going",
+    "description": "Big social house, Friday dinners and the odd open-mic night. Bus to the city every 10 minutes.",
+    "housemates": [
+      "Adelaide · Music Theatre",
+      "Adelaide · Media",
+      "Flinders · Creative Writing"
+    ],
+    "photos": [
+      "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/01-bedroom.jpg",
+      "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/02-living.jpg",
+      "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/03-bathroom.jpg",
+      "flats/e368b447-68ed-5f61-8441-d2ec7c9e5be7/04-exterior.jpg"
+    ]
+  },
+  {
+    "id": "5704c8b8-dbbf-5501-9209-546ea8dd2679",
+    "owner": "p14",
+    "title": "Room near Thebarton oval",
+    "suburb": "Torrensville",
+    "street": "Henley Beach Rd",
+    "lat": -34.924766,
+    "lng": 138.556338,
+    "rentPerWeek": 205,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 3,
+    "availableInDays": 0,
+    "features": [
+      "Laundry",
+      "Parking",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Social house",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Footy fans welcome",
+    "description": "Friendly house near the Thebarton oval. Bus straight down Henley Beach Rd to the city in 10 minutes.",
+    "housemates": [
+      "Flinders · Criminology",
+      "Adelaide · Agricultural Sciences"
+    ],
+    "photos": [
+      "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/01-bedroom.jpg",
+      "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/02-living.jpg",
+      "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/03-kitchen.jpg",
+      "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/04-bathroom.jpg",
+      "flats/5704c8b8-dbbf-5501-9209-546ea8dd2679/05-exterior.jpg"
+    ]
+  },
+  {
+    "id": "351db218-f869-53bc-bad0-1dd4322b8732",
+    "owner": "p13",
+    "title": "Calm room in Prospect bungalow",
+    "suburb": "Prospect",
+    "street": "Prospect Rd",
+    "lat": -34.895123,
+    "lng": 138.595207,
+    "rentPerWeek": 220,
+    "billsPerWeek": 24,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 21,
+    "features": [
+      "Air con",
+      "Desk",
+      "Double bed",
+      "Laundry"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Plant parents"
+    ],
+    "preferredFlatmate": "Quiet musician-friendly household",
+    "description": "Character bungalow a block from the Prospect Rd cafés. Quiet house, soundproofed practice nook.",
+    "housemates": [
+      "Adelaide · Music",
+      "Flinders · Psychology"
+    ],
+    "photos": [
+      "flats/351db218-f869-53bc-bad0-1dd4322b8732/01-bedroom.jpg",
+      "flats/351db218-f869-53bc-bad0-1dd4322b8732/02-living.jpg",
+      "flats/351db218-f869-53bc-bad0-1dd4322b8732/03-kitchen.jpg",
+      "flats/351db218-f869-53bc-bad0-1dd4322b8732/04-bathroom.jpg",
+      "flats/351db218-f869-53bc-bad0-1dd4322b8732/05-exterior.jpg"
+    ]
+  },
+  {
+    "id": "9a7c76e6-f15f-5781-a11d-cbe2bd882a3f",
+    "owner": "p06",
+    "title": "Ensuite room in Unley townhouse",
+    "suburb": "Unley",
+    "street": "King William Rd",
+    "lat": -34.951396,
+    "lng": 138.59967,
+    "rentPerWeek": 265,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "PrivateEnsuite",
+    "bathroom": "Ensuite",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 30,
+    "features": [
+      "Air con",
+      "Double bed",
+      "Desk",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Plant parents",
+      "Quiet weeknights"
+    ],
+    "preferredFlatmate": "Creative, tidy, non-smoker",
+    "description": "Modern townhouse off King William Rd with a small garden. Tram to the city from Greenhill Rd.",
+    "housemates": [
+      "Adelaide · Creative Arts",
+      "Adelaide · Architecture"
+    ],
+    "photos": [
+      "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/01-bedroom.jpg",
+      "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/02-living.jpg",
+      "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/03-kitchen.jpg",
+      "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/04-bathroom.jpg",
+      "flats/9a7c76e6-f15f-5781-a11d-cbe2bd882a3f/05-exterior.jpg"
+    ]
+  },
+  {
+    "id": "bebd471e-3a1b-593d-834f-d4bbf0bb9f4f",
+    "owner": "p16",
+    "title": "Tidy room close to the parklands",
+    "suburb": "Parkside",
+    "street": "Glen Osmond Rd",
+    "lat": -34.941894,
+    "lng": 138.618135,
+    "rentPerWeek": 215,
+    "billsPerWeek": 22,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 3,
+    "availableInDays": 5,
+    "features": [
+      "Wi-Fi included",
+      "Laundry",
+      "Desk"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Early birds"
+    ],
+    "preferredFlatmate": "Postgrad preferred, badminton a bonus",
+    "description": "Clean, quiet unit near the south parklands. A short bus up Glen Osmond Rd to the city.",
+    "housemates": [
+      "Adelaide · Accounting",
+      "Adelaide · Data Science"
+    ],
+    "photos": [
+      "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/01-bedroom.jpg",
+      "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/02-living.jpg",
+      "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/03-kitchen.jpg",
+      "flats/bebd471e-3a1b-593d-834f-d4bbf0bb9f4f/04-exterior.jpg"
+    ]
+  },
+  {
+    "id": "2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4",
+    "owner": "p45",
+    "title": "New apartment room in Bowden",
+    "suburb": "Bowden",
+    "street": "Park Tce",
+    "lat": -34.904833,
+    "lng": 138.580549,
+    "rentPerWeek": 275,
+    "billsPerWeek": 25,
+    "bedrooms": 2,
+    "flatmates": 1,
+    "toilet": "PrivateEnsuite",
+    "bathroom": "Ensuite",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 12,
+    "features": [
+      "Air con",
+      "Balcony",
+      "Double bed",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Early birds",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Early riser, clean and organised",
+    "description": "New-build apartment in Bowden with a balcony. Train to Adelaide Railway Station in 5 minutes.",
+    "housemates": [
+      "Adelaide · Media and Communication"
+    ],
+    "photos": [
+      "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/01-bedroom.jpg",
+      "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/02-living.jpg",
+      "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/03-kitchen.jpg",
+      "flats/2ff3c78b-fd52-5c71-8289-1a7b2d83c7e4/04-exterior.jpg"
+    ]
+  },
+  {
+    "id": "850452bf-9825-55f6-9252-48b1a6ce3617",
+    "owner": "p11",
+    "title": "Room 15 min walk from Flinders Uni",
+    "suburb": "Bedford Park",
+    "street": "Sturt Rd",
+    "lat": -35.01711,
+    "lng": 138.570188,
+    "rentPerWeek": 185,
+    "billsPerWeek": 25,
+    "bedrooms": 4,
+    "flatmates": 3,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 3,
+    "availableInDays": 0,
+    "features": [
+      "Laundry",
+      "Parking",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Early birds",
+      "Social house"
+    ],
+    "preferredFlatmate": "Flinders student, beach lover",
+    "description": "Big share house on Sturt Rd, a 15-minute walk to the Flinders campus. Walk to lectures, bus to Glenelg for the beach.",
+    "housemates": [
+      "Flinders · Paramedicine",
+      "Flinders · Nursing",
+      "Flinders · Nutrition"
+    ],
+    "photos": [
+      "flats/850452bf-9825-55f6-9252-48b1a6ce3617/01-bedroom.jpg",
+      "flats/850452bf-9825-55f6-9252-48b1a6ce3617/02-living.jpg",
+      "flats/850452bf-9825-55f6-9252-48b1a6ce3617/03-kitchen.jpg",
+      "flats/850452bf-9825-55f6-9252-48b1a6ce3617/04-exterior.jpg"
+    ]
+  },
+  {
+    "id": "0f496ac1-f647-588d-988b-04e21c572b0d",
+    "owner": "p30",
+    "title": "Quiet room in St Marys, suits placements",
+    "suburb": "St Marys",
+    "street": "Daws Rd",
+    "lat": -34.993007,
+    "lng": 138.577217,
+    "rentPerWeek": 175,
+    "billsPerWeek": 22,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 9,
+    "features": [
+      "Double bed",
+      "Desk",
+      "Laundry"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Plant parents"
+    ],
+    "preferredFlatmate": "Quiet, suits shift workers",
+    "description": "Quiet home in St Marys, a short bus to Flinders Medical Centre. Suits placements and shift work.",
+    "housemates": [
+      "Flinders · Midwifery",
+      "Flinders · Medicine"
+    ],
+    "photos": [
+      "flats/0f496ac1-f647-588d-988b-04e21c572b0d/01-bedroom.jpg",
+      "flats/0f496ac1-f647-588d-988b-04e21c572b0d/02-living.jpg",
+      "flats/0f496ac1-f647-588d-988b-04e21c572b0d/03-kitchen.jpg",
+      "flats/0f496ac1-f647-588d-988b-04e21c572b0d/04-exterior.jpg"
+    ]
+  },
+  {
+    "id": "260c3047-9ad8-50f2-8baa-fb7845036309",
+    "owner": "p21",
+    "title": "Room next to Tonsley campus",
+    "suburb": "Mitchell Park",
+    "street": "Alawoona Ave",
+    "lat": -35.008642,
+    "lng": 138.563239,
+    "rentPerWeek": 170,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 3,
+    "availableInDays": 3,
+    "features": [
+      "Wi-Fi included",
+      "Desk",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Tech-minded, OK with late nights",
+    "description": "About 13 minutes' walk to Tonsley. Fast NBN and a shared study room with a whiteboard.",
+    "housemates": [
+      "Flinders · Computer Science",
+      "Flinders · Cybersecurity"
+    ],
+    "photos": [
+      "flats/260c3047-9ad8-50f2-8baa-fb7845036309/01-bedroom.jpg",
+      "flats/260c3047-9ad8-50f2-8baa-fb7845036309/02-kitchen.jpg",
+      "flats/260c3047-9ad8-50f2-8baa-fb7845036309/03-bathroom.jpg",
+      "flats/260c3047-9ad8-50f2-8baa-fb7845036309/04-exterior.jpg"
+    ]
+  },
+  {
+    "id": "05e4e863-f39d-5964-9a24-6cf963e1de1e",
+    "owner": "p34",
+    "title": "Unfurnished room near Westfield Marion",
+    "suburb": "Marion",
+    "street": "Marion Rd",
+    "lat": -35.003902,
+    "lng": 138.557554,
+    "rentPerWeek": 190,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Unfurnished",
+    "minStayMonths": 6,
+    "availableInDays": 16,
+    "features": [
+      "Parking",
+      "Laundry",
+      "Air con"
+    ],
+    "houseRhythm": [
+      "Early birds",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Early to bed, gym-goer",
+    "description": "Spacious unfurnished room, close to Westfield Marion with buses to Flinders.",
+    "housemates": [
+      "Flinders · Paramedicine",
+      "Flinders · Social Work"
+    ],
+    "photos": [
+      "flats/05e4e863-f39d-5964-9a24-6cf963e1de1e/01-bedroom.jpg",
+      "flats/05e4e863-f39d-5964-9a24-6cf963e1de1e/02-kitchen.jpg",
+      "flats/05e4e863-f39d-5964-9a24-6cf963e1de1e/03-bathroom.jpg"
+    ]
+  },
+  {
+    "id": "316f3b11-c4fc-5e16-a052-6a38832b31f6",
+    "owner": "p47",
+    "title": "Beachside room, tram to the city",
+    "suburb": "Glenelg",
+    "street": "Jetty Rd",
+    "lat": -34.980043,
+    "lng": 138.517957,
+    "rentPerWeek": 250,
+    "billsPerWeek": 30,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 20,
+    "features": [
+      "Balcony",
+      "Air con",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Social house",
+      "Shared dinners"
+    ],
+    "preferredFlatmate": "Beachy, social, clean",
+    "description": "Two minutes from the beach. The tram goes straight up to Victoria Square and Flinders City.",
+    "housemates": [
+      "Flinders · Digital Forensics",
+      "Adelaide · Arts"
+    ],
+    "photos": [
+      "flats/316f3b11-c4fc-5e16-a052-6a38832b31f6/01-bedroom.jpg",
+      "flats/316f3b11-c4fc-5e16-a052-6a38832b31f6/02-kitchen.jpg",
+      "flats/316f3b11-c4fc-5e16-a052-6a38832b31f6/03-bathroom.jpg"
+    ]
+  },
+  {
+    "id": "a28e23fa-e787-5189-bd1b-8d9d4f0a481b",
+    "owner": "p23",
+    "title": "Room by the lake, walk to campus",
+    "suburb": "Mawson Lakes",
+    "street": "Main St",
+    "lat": -34.806764,
+    "lng": 138.616671,
+    "rentPerWeek": 195,
+    "billsPerWeek": 22,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 6,
+    "features": [
+      "Desk",
+      "Wi-Fi included",
+      "Laundry",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Early birds"
+    ],
+    "preferredFlatmate": "STEM student, quiet on weeknights",
+    "description": "Townhouse by the lake. 6 minutes' walk to the Mawson Lakes campus, train to the city from the interchange.",
+    "housemates": [
+      "Adelaide · Software Engineering",
+      "Adelaide · IT"
+    ],
+    "photos": [
+      "flats/a28e23fa-e787-5189-bd1b-8d9d4f0a481b/01-bedroom.jpg",
+      "flats/a28e23fa-e787-5189-bd1b-8d9d4f0a481b/02-kitchen.jpg",
+      "flats/a28e23fa-e787-5189-bd1b-8d9d4f0a481b/03-bathroom.jpg"
+    ]
+  },
+  {
+    "id": "63f4ae66-305f-5475-b8ff-e107f7a09c5a",
+    "owner": "p33",
+    "title": "Garden room near Magill campus",
+    "suburb": "Magill",
+    "street": "Magill Rd",
+    "lat": -34.91306,
+    "lng": 138.670663,
+    "rentPerWeek": 200,
+    "billsPerWeek": 24,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 3,
+    "availableInDays": 11,
+    "features": [
+      "Double bed",
+      "Laundry",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Plant parents",
+      "Quiet weeknights"
+    ],
+    "preferredFlatmate": "Education or social sciences student",
+    "description": "Cosy room with a garden view, 7 minutes' walk to the Magill campus.",
+    "housemates": [
+      "Adelaide · Education",
+      "Adelaide · Psychology"
+    ],
+    "photos": [
+      "flats/63f4ae66-305f-5475-b8ff-e107f7a09c5a/01-bedroom.jpg",
+      "flats/63f4ae66-305f-5475-b8ff-e107f7a09c5a/02-kitchen.jpg",
+      "flats/63f4ae66-305f-5475-b8ff-e107f7a09c5a/03-bathroom.jpg"
+    ]
+  },
+  {
+    "id": "15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4",
+    "owner": "p19",
+    "title": "Furnished room near Victoria Square",
+    "suburb": "Adelaide",
+    "street": "Wakefield St",
+    "lat": -34.928449,
+    "lng": 138.607291,
+    "rentPerWeek": 260,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 27,
+    "features": [
+      "Air con",
+      "Double bed",
+      "Desk",
+      "Laundry"
+    ],
+    "houseRhythm": [
+      "Early birds",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Sporty, early riser",
+    "description": "Furnished CBD apartment near Victoria Square. Trams from Victoria Square, gym 3 minutes away.",
+    "housemates": [
+      "Adelaide · Physiotherapy",
+      "Adelaide · Health Science"
+    ],
+    "photos": [
+      "flats/15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4/01-bedroom.jpg",
+      "flats/15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4/02-kitchen.jpg",
+      "flats/15cbbac2-9c4d-55d5-9bde-ecf1c07f5ca4/03-bathroom.jpg"
+    ]
+  },
+  {
+    "id": "faab8ef6-a983-5a1f-9b59-94ab0c975ccd",
+    "owner": "p01",
+    "title": "Bright furnished room near North Terrace",
+    "suburb": "Adelaide",
+    "street": "Frome St",
+    "lat": -34.922413,
+    "lng": 138.606585,
+    "rentPerWeek": 230,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "PrivateEnsuite",
+    "bathroom": "Ensuite",
+    "furnished": "Partly",
+    "minStayMonths": 6,
+    "availableInDays": 0,
+    "features": [
+      "Air con",
+      "Double bed",
+      "Desk",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Shared dinners"
+    ],
+    "preferredFlatmate": "Quiet, non-smoker, late study OK",
+    "description": "Furnished room with space to study and a shared kitchen. Located on Frome St in Adelaide.",
+    "housemates": [
+      "Flinders · Law",
+      "Adelaide · Music"
+    ],
+    "photos": [
+      "flats/faab8ef6-a983-5a1f-9b59-94ab0c975ccd/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "6699f9e2-ab32-54a5-b17e-9c1cc4050ccc",
+    "owner": "p04",
+    "title": "City room with a modern shared kitchen",
+    "suburb": "North Adelaide",
+    "street": "Melbourne St",
+    "lat": -34.905751,
+    "lng": 138.607945,
+    "rentPerWeek": 280,
+    "billsPerWeek": 20,
+    "bedrooms": 4,
+    "flatmates": 3,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 3,
+    "features": [
+      "Kitchenette",
+      "Double bed",
+      "Air con",
+      "Laundry"
+    ],
+    "houseRhythm": [
+      "Early birds",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Postgrad or mature undergrad",
+    "description": "Room in a shared home with a practical kitchen and easy public transport. Located on Melbourne St in North Adelaide.",
+    "housemates": [
+      "Adelaide · Engineering",
+      "Adelaide · Medicine",
+      "Flinders · IT"
+    ],
+    "photos": [
+      "flats/6699f9e2-ab32-54a5-b17e-9c1cc4050ccc/01-kitchen.jpg"
+    ]
+  },
+  {
+    "id": "6f58adc6-3db6-51fd-b253-3705eb18c1e0",
+    "owner": "p05",
+    "title": "Sunny bedroom close to Central Market",
+    "suburb": "Adelaide",
+    "street": "Gouger St",
+    "lat": -34.930344,
+    "lng": 138.590549,
+    "rentPerWeek": 195,
+    "billsPerWeek": 30,
+    "bedrooms": 4,
+    "flatmates": 3,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 6,
+    "features": [
+      "Balcony",
+      "Laundry",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Social house",
+      "Shared dinners"
+    ],
+    "preferredFlatmate": "Any student, pets considered",
+    "description": "Bright bedroom in a small student share house. Located on Gouger St in Adelaide.",
+    "housemates": [
+      "Flinders · Business",
+      "Adelaide · Commerce",
+      "Adelaide · Arts"
+    ],
+    "photos": [
+      "flats/6f58adc6-3db6-51fd-b253-3705eb18c1e0/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "36fa483e-fcf4-5fee-af33-dc4d3fe70eda",
+    "owner": "p09",
+    "title": "Room with wardrobe near Hutt Street",
+    "suburb": "Adelaide",
+    "street": "Hutt St",
+    "lat": -34.931621,
+    "lng": 138.612541,
+    "rentPerWeek": 250,
+    "billsPerWeek": 22,
+    "bedrooms": 2,
+    "flatmates": 1,
+    "toilet": "PrivateEnsuite",
+    "bathroom": "Ensuite",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 9,
+    "features": [
+      "Air con",
+      "Double bed",
+      "Kitchenette",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Plant parents"
+    ],
+    "preferredFlatmate": "Female student preferred",
+    "description": "Private room with storage in a tidy shared home. Located on Hutt St in Adelaide.",
+    "housemates": [
+      "Flinders · Nursing"
+    ],
+    "photos": [
+      "flats/36fa483e-fcf4-5fee-af33-dc4d3fe70eda/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "5d3976c9-064e-5e30-b7e4-5c6dad9023b6",
+    "owner": "p10",
+    "title": "Furnished room near the city campus",
+    "suburb": "Adelaide",
+    "street": "Grote St",
+    "lat": -34.930377,
+    "lng": 138.58852,
+    "rentPerWeek": 240,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 3,
+    "availableInDays": 12,
+    "features": [
+      "Air con",
+      "Desk",
+      "Wi-Fi included",
+      "Laundry"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Tidy student, happy to share cleaning roster",
+    "description": "Furnished bedroom with good natural light. Located on Grote St in Adelaide.",
+    "housemates": [
+      "Adelaide · IT",
+      "Adelaide · Economics"
+    ],
+    "photos": [
+      "flats/5d3976c9-064e-5e30-b7e4-5c6dad9023b6/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "d27c02a5-c797-5dc0-bbc6-706867ae4918",
+    "owner": "p15",
+    "title": "Quiet bedroom in a Kent Town share house",
+    "suburb": "Kent Town",
+    "street": "Rundle St",
+    "lat": -34.921005,
+    "lng": 138.616959,
+    "rentPerWeek": 240,
+    "billsPerWeek": 28,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 15,
+    "features": [
+      "Double bed",
+      "Laundry",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Early birds"
+    ],
+    "preferredFlatmate": "Final-year or postgrad, quiet",
+    "description": "Quiet room for a student who likes calm evenings. Located on Rundle St in Kent Town.",
+    "housemates": [
+      "Adelaide · Law",
+      "Adelaide · Pharmacy"
+    ],
+    "photos": [
+      "flats/d27c02a5-c797-5dc0-bbc6-706867ae4918/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "0fd0b8b7-31f2-56a2-b061-5edae9004835",
+    "owner": "p18",
+    "title": "Townhouse room near The Parade",
+    "suburb": "Norwood",
+    "street": "The Parade",
+    "lat": -34.920779,
+    "lng": 138.63911,
+    "rentPerWeek": 245,
+    "billsPerWeek": 30,
+    "bedrooms": 4,
+    "flatmates": 3,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 18,
+    "features": [
+      "Air con",
+      "Double bed",
+      "Balcony",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Social house",
+      "Shared dinners"
+    ],
+    "preferredFlatmate": "Social and easy-going",
+    "description": "Townhouse share with parking and a short trip to campus. Located on The Parade in Norwood.",
+    "housemates": [
+      "Adelaide · Music Theatre",
+      "Adelaide · Media",
+      "Flinders · Creative Writing"
+    ],
+    "photos": [
+      "flats/0fd0b8b7-31f2-56a2-b061-5edae9004835/01-exterior.jpg"
+    ]
+  },
+  {
+    "id": "853a4d3e-7577-577d-be00-542d46b1eaf0",
+    "owner": "p20",
+    "title": "Light-filled room in Torrensville",
+    "suburb": "Torrensville",
+    "street": "Henley Beach Rd",
+    "lat": -34.924766,
+    "lng": 138.557058,
+    "rentPerWeek": 225,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 21,
+    "features": [
+      "Laundry",
+      "Parking",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Social house",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Footy fans welcome",
+    "description": "Comfortable furnished room in a friendly house. Located on Henley Beach Rd in Torrensville.",
+    "housemates": [
+      "Flinders · Criminology",
+      "Adelaide · Agricultural Sciences"
+    ],
+    "photos": [
+      "flats/853a4d3e-7577-577d-be00-542d46b1eaf0/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "c1489fb0-a312-532f-a285-2034fe01547c",
+    "owner": "p22",
+    "title": "Loft-style room near Prospect Road",
+    "suburb": "Prospect",
+    "street": "Prospect Rd",
+    "lat": -34.895483,
+    "lng": 138.595207,
+    "rentPerWeek": 205,
+    "billsPerWeek": 24,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 3,
+    "availableInDays": 24,
+    "features": [
+      "Air con",
+      "Desk",
+      "Double bed",
+      "Laundry"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Plant parents"
+    ],
+    "preferredFlatmate": "Quiet musician-friendly household",
+    "description": "Loft-style bedroom with room for a desk. Located on Prospect Rd in Prospect.",
+    "housemates": [
+      "Adelaide · Music",
+      "Flinders · Psychology"
+    ],
+    "photos": [
+      "flats/c1489fb0-a312-532f-a285-2034fe01547c/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "f6fb808d-aa05-588f-bc8c-3c34b007412a",
+    "owner": "p24",
+    "title": "Room with study space in Unley",
+    "suburb": "Unley",
+    "street": "King William Rd",
+    "lat": -34.952116,
+    "lng": 138.59895,
+    "rentPerWeek": 265,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "PrivateEnsuite",
+    "bathroom": "Ensuite",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 2,
+    "features": [
+      "Air con",
+      "Double bed",
+      "Desk",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Plant parents",
+      "Quiet weeknights"
+    ],
+    "preferredFlatmate": "Creative, tidy, non-smoker",
+    "description": "Character home with a shared lounge and kitchen. Located on King William Rd in Unley.",
+    "housemates": [
+      "Adelaide · Creative Arts",
+      "Adelaide · Architecture"
+    ],
+    "photos": [
+      "flats/f6fb808d-aa05-588f-bc8c-3c34b007412a/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "98e65d9f-9a45-54f8-8281-4b370a400096",
+    "owner": "p25",
+    "title": "Colourful bedroom near the parklands",
+    "suburb": "Parkside",
+    "street": "Glen Osmond Rd",
+    "lat": -34.941354,
+    "lng": 138.618315,
+    "rentPerWeek": 225,
+    "billsPerWeek": 22,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 5,
+    "features": [
+      "Wi-Fi included",
+      "Laundry",
+      "Desk"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Early birds"
+    ],
+    "preferredFlatmate": "Postgrad preferred, badminton a bonus",
+    "description": "Bedroom with a distinctive green feature wall. Located on Glen Osmond Rd in Parkside.",
+    "housemates": [
+      "Adelaide · Accounting",
+      "Adelaide · Data Science"
+    ],
+    "photos": [
+      "flats/98e65d9f-9a45-54f8-8281-4b370a400096/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "35615ab4-8665-524b-953d-6b7fab1deaea",
+    "owner": "p26",
+    "title": "Large room in a Bowden apartment",
+    "suburb": "Bowden",
+    "street": "Park Tce",
+    "lat": -34.904653,
+    "lng": 138.580009,
+    "rentPerWeek": 295,
+    "billsPerWeek": 25,
+    "bedrooms": 2,
+    "flatmates": 1,
+    "toilet": "PrivateEnsuite",
+    "bathroom": "Ensuite",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 8,
+    "features": [
+      "Air con",
+      "Balcony",
+      "Double bed",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Early birds",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Early riser, clean and organised",
+    "description": "Spacious bedroom with a quiet study corner. Located on Park Tce in Bowden.",
+    "housemates": [
+      "Adelaide · Media and Communication"
+    ],
+    "photos": [
+      "flats/35615ab4-8665-524b-953d-6b7fab1deaea/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "ce63c0d7-ff6b-5d43-8b80-9c28bba9a538",
+    "owner": "p27",
+    "title": "Studio-style room near Flinders",
+    "suburb": "Bedford Park",
+    "street": "Sturt Rd",
+    "lat": -35.01729,
+    "lng": 138.570548,
+    "rentPerWeek": 170,
+    "billsPerWeek": 25,
+    "bedrooms": 4,
+    "flatmates": 3,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 6,
+    "availableInDays": 11,
+    "features": [
+      "Laundry",
+      "Parking",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Early birds",
+      "Social house"
+    ],
+    "preferredFlatmate": "Flinders student, beach lover",
+    "description": "Studio-style setup with an open shared kitchen. Located on Sturt Rd in Bedford Park.",
+    "housemates": [
+      "Flinders · Paramedicine",
+      "Flinders · Nursing",
+      "Flinders · Nutrition"
+    ],
+    "photos": [
+      "flats/ce63c0d7-ff6b-5d43-8b80-9c28bba9a538/01-kitchen.jpg"
+    ]
+  },
+  {
+    "id": "db4565e0-370d-5451-a688-8a5e8eabb1ce",
+    "owner": "p28",
+    "title": "Cosy room in St Marys",
+    "suburb": "St Marys",
+    "street": "Daws Rd",
+    "lat": -34.993547,
+    "lng": 138.576857,
+    "rentPerWeek": 175,
+    "billsPerWeek": 22,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 14,
+    "features": [
+      "Double bed",
+      "Desk",
+      "Laundry"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Plant parents"
+    ],
+    "preferredFlatmate": "Quiet, suits shift workers",
+    "description": "Cosy furnished room in a low-key household. Located on Daws Rd in St Marys.",
+    "housemates": [
+      "Flinders · Midwifery",
+      "Flinders · Medicine"
+    ],
+    "photos": [
+      "flats/db4565e0-370d-5451-a688-8a5e8eabb1ce/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "3e9eb7d0-b95b-5d7f-b987-2d52003af7bd",
+    "owner": "p29",
+    "title": "Twin room near Tonsley campus",
+    "suburb": "Mitchell Park",
+    "street": "Alawoona Ave",
+    "lat": -35.007922,
+    "lng": 138.563779,
+    "rentPerWeek": 180,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 17,
+    "features": [
+      "Wi-Fi included",
+      "Desk",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Tech-minded, OK with late nights",
+    "description": "Twin-bed room with a shared kitchen and bathroom. Located on Alawoona Ave in Mitchell Park.",
+    "housemates": [
+      "Flinders · Computer Science",
+      "Flinders · Cybersecurity"
+    ],
+    "photos": [
+      "flats/3e9eb7d0-b95b-5d7f-b987-2d52003af7bd/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "82676cfe-7a6d-5705-a312-bb1dbbfebd15",
+    "owner": "p31",
+    "title": "Private room close to Marion shops",
+    "suburb": "Marion",
+    "street": "Marion Rd",
+    "lat": -35.003542,
+    "lng": 138.557374,
+    "rentPerWeek": 210,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 20,
+    "features": [
+      "Parking",
+      "Laundry",
+      "Air con"
+    ],
+    "houseRhythm": [
+      "Early birds",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Early to bed, gym-goer",
+    "description": "Private furnished room near shops and bus routes. Located on Marion Rd in Marion.",
+    "housemates": [
+      "Flinders · Paramedicine",
+      "Flinders · Social Work"
+    ],
+    "photos": [
+      "flats/82676cfe-7a6d-5705-a312-bb1dbbfebd15/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "f0688f1f-aa37-52f3-a527-239a9b055a37",
+    "owner": "p32",
+    "title": "Studio room with a beach tram nearby",
+    "suburb": "Glenelg",
+    "street": "Jetty Rd",
+    "lat": -34.980043,
+    "lng": 138.518677,
+    "rentPerWeek": 235,
+    "billsPerWeek": 30,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Partly",
+    "minStayMonths": 3,
+    "availableInDays": 23,
+    "features": [
+      "Balcony",
+      "Air con",
+      "Wi-Fi included"
+    ],
+    "houseRhythm": [
+      "Social house",
+      "Shared dinners"
+    ],
+    "preferredFlatmate": "Beachy, social, clean",
+    "description": "Room with sitting space and a shared kitchen. Located on Jetty Rd in Glenelg.",
+    "housemates": [
+      "Flinders · Digital Forensics",
+      "Adelaide · Arts"
+    ],
+    "photos": [
+      "flats/f0688f1f-aa37-52f3-a527-239a9b055a37/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "09de2c3d-8824-5c41-9420-3391af6a6c68",
+    "owner": "p35",
+    "title": "Open-plan room near Mawson Lakes",
+    "suburb": "Mawson Lakes",
+    "street": "Main St",
+    "lat": -34.807124,
+    "lng": 138.616671,
+    "rentPerWeek": 195,
+    "billsPerWeek": 22,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 1,
+    "features": [
+      "Desk",
+      "Wi-Fi included",
+      "Laundry",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Quiet weeknights",
+      "Early birds"
+    ],
+    "preferredFlatmate": "STEM student, quiet on weeknights",
+    "description": "Open-plan sleeping area close to the train interchange. Located on Main St in Mawson Lakes.",
+    "housemates": [
+      "Adelaide · Software Engineering",
+      "Adelaide · IT"
+    ],
+    "photos": [
+      "flats/09de2c3d-8824-5c41-9420-3391af6a6c68/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "010c87ba-c9eb-5044-bf58-dbdd8fb628ed",
+    "owner": "p36",
+    "title": "Modern room near Magill campus",
+    "suburb": "Magill",
+    "street": "Magill Rd",
+    "lat": -34.91378,
+    "lng": 138.669943,
+    "rentPerWeek": 210,
+    "billsPerWeek": 24,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 6,
+    "availableInDays": 4,
+    "features": [
+      "Double bed",
+      "Laundry",
+      "Parking"
+    ],
+    "houseRhythm": [
+      "Plant parents",
+      "Quiet weeknights"
+    ],
+    "preferredFlatmate": "Education or social sciences student",
+    "description": "Tidy modern room in a quiet household. Located on Magill Rd in Magill.",
+    "housemates": [
+      "Adelaide · Education",
+      "Adelaide · Psychology"
+    ],
+    "photos": [
+      "flats/010c87ba-c9eb-5044-bf58-dbdd8fb628ed/01-bedroom.jpg"
+    ]
+  },
+  {
+    "id": "d8e2a09a-7c93-562b-9636-5e33e67e70b3",
+    "owner": "p37",
+    "title": "Student room by Victoria Square",
+    "suburb": "Adelaide",
+    "street": "Wakefield St",
+    "lat": -34.927909,
+    "lng": 138.607471,
+    "rentPerWeek": 280,
+    "billsPerWeek": 25,
+    "bedrooms": 3,
+    "flatmates": 2,
+    "toilet": "Shared",
+    "bathroom": "Shared",
+    "furnished": "Fully",
+    "minStayMonths": 3,
+    "availableInDays": 7,
+    "features": [
+      "Air con",
+      "Double bed",
+      "Desk",
+      "Laundry"
+    ],
+    "houseRhythm": [
+      "Early birds",
+      "Gym crew"
+    ],
+    "preferredFlatmate": "Sporty, early riser",
+    "description": "Furnished student room near the city tram. Located on Wakefield St in Adelaide.",
+    "housemates": [
+      "Adelaide · Physiotherapy",
+      "Adelaide · Health Science"
+    ],
+    "photos": [
+      "flats/d8e2a09a-7c93-562b-9636-5e33e67e70b3/01-bedroom.jpg"
+    ]
+  }
 ]
