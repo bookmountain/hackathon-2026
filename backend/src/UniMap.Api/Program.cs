@@ -55,7 +55,8 @@ builder.Services.AddAuthorization();
 
 // --- Web ---
 builder.Services.AddControllers()
-    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    // allowIntegerValues: false, otherwise "22" or 22 is accepted as an (undefined) enum value.
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
 builder.Services.AddProblemDetails();
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
     .WithOrigins(config.GetSection("Cors:Origins").Get<string[]>() ?? [])
