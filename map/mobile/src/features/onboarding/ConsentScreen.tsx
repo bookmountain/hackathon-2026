@@ -6,13 +6,8 @@ import { Button, Checkbox, Icon } from "@/components/ui";
 import { useToast } from "@/components/feedback/Toast";
 import { uniOfEmail, useAppStore, type Consents } from "@/store";
 import { colors, font } from "@/theme";
+import { PRIVACY_LINKS } from "./constants";
 import { goToApp } from "./navigation";
-
-export const PRIVACY_LINKS = {
-  app: "https://www.oaic.gov.au/privacy/australian-privacy-principles",
-  act: "https://www.legislation.gov.au/C2004A03712/latest/text",
-  esafety: "https://www.esafety.gov.au/",
-};
 
 const SUMMARY = [
   ["Others only ever see", "Your nickname, major and uni. An avatar only if you choose one."],

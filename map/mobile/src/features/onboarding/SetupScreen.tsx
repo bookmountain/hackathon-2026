@@ -6,9 +6,8 @@ import { AvatarPicker, Button, FieldLabel, SelectField, TextField } from "@/comp
 import { MAJORS } from "@/data/seed";
 import { uniOfEmail, useAppStore } from "@/store";
 import { colors, font } from "@/theme";
+import { NICKNAME_MAX } from "./constants";
 import { goToApp } from "./navigation";
-
-export const NICKNAME_MAX = 20;
 
 export default function SetupScreen() {
   const { state, actions } = useAppStore();
