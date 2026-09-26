@@ -42,6 +42,7 @@ public static class DevSeeder
         var students = Read<List<SeedStudent>>("students.json") ?? [];
         await SeedStudentsAsync(db, logger, students);
         await SeedFlatsAsync(db, logger, students);
+        await SeedChatsAsync(db, logger, students);
     }
 
     private static async Task SeedStudentsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
@@ -215,6 +216,73 @@ public static class DevSeeder
         if (updated == 0) return;
         await db.SaveChangesAsync();
         logger.LogWarning("Synced ids/photos on {Count} seeded flat listings", updated);
+    }
+
+    /// <summary>
+    /// A few chats for Koala_Kai (the Swagger login) so the Messages screen isn't empty in the demo:
+    /// one per chat type, with unread replies. Replies are from the UCompass prototype.
+    /// </summary>
+    private static async Task SeedChatsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
+    {
+        if (await db.Conversations.AnyAsync()) return;
+
+        var emailById = students.ToDictionary(s => s.Id, s => s.Email);
+        var users = await db.Users.ToDictionaryAsync(u => u.Email, u => u.Id);
+        Guid? U(string id) => emailById.TryGetValue(id, out var e) && users.TryGetValue(e, out var u) ? u : null;
+        var flats = (Read<List<SeedFlat>>("flats.json") ?? []).ToDictionary(f => f.Id);
+        var flatIds = await db.FlatListings.Select(f => f.Id).ToListAsync();
+
+        var now = DateTimeOffset.UtcNow;
+        var added = 0;
+
+        // (me, other, about flat, [(fromMe, text, minutesAgo)], meReadAll)
+        var scripts = new (string Me, string Other, Guid? Flat, (bool FromMe, string Text, int Ago)[] Lines, bool ReadAll)[]
+        {
+            ("p01", "p07", flats.Values.FirstOrDefault(f => f.Owner == "p07")?.Id,
+                [(true, "Hi! Is the room at Frome St still available?", 95),
+                 (false, "Hi! Yes, the room's still free. Want to inspect Thursday arvo?", 12)], false),
+            ("p01", "p05", null,
+                [(false, "Hey! Saw you're in CS too. Keen to do MATHS 1011 revision at Barr Smith this week?", 40)], false),
+        };
+        // Also chat with the owner of Mia's Hutt St room, already read.
+        var hutt = flats.Values.FirstOrDefault(f => f.Owner == "p02");
+        if (hutt is not null)
+            scripts = [.. scripts, ("p01", "p02", hutt.Id,
+                [(true, "Hi! How are bills split at the Hutt St place?", 60 * 26),
+                 (false, "Bills are split evenly — electricity, gas and Wi-Fi.", 60 * 25),
+                 (true, "Perfect, thanks! I'll let you know after I inspect.", 60 * 24)], true)];
+
+        foreach (var (meId, otherId, flatId, lines, readAll) in scripts)
+        {
+            if (U(meId) is not { } me || U(otherId) is not { } other) continue;
+            var (a, b) = Conversation.Order(me, other);
+            var conv = new Conversation { UserAId = a, UserBId = b, CreatedAt = now.AddMinutes(-lines[0].Ago - 1) };
+            db.Conversations.Add(conv);
+
+            if (flatId is { } fid && flatIds.Contains(fid) && flats.TryGetValue(fid, out var f))
+                db.ChatMessages.Add(new ChatMessage
+                {
+                    ConversationId = conv.Id, Kind = ChatMessageKind.About, AboutType = ChatAboutType.Flat, AboutId = fid,
+                    Body = $"About: {f.Title} · ${f.RentPerWeek}/wk", CreatedAt = now.AddMinutes(-lines[0].Ago - 1),
+                });
+
+            foreach (var (fromMe, text, ago) in lines)
+            {
+                var at = now.AddMinutes(-ago);
+                db.ChatMessages.Add(new ChatMessage
+                {
+                    ConversationId = conv.Id, SenderId = fromMe ? me : other, Kind = ChatMessageKind.Text, Body = text, CreatedAt = at,
+                });
+                conv.LastMessageAt = at;
+                if (fromMe) conv.MarkRead(me, at);
+                else conv.MarkRead(other, at);
+            }
+            if (readAll) conv.MarkRead(me, conv.LastMessageAt);
+            added++;
+        }
+
+        await db.SaveChangesAsync();
+        logger.LogWarning("Seeded {Count} demo chats for a1900000@adelaide.edu.au (Koala_Kai)", added);
     }
 
     private static T? Read<T>(string file)

@@ -52,6 +52,21 @@ All of these need a login token, except `options`.
 
 Other students see each pin rounded to about 100 m; only the owner sees the exact spot.
 
+### Chats (messaging)
+
+One chat per pair of students. Other people only see your nickname, major, uni and avatar.
+
+- `POST /api/chats` with `{ flatId, text }`: the "Message tenant" button. Opens or reuses the chat with
+  the listing's owner and adds an "About: {listing} · $rent/wk" line. Use `{ userId, text }` to message a
+  student directly.
+- `GET /api/chats`: your chats, with the last message and unread count.
+- `GET /api/chats/{id}/messages` (page back with `before`), `POST /api/chats/{id}/messages`,
+  `POST /api/chats/{id}/read`.
+- Real time: connect SignalR to `/hubs/chat?access_token={jwt}`. The server sends `message`, `read` and
+  `typing` events. Call the hub method `Typing(conversationId)` to show "•••" to the other person.
+
+Koala_Kai (`a1900000@adelaide.edu.au`) has 3 seeded chats, 2 with unread replies.
+
 ### Demo data
 
 In Development, an empty database is seeded from `backend/src/UniMap.Api/Data/Seed/`:

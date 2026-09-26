@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.SignalR;
 using UniMap.Api.Data;
+using UniMap.Api.Hubs;
 using UniMap.Api.Options;
 using UniMap.Api.Services;
 using UniMap.Api.Swagger;
@@ -32,6 +34,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddSingleton<VerificationCodeStore>();
 builder.Services.AddSingleton<StorageService>();
+builder.Services.AddScoped<ChatService>();
 if (config.GetSection("Email").Get<EmailOptions>()?.IsConfigured == true)
     builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 else
@@ -49,6 +52,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwt.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
         };
+        // Browsers can't set headers on WebSockets, so SignalR sends the token as ?access_token=.
+        o.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                if (ctx.Request.Path.StartsWithSegments("/hubs") && ctx.Request.Query["access_token"] is { Count: > 0 } t)
+                    ctx.Token = t;
+                return Task.CompletedTask;
+            },
+        };
     });
 builder.Services.AddAuthorization();
 
@@ -59,8 +72,11 @@ builder.Services.AddControllers()
 builder.Services.AddProblemDetails();
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
     .WithOrigins(config.GetSection("Cors:Origins").Get<string[]>() ?? [])
-    .AllowAnyHeader().AllowAnyMethod()));
+    .AllowAnyHeader().AllowAnyMethod().AllowCredentials())); // credentials: SignalR from the browser
 builder.Services.AddHealthChecks();
+builder.Services.AddSignalR()
+    .AddJsonProtocol(o => o.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
+builder.Services.AddSingleton<IUserIdProvider, SubUserIdProvider>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>
@@ -110,6 +126,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+app.MapHub<ChatHub>("/hubs/chat");
 app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 
 app.Run();

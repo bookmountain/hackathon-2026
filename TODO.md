@@ -44,6 +44,16 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
 - [ ] **Consent screen.** The prototype's 4 consents (3 required) aren't stored anywhere yet. We should
       record them with timestamps, as the Australian Privacy Principles expect.
 
+## Chats
+
+- [ ] **Block and report.** The consent screen promises "Report & block in one tap". Blocked users
+      shouldn't be able to open a chat.
+- [ ] **Rate-limit** chat creation and sending, to stop spam to strangers.
+- [ ] **Push notifications** (Expo, FCM or APNs) for when the app is closed. SignalR only reaches open apps.
+- [ ] **Scaling out:** with more than one API instance, SignalR needs a Redis backplane
+      (`AddStackExchangeRedis`). Redis is already running.
+- [ ] Chats about market items and meetups. `ChatAboutType` only has `Flat` so far.
+
 ## Removed profile fields
 
 - [ ] **Age range and Nationality** (removed by the PM on 2026-09-26). The API still accepts them, but

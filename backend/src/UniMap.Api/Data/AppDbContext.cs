@@ -9,6 +9,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<Degree> Degrees => Set<Degree>();
     public DbSet<FlatListing> FlatListings => Set<FlatListing>();
+    public DbSet<Conversation> Conversations => Set<Conversation>();
+    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -66,6 +68,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(f => new { f.Status, f.RentPerWeek });
             e.HasIndex(f => f.Features).HasMethod("gin");
             e.HasOne(f => f.Owner).WithMany().HasForeignKey(f => f.OwnerId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<Conversation>(e =>
+        {
+            e.HasIndex(c => new { c.UserAId, c.UserBId }).IsUnique();
+            e.HasIndex(c => c.UserBId);
+            e.HasOne(c => c.UserA).WithMany().HasForeignKey(c => c.UserAId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(c => c.UserB).WithMany().HasForeignKey(c => c.UserBId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<ChatMessage>(e =>
+        {
+            e.Property(m => m.Body).HasMaxLength(2000);
+            e.Property(m => m.Kind).HasConversion<string>().HasMaxLength(16);
+            e.Property(m => m.AboutType).HasConversion<string>().HasMaxLength(16);
+            e.HasIndex(m => new { m.ConversationId, m.CreatedAt });
+            e.HasOne(m => m.Conversation).WithMany().HasForeignKey(m => m.ConversationId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
