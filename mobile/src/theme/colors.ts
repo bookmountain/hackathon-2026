@@ -1,4 +1,4 @@
-// Colour tokens from design/UCompass Demo.dc.html
+// Colour tokens
 export const colors = {
   brand: "#1F5BFF",
   brandPressed: "#1646CC",

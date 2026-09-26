@@ -1,4 +1,4 @@
-// Demo data from design/UCompass Demo.dc.html. Replace with API calls once a backend exists.
+// Demo data. Replace with API calls once a backend exists.
 // Coordinates are real places (OpenStreetMap / Nominatim lookups, Sep 2026).
 import type { ChatMessage, ChatTopic, Flat, Item, MeetupEvent, Person, Pickup } from "./types";
 
