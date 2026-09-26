@@ -8,6 +8,7 @@ import {
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ToastProvider } from "@/components/feedback/Toast";
+import { AppStoreProvider } from "@/store";
 import { colors } from "@/theme";
 
 export default function RootLayout() {
@@ -22,9 +23,11 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError) return null;
 
   return (
-    <ToastProvider>
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.surface } }} />
-      <StatusBar style="dark" />
-    </ToastProvider>
+    <AppStoreProvider>
+      <ToastProvider>
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.surface } }} />
+        <StatusBar style="dark" />
+      </ToastProvider>
+    </AppStoreProvider>
   );
 }

@@ -43,6 +43,7 @@ Checks before each commit:
 ```bash
 npx tsc --noEmit
 npx expo lint
+npm test          # unit tests for the store and pure helpers
 ```
 
 ## Status
