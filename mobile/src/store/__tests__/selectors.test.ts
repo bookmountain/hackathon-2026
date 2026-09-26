@@ -1,5 +1,8 @@
-import { resolvePlace, selectHasUnread, selectMe, uniOfEmail } from "../selectors";
-import { initialState } from "../state";
+import { ME } from "@/test/fixtures";
+import { selectHasUnread, selectMe, selectSignedIn, uniOfEmail } from "../selectors";
+import { initialState, type AppState } from "../state";
+
+const signedIn: AppState = { ...initialState, session: { ...initialState.session, booted: true, token: "t", me: ME, avatar: 2 } };
 
 describe("uniOfEmail", () => {
   it("detects Flinders and defaults to Adelaide", () => {
@@ -8,33 +11,40 @@ describe("uniOfEmail", () => {
   });
 });
 
-describe("resolvePlace", () => {
-  it("expands a pickup id into the safe pickup point", () => {
-    expect(resolvePlace("bsl")).toMatchObject({ name: "Barr Smith Library", short: "Barr Smith", central: true });
-  });
-
-  it("keeps custom pins as seller-chosen places", () => {
-    expect(resolvePlace({ name: "Pulteney St", latitude: -34.92616, longitude: 138.60583 })).toEqual({
-      name: "Pulteney St",
-      short: "Pulteney St",
-      sub: "",
-      latitude: -34.92616,
-      longitude: 138.60583,
-      central: false,
-    });
-  });
-
-  it("throws on an unknown pickup id", () => {
-    expect(() => resolvePlace("nowhere")).toThrow('Unknown pickup point "nowhere"');
+describe("selectSignedIn", () => {
+  it("needs a token, consent and a profile", () => {
+    expect(selectSignedIn(signedIn)).toBe(true);
+    expect(selectSignedIn(initialState)).toBe(false);
+    const noConsent = { ...signedIn, session: { ...signedIn.session, me: { ...ME, consentComplete: false } } };
+    expect(selectSignedIn(noConsent)).toBe(false);
+    const noProfile = { ...signedIn, session: { ...signedIn.session, me: { ...ME, profile: null } } };
+    expect(selectSignedIn(noProfile)).toBe(false);
   });
 });
 
-describe("selectMe / selectHasUnread", () => {
-  it("falls back to 'You' before a nickname is set", () => {
-    expect(selectMe(initialState)).toMatchObject({ id: "me", nick: "You", avatar: -1 });
+describe("selectMe", () => {
+  it("shapes the account like other people", () => {
+    expect(selectMe(signedIn)).toEqual({
+      id: ME.userId,
+      nick: "Koala_Kai",
+      major: "Computer Science",
+      uni: "Adelaide Uni",
+      avatar: 2,
+      avatarUrl: ME.profile?.avatarUrl,
+    });
   });
 
-  it("starts with the seeded unread message", () => {
-    expect(selectHasUnread(initialState)).toBe(true);
+  it("falls back before the profile exists", () => {
+    const state = { ...initialState, session: { ...initialState.session, email: "chan0042@flinders.edu.au" } };
+    expect(selectMe(state)).toMatchObject({ nick: "You", major: "", uni: "Flinders Uni", avatar: -1 });
+  });
+});
+
+describe("selectHasUnread", () => {
+  it("is true when any chat has unread messages", () => {
+    const person = { id: "p", nick: "p", major: "", uni: "Adelaide Uni" as const, avatar: -1 };
+    const chat = { id: "c1", person, preview: "", unread: 0, lastAt: "" };
+    expect(selectHasUnread({ ...initialState, chats: [chat] })).toBe(false);
+    expect(selectHasUnread({ ...initialState, chats: [chat, { ...chat, id: "c2", unread: 2 }] })).toBe(true);
   });
 });

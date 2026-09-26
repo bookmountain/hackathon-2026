@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRefreshOnFocus } from "@/api/hooks";
 import { ChipRow } from "@/components/ui";
 import { CampusMap, MapHint, MapMarker } from "@/features/map";
 import TabScreen from "@/features/shell/TabScreen";
@@ -13,7 +14,8 @@ import FlatSheet from "./FlatSheet";
 import { FLAT_FILTERS, filterFlats, type FlatFilter } from "./logic";
 
 export default function FlatsTab() {
-  const { state } = useAppStore();
+  const { state, actions } = useAppStore();
+  const { refreshing, refresh } = useRefreshOnFocus(actions.loadFlats);
   // Set by "List a room" after publishing, to show the new room on the map
   const { focus } = useLocalSearchParams<{ focus?: string }>();
   const [handledFocus, setHandledFocus] = useState<string | undefined>();
@@ -71,7 +73,10 @@ export default function FlatsTab() {
           ))}
         </CampusMap>
       ) : (
-        <ScrollView contentContainerStyle={styles.list}>
+        <ScrollView
+          contentContainerStyle={styles.list}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}
+        >
           <View style={styles.intro}>
             <Text style={styles.title}>Rooms from fellow students</Text>
             <Text style={styles.subtitle}>Every tenant is uni-verified. See who lives there before you message.</Text>

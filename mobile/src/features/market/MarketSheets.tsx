@@ -1,9 +1,8 @@
 import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Button, Icon, Striped } from "@/components/ui";
+import { Button, Icon, Photo } from "@/components/ui";
 import type { Item, Pickup } from "@/data/types";
 import { MapSheet } from "@/features/map";
-import { resolvePlace } from "@/store";
 import { colors, font } from "@/theme";
 import { availabilityColors } from "./logic";
 
@@ -38,11 +37,11 @@ export function PickupSheet({ pickup, items }: { pickup: Pickup; items: Item[] }
 
 // Tapped a seller's own price tag
 export function ItemSheet({ item }: { item: Item }) {
-  const place = resolvePlace(item.loc);
+  const place = item.loc;
   return (
     <MapSheet>
       <View style={styles.itemHead}>
-        <Striped tone={item.tone} stripe={8} base={colors.surface} label="photo" style={styles.thumb} />
+        <Photo uri={item.photo} tone={item.tone} stripe={8} base={colors.surface} label="photo" style={styles.thumb} />
         <View style={styles.itemText}>
           <Text style={styles.itemPrice}>${item.price}</Text>
           <Text style={styles.itemTitle}>{item.title}</Text>

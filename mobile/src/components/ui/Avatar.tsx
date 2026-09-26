@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { colors, font } from "@/theme";
 
 // Avatar palette from the design: [background, text]
@@ -21,9 +21,24 @@ export function avatarLook(index: number | null | undefined, nick: string) {
   return { bg, fg, text: initial.toUpperCase() };
 }
 
-type Props = { index: number | null | undefined; nick: string; size?: number };
+type Props = {
+  index: number | null | undefined;
+  nick: string;
+  size?: number;
+  /** Uploaded photo; wins over the preset colour */
+  url?: string | null;
+};
 
-export default function Avatar({ index, nick, size = 40 }: Props) {
+export default function Avatar({ index, nick, size = 40, url }: Props) {
+  if (url) {
+    return (
+      <Image
+        source={{ uri: url }}
+        accessibilityIgnoresInvertColors
+        style={[styles.circle, { width: size, height: size, backgroundColor: colors.anon }]}
+      />
+    );
+  }
   const look = avatarLook(index, nick);
   return (
     <View style={[styles.circle, { width: size, height: size, backgroundColor: look.bg }]}>

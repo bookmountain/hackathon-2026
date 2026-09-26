@@ -1,13 +1,30 @@
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as api from "@/api/endpoints";
+import { useSubmit } from "@/api/hooks";
+import type { ConsentsResponse, ConsentType } from "@/api/types";
 import { Button, Checkbox, Icon } from "@/components/ui";
 import { useToast } from "@/components/feedback/Toast";
-import { uniOfEmail, useAppStore, type Consents } from "@/store";
+import { selectMe, selectSignedIn, useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { PRIVACY_LINKS } from "./constants";
 import { goToApp } from "./navigation";
+
+type Consents = { terms: boolean; location: boolean; age: boolean; stats: boolean };
+
+const NO_CONSENTS: Consents = { terms: false, location: false, age: false, stats: false };
+
+function fromApi(res: ConsentsResponse): Consents {
+  const granted = (type: ConsentType) => !!res.items.find((i) => i.type === type)?.granted;
+  return {
+    terms: granted("Terms"),
+    location: granted("Location"),
+    age: granted("AgeAndEnrolment"),
+    stats: granted("UsageStats"),
+  };
+}
 
 const SUMMARY = [
   ["Others only ever see", "Your nickname, major and uni. An avatar only if you choose one."],
@@ -34,25 +51,41 @@ function Link({ url, children }: { url: string; children: string }) {
 export default function ConsentScreen() {
   const { state, actions } = useAppStore();
   const toast = useToast();
-  const [consents, setConsents] = useState<Consents>(state.session.consents);
+  const { busy, submit } = useSubmit();
+  const [consents, setConsents] = useState<Consents>(NO_CONSENTS);
   const ready = CHECKS.every((c) => !c.required || consents[c.key]);
+  // Reviewing from Profile rather than onboarding
+  const reviewing = selectSignedIn(state);
+
+  // Show what was agreed before (Profile → "Review my consents", or signing in again)
+  useEffect(() => {
+    let active = true;
+    api.me.getConsents().then(
+      (res) => active && setConsents(fromApi(res)),
+      () => {},
+    );
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const accept = () => {
     if (!ready) {
       toast("Tick the three required boxes to continue");
       return;
     }
-    actions.setConsents(consents);
-    if (state.session.signedIn) {
-      // Reviewing from Profile: return to it
-      router.back();
-    } else if (state.session.nick) {
-      // Signed back in with a profile already set up
-      actions.enterApp();
-      goToApp();
-    } else {
-      router.push("/setup");
-    }
+    void submit(async () => {
+      await api.me.saveConsents({
+        terms: consents.terms,
+        location: consents.location,
+        ageAndEnrolment: consents.age,
+        usageStats: consents.stats,
+      });
+      const me = await actions.refreshMe();
+      if (reviewing) router.back();
+      else if (me.profile) goToApp();
+      else router.push("/setup");
+    });
   };
 
   return (
@@ -60,7 +93,7 @@ export default function ConsentScreen() {
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.badge}>
           <Icon name="shield" size={14} color={colors.brand} />
-          <Text style={styles.badgeText}>Verified student · {uniOfEmail(state.session.email)}</Text>
+          <Text style={styles.badgeText}>Verified student · {selectMe(state).uni}</Text>
         </View>
         <Text style={styles.title}>Before you start</Text>
         <Text style={styles.intro}>
@@ -95,7 +128,13 @@ export default function ConsentScreen() {
         ))}
       </ScrollView>
       <View style={styles.footer}>
-        <Button label="I agree & continue" onPress={accept} inactive={!ready} weight={700} />
+        <Button
+          label={busy ? "Saving…" : "I agree & continue"}
+          onPress={accept}
+          inactive={!ready}
+          disabled={busy}
+          weight={700}
+        />
       </View>
     </SafeAreaView>
   );

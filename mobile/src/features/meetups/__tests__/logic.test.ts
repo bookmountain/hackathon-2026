@@ -1,53 +1,60 @@
-import { EVENTS } from "@/data/seed";
-import { distanceMeters } from "@/features/map/geometry";
-import { buildEvent, EMPTY_EVENT, eventProblem, fillPercent, goingCount } from "../logic";
+import { EVENT } from "@/test/fixtures";
+import { EMPTY_EVENT, eventProblem, eventRequest, fillPercent, joinLabel } from "../logic";
+
+const now = new Date(2026, 8, 26, 16, 0); // Sat 26 Sep 2026, 4pm
+const later = new Date(2026, 8, 29, 19, 0);
 
 describe("headcount", () => {
-  it("adds you once joined", () => {
-    expect(goingCount(EVENTS[0], false)).toBe(14);
-    expect(goingCount(EVENTS[0], true)).toBe(15);
-    expect(fillPercent(EVENTS[0], true)).toBe(50);
+  it("fills the bar from the API's count", () => {
+    expect(fillPercent(EVENT)).toBe(50);
+  });
+
+  it("labels the Join toggle", () => {
+    expect(joinLabel(EVENT)).toBe("Join");
+    expect(joinLabel({ ...EVENT, joined: true })).toBe("Going ✓");
+    expect(joinLabel({ ...EVENT, full: true })).toBe("Full");
+    expect(joinLabel({ ...EVENT, full: true, joined: true })).toBe("Going ✓");
+    expect(joinLabel({ ...EVENT, host: true, joined: true })).toBe("Hosting");
   });
 });
 
 describe("eventProblem", () => {
-  it("needs a name, and a pin for custom places", () => {
-    expect(eventProblem(EMPTY_EVENT)).toBe("Give your event a name");
-    expect(eventProblem({ ...EMPTY_EVENT, title: "Coffee", where: "custom" })).toBe("Pin the location on the map");
-    expect(eventProblem({ ...EMPTY_EVENT, title: "Coffee" })).toBeNull();
+  it("needs a name, a future time, and a pin for custom places", () => {
+    expect(eventProblem(EMPTY_EVENT, now)).toBe("Give your event a name");
+    expect(eventProblem({ ...EMPTY_EVENT, title: "Coffee" }, now)).toBe("Pick a date & time");
+    expect(eventProblem({ ...EMPTY_EVENT, title: "Coffee", when: new Date(2026, 8, 26, 9) }, now)).toBe("Pick a time in the future");
+    expect(eventProblem({ ...EMPTY_EVENT, title: "Coffee", when: later, where: "custom" }, now)).toBe("Pin the location on the map");
+    expect(eventProblem({ ...EMPTY_EVENT, title: "Coffee", when: later }, now)).toBeNull();
   });
 });
 
-describe("buildEvent", () => {
-  const now = new Date(2026, 8, 26, 16, 0); // Sat 26 Sep 2026, 4pm
-
-  it("places central events just off the pickup and defaults to two days out", () => {
-    const event = buildEvent({ ...EMPTY_EVENT, title: " Coffee & code " }, "e-new", now);
-    expect(event).toMatchObject({
-      id: "e-new",
+describe("eventRequest", () => {
+  it("sends a preset place by id and the start as an instant", () => {
+    expect(eventRequest({ ...EMPTY_EVENT, title: " Coffee & code ", when: later })).toEqual({
       title: "Coffee & code",
-      day: "MON",
-      date: "28",
-      time: "4:00 pm",
-      when: "Mon 28 Sep · 4:00 pm",
-      where: { name: "Barr Smith Library" },
-      going: 0,
-      cap: 20,
-      desc: "Hosted anonymously. Walk-ins welcome.",
+      type: "Study",
+      startsAt: later.toISOString(),
+      endsAt: null,
+      description: null,
+      placeId: "barr-smith-library",
+      placeName: null,
+      lat: null,
+      lng: null,
+      capacity: 20,
+      walkInsWelcome: true,
     });
-    // About 32 m south-east of the pickup marker, so both pins stay tappable
-    const fromPickup = distanceMeters({ latitude: -34.91888, longitude: 138.60448 }, event.where);
-    expect(fromPickup).toBeGreaterThan(25);
-    expect(fromPickup).toBeLessThan(40);
   });
 
-  it("uses a dropped pin and its name", () => {
-    const event = buildEvent(
-      { ...EMPTY_EVENT, title: "Picnic", where: "custom", pin: { latitude: -34.9235, longitude: 138.6155 }, place: "Rymill Park", walkIn: false },
-      "e-new",
-      now,
-    );
-    expect(event.where).toEqual({ name: "Rymill Park", latitude: -34.9235, longitude: 138.6155 });
-    expect(event.desc).toBe("Hosted anonymously. RSVP to join.");
+  it("sends a dropped pin with its name", () => {
+    const body = eventRequest({
+      ...EMPTY_EVENT,
+      title: "Picnic",
+      when: later,
+      where: "custom",
+      pin: { latitude: -34.9235, longitude: 138.6155 },
+      place: "Rymill Park",
+      walkIn: false,
+    });
+    expect(body).toMatchObject({ placeId: null, placeName: "Rymill Park", lat: -34.9235, lng: 138.6155, walkInsWelcome: false });
   });
 });

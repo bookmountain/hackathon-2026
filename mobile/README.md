@@ -21,10 +21,12 @@ mobile/
     │   ├── chat/          messages + chat thread
     │   └── profile/
     ├── components/    Shared UI building blocks (buttons, fields, chips…)
+    ├── api/           API client, endpoints, photo upload, live updates
     ├── store/         App state (React context + reducer)
-    ├── data/          Seed data used until a backend exists
+    ├── data/          Screen types, and adapters from API responses
     ├── theme/         Colours, typography, shared styles
-    └── lib/           Small pure helpers
+    ├── lib/           Small pure helpers
+    └── test/          Sample API data for unit tests
 ```
 
 Import with the `@/` alias, e.g. `import { COLORS } from "@/theme"`.
@@ -46,7 +48,24 @@ npx expo lint
 npm test          # unit tests for the store and pure helpers
 ```
 
-## Status
+## Backend
 
-Everything runs on local seed data — there is no backend yet. Login accepts
-any `@adelaide.edu.au` / `@flinders.edu.au` address and any 6-digit code.
+The app uses the hosted API at https://hackathon-2026-map.bookmountain.work (Swagger at `/swagger`;
+endpoints are in the repo's [README](../README.md)). To use a local API instead, start Expo with
+`EXPO_PUBLIC_API_URL=http://<your-computer's-LAN-IP>:8080 npx expo start` (the phone can't reach
+`localhost`).
+
+- **Sign in:** tap "Demo account" for Koala_Kai (`a1900000@adelaide.edu.au` / `password123`), or create an
+  account with any `@adelaide.edu.au` / `@flinders.edu.au` address. There's no real email yet, so the
+  hosted API hands the code back and "Autofill demo code" fills it in.
+- **Session:** the token is kept in SecureStore, so reopening the app skips login.
+- **Data:** each tab reloads from the API when it comes into focus (photo URLs expire after 24 hours);
+  lists also have pull-to-refresh.
+- **Live updates:** chat messages, "•••" typing and meetup headcounts arrive over a WebSocket to
+  `/hubs/chat` (`src/api/realtime.ts`, a small SignalR client).
+- **Photos:** "List a room" and "Sell" pick photos from the library (`expo-image-picker`) and upload them
+  to R2 with presigned URLs before publishing.
+
+Where the app differs from the prototype because of the API is in
+[FRONTEND-GAPS.md](../FRONTEND-GAPS.md). Not in the app yet: editing or deleting your own listings,
+"Mark as sold", event end times, photo avatars, and people on the map.

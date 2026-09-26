@@ -1,7 +1,10 @@
 import { router } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
+import * as api from "@/api/endpoints";
+import { useLoad, useSubmit } from "@/api/hooks";
 import { useToast } from "@/components/feedback/Toast";
 import { Button, Pill } from "@/components/ui";
+import { minStayLabel } from "@/data/adapters";
 import type { Flat } from "@/data/types";
 import { MapSheet } from "@/features/map";
 import { useAppStore } from "@/store";
@@ -12,12 +15,17 @@ import { messageTenant } from "./messageTenant";
 export default function FlatSheet({ flat }: { flat: Flat }) {
   const { actions } = useAppStore();
   const toast = useToast();
+  const { busy, submit } = useSubmit();
+  // Minimum stay and features are only in the detail
+  const { data: detail } = useLoad(() => api.flats.get(flat.id), flat.id);
+  const minStay = detail ? minStayLabel(detail.minStayMonths) : "…";
   const facts = [
     { k: "Bedrooms", v: String(flat.beds) },
     { k: "Flatmates", v: String(flat.members) },
     { k: "Bills/wk", v: `$${flat.bills}` },
-    { k: "Min stay", v: flat.minStay.replace(" months", "mo").replace(" month", "mo") },
+    { k: "Min stay", v: minStay.replace(" months", "mo").replace(" month", "mo") },
   ];
+  const summary = [flat.toilet, flat.furnished, detail?.features.slice(0, 3).join(", ")].filter(Boolean).join(" · ");
 
   return (
     <MapSheet>
@@ -44,9 +52,7 @@ export default function FlatSheet({ flat }: { flat: Flat }) {
         ))}
       </View>
 
-      <Text style={styles.summary}>
-        {flat.toilet} · {flat.furnished} · {flat.feats.slice(0, 3).join(", ")}
-      </Text>
+      <Text style={styles.summary}>{summary}</Text>
 
       <View style={styles.actions}>
         <Button
@@ -56,12 +62,13 @@ export default function FlatSheet({ flat }: { flat: Flat }) {
           onPress={() => router.push({ pathname: "/flats/[id]", params: { id: flat.id } })}
         />
         <Button
-          label="Message tenant"
+          label={flat.mine ? "Your listing" : "Message tenant"}
           size="md"
           variant="outline"
           weight={700}
           style={styles.grow}
-          onPress={() => messageTenant(flat, actions, toast)}
+          disabled={busy}
+          onPress={() => submit(() => messageTenant(flat, actions, toast))}
         />
       </View>
     </MapSheet>

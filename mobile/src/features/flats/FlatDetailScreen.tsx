@@ -2,9 +2,15 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState, type ReactNode } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as api from "@/api/endpoints";
+import { useLoad, useSubmit } from "@/api/hooks";
 import { useToast } from "@/components/feedback/Toast";
-import { BackButton, Button, Pill, Striped, TextField } from "@/components/ui";
-import { findPerson, selectMe, useAppStore } from "@/store";
+import { BackButton, Button, Pill, TextField } from "@/components/ui";
+import { toFlatDetail } from "@/data/adapters";
+import type { FlatDetail } from "@/data/types";
+import { LoadingScreen } from "@/features/shell/LoadingScreen";
+import PhotoPager from "@/features/shell/PhotoPager";
+import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { messageTenant } from "./messageTenant";
 
@@ -23,20 +29,20 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 export default function FlatDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { state, actions } = useAppStore();
-  const toast = useToast();
-  const [message, setMessage] = useState("");
-  const flat = state.flats.find((f) => f.id === id);
-  if (!flat) return null;
+  const { data, error, reload } = useLoad(() => api.flats.get(id), id);
+  if (!data) return <LoadingScreen error={error} onRetry={reload} />;
+  return <FlatDetailView flat={toFlatDetail(data)} />;
+}
 
-  const me = selectMe(state);
-  const tenant =
-    flat.tenant === "me"
-      ? { nick: `${me.nick} (you)`, line: `${me.major || "Your major"} · ${me.uni}` }
-      : (() => {
-          const p = findPerson(flat.tenant);
-          return { nick: p?.nick ?? "Tenant", line: p ? `${p.major} · ${p.uni}` : "" };
-        })();
+function FlatDetailView({ flat }: { flat: FlatDetail }) {
+  const { actions } = useAppStore();
+  const toast = useToast();
+  const { busy, submit } = useSubmit();
+  const [message, setMessage] = useState("");
+
+  const tenant = flat.mine
+    ? { nick: `${flat.owner.nick} (you)`, line: `${flat.owner.major} · ${flat.owner.uni}` }
+    : { nick: flat.owner.nick, line: `${flat.owner.major} · ${flat.owner.uni}` };
 
   const roomFacts = [
     { k: "Bedrooms", v: `${flat.beds} bedrooms` },
@@ -59,11 +65,11 @@ export default function FlatDetailScreen() {
     <View style={styles.screen}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled">
-          <Striped tone={flat.tone} stripe={14} label="room photos · 1/5" style={styles.photo}>
+          <PhotoPager photos={flat.photos} tone={flat.tone} label="room photos" height={230}>
             <SafeAreaView edges={["top"]} style={styles.back}>
               <BackButton variant="white" onPress={() => router.back()} />
             </SafeAreaView>
-          </Striped>
+          </PhotoPager>
 
           <View style={styles.body}>
             <View style={styles.headline}>
@@ -87,6 +93,8 @@ export default function FlatDetailScreen() {
                 ${flat.price} rent{"\n"}+ ${flat.bills} bills
               </Text>
             </View>
+
+            {flat.desc ? <Text style={styles.desc}>{flat.desc}</Text> : null}
 
             <Section title="The room">
               <View style={styles.grid}>
@@ -112,7 +120,7 @@ export default function FlatDetailScreen() {
 
             <Section title="Features">
               <View style={styles.wrap}>
-                {flat.feats.map((f) => (
+                {(flat.feats.length ? flat.feats : ["Ask the tenant"]).map((f) => (
                   <Pill key={f} label={f} size={13} />
                 ))}
               </View>
@@ -130,7 +138,7 @@ export default function FlatDetailScreen() {
                 ))}
               </View>
               <View style={styles.wrap}>
-                {flat.rhythm.map((r) => (
+                {(flat.rhythm.length ? flat.rhythm : ["Ask the tenant"]).map((r) => (
                   <Pill key={r} label={r} dashed size={12.5} />
                 ))}
               </View>
@@ -148,25 +156,29 @@ export default function FlatDetailScreen() {
               ))}
             </Section>
 
-            <View style={styles.messageBox}>
-              <Text style={styles.sectionTitle}>Message {tenant.nick}</Text>
-              <Text style={styles.area}>Current tenant · {tenant.line}</Text>
-              <View style={styles.wrap}>
-                {QUICK_QUESTIONS.map((q) => (
-                  <Pressable key={q} onPress={() => setMessage(message ? `${message} ${q}` : q)} style={styles.quick}>
-                    <Text style={styles.quickText}>{q}</Text>
-                  </Pressable>
-                ))}
+            {!flat.mine && (
+              <View style={styles.messageBox}>
+                <Text style={styles.sectionTitle}>Message {tenant.nick}</Text>
+                <Text style={styles.area}>Current tenant · {tenant.line}</Text>
+                <View style={styles.wrap}>
+                  {QUICK_QUESTIONS.map((q) => (
+                    <Pressable key={q} onPress={() => setMessage(message ? `${message} ${q}` : q)} style={styles.quick}>
+                      <Text style={styles.quickText}>{q}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+                <TextField multiline value={message} onChangeText={setMessage} maxLength={2000} />
               </View>
-              <TextField multiline value={message} onChangeText={setMessage} />
-            </View>
+            )}
           </View>
         </ScrollView>
 
         <SafeAreaView edges={["bottom"]} style={styles.footer}>
           <Button
-            label="Send message to tenant"
-            onPress={() => messageTenant(flat, actions, toast, message.trim() || undefined)}
+            label={flat.mine ? "Your listing" : busy ? "Opening chat…" : "Send message to tenant"}
+            inactive={flat.mine}
+            disabled={busy}
+            onPress={() => submit(() => messageTenant(flat, actions, toast, message.trim() || undefined))}
           />
         </SafeAreaView>
       </KeyboardAvoidingView>
@@ -177,7 +189,6 @@ export default function FlatDetailScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
-  photo: { height: 230 },
   back: { position: "absolute", left: 14, top: 14 },
   body: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 20, gap: 20 },
   headline: { gap: 6 },
@@ -186,6 +197,7 @@ const styles = StyleSheet.create({
   per: { color: colors.muted, ...font(600, 15) },
   title: { color: colors.ink, ...font(800, 18, 1.25) },
   area: { color: colors.muted, ...font(500, 13.5) },
+  desc: { color: colors.body, ...font(500, 14.5, 1.55) },
   cost: {
     backgroundColor: colors.ink,
     borderRadius: 18,

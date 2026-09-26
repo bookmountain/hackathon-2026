@@ -1,49 +1,232 @@
+import * as SecureStore from "expo-secure-store";
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
-import type { ChatTopic, Flat, Item, MeetupEvent } from "@/data/types";
+import { setToken, setUnauthorizedHandler } from "@/api/client";
+import * as api from "@/api/endpoints";
+import { connectRealtime, type Realtime } from "@/api/realtime";
+import type { AuthResponse, ChatMessageDto, Me, StartChatRequest } from "@/api/types";
+import { previewOf, toEvent, toFlat, toItem, toMessage, toPickup, toThread } from "@/data/adapters";
+import type { MeetupEvent } from "@/data/types";
 import { reducer } from "./reducer";
-import { initialState, type AppState, type Consents, type Session } from "./state";
+import { selectSignedIn } from "./selectors";
+import { initialState, type AppState } from "./state";
 
-/** How long the other person "types" before a demo reply arrives */
-export const REPLY_DELAY_MS = 1500;
+/** How long "•••" stays up after the last typing ping */
+export const TYPING_TIMEOUT_MS = 4000;
+
+const TOKEN_KEY = "ucompass.token";
+const avatarKey = (userId: string) => `ucompass.avatar.${userId}`;
+
+// SecureStore can be unavailable (e.g. on web); the app then just forgets the session on reload
+async function readStored(key: string): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync(key);
+  } catch {
+    return null;
+  }
+}
+
+async function writeStored(key: string, value: string | null) {
+  try {
+    if (value === null) await SecureStore.deleteItemAsync(key);
+    else await SecureStore.setItemAsync(key, value);
+  } catch {
+    // Not persisted; the session still works until the app restarts
+  }
+}
+
+async function storedAvatar(userId: string): Promise<number> {
+  const value = Number(await readStored(avatarKey(userId)));
+  return Number.isInteger(value) ? value : -1;
+}
 
 function useStoreValue() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const replyTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  useEffect(() => () => clearTimeout(replyTimer.current), []);
+  // Real-time handlers and async actions read the latest state through this
+  const stateRef = useRef<AppState>(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+  const realtime = useRef<Realtime | null>(null);
+  const typingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const actions = useMemo(() => {
-    const queueReply = (personId: string) => {
-      dispatch({ type: "setTyping", personId });
-      clearTimeout(replyTimer.current);
-      replyTimer.current = setTimeout(() => dispatch({ type: "receiveReply", personId }), REPLY_DELAY_MS);
+    const signOut = () => {
+      setToken(null);
+      void writeStored(TOKEN_KEY, null);
+      dispatch({ type: "signOut" });
+    };
+
+    const refreshMe = async (): Promise<Me> => {
+      const me = await api.me.get();
+      dispatch({ type: "setMe", me });
+      return me;
+    };
+
+    const loadChats = async () => {
+      const chats = await api.chats.list();
+      dispatch({ type: "setChats", chats: chats.map(toThread) });
+    };
+
+    const receiveMessage = (dto: ChatMessageDto) => {
+      if (!stateRef.current.chats.some((c) => c.id === dto.conversationId)) {
+        // Someone started a new chat with you
+        void loadChats().catch(() => {});
+        return;
+      }
+      dispatch({
+        type: "addMessage",
+        chatId: dto.conversationId,
+        message: toMessage(dto),
+        preview: previewOf(dto),
+        unread: !dto.isMine,
+      });
     };
 
     return {
-      signIn: (email: string) => dispatch({ type: "signIn", email }),
-      setConsents: (consents: Consents) => dispatch({ type: "setConsents", consents }),
-      updateProfile: (profile: Partial<Pick<Session, "nick" | "major" | "avatar">>) =>
-        dispatch({ type: "updateProfile", profile }),
-      enterApp: () => dispatch({ type: "enterApp" }),
-      signOut: () => dispatch({ type: "signOut" }),
-      toggleJoin: (eventId: string) => dispatch({ type: "toggleJoin", eventId }),
-      addFlat: (flat: Flat) => dispatch({ type: "addFlat", flat }),
-      addItem: (item: Item) => dispatch({ type: "addItem", item }),
-      addEvent: (event: MeetupEvent) => dispatch({ type: "addEvent", event }),
+      signOut,
+      refreshMe,
 
-      /** Opens a thread; with a first message, the other person replies after a delay */
-      openChat: (personId: string, topic: ChatTopic, context?: string, firstMessage?: string) => {
-        dispatch({ type: "openChat", personId, topic, context, firstMessage });
-        if (firstMessage) queueReply(personId);
+      /** Remember the address being signed up, and the code the demo API hands back */
+      setPending: (email: string, devCode: string | null) => dispatch({ type: "setSession", session: { email, devCode } }),
+
+      /** After login or verify: keep the token and load the account */
+      signIn: async (auth: AuthResponse): Promise<Me> => {
+        setToken(auth.accessToken);
+        const me = await api.me.get();
+        const avatar = await storedAvatar(me.userId);
+        await writeStored(TOKEN_KEY, auth.accessToken);
+        dispatch({ type: "setSession", session: { token: auth.accessToken, me, email: me.email, devCode: null, avatar } });
+        return me;
       },
-      sendMessage: (personId: string, text: string) => {
+
+      setAvatar: (avatar: number) => {
+        const me = stateRef.current.session.me;
+        if (me) void writeStored(avatarKey(me.userId), String(avatar));
+        dispatch({ type: "setSession", session: { avatar } });
+      },
+
+      loadFlats: async () => {
+        const flats = await api.flats.list();
+        const now = new Date();
+        dispatch({ type: "setFlats", flats: flats.map((f) => toFlat(f, now)) });
+      },
+
+      loadItems: async () => {
+        const [items, points] = await Promise.all([api.items.list(), api.items.pickupPoints()]);
+        const pickups = points.map(toPickup);
+        const now = new Date();
+        dispatch({ type: "setPickups", pickups });
+        dispatch({ type: "setItems", items: items.map((i) => toItem(i, pickups, now)) });
+      },
+
+      /** The safe pickup points, also the Host form's preset places */
+      loadPickups: async () => {
+        const points = await api.items.pickupPoints();
+        dispatch({ type: "setPickups", pickups: points.map(toPickup) });
+      },
+
+      loadEvents: async () => {
+        const events = await api.events.list();
+        dispatch({ type: "setEvents", events: events.map(toEvent) });
+      },
+
+      putEvent: (event: MeetupEvent) => dispatch({ type: "putEvent", event }),
+
+      /** Join / "Going ✓"; resolves to the updated event */
+      toggleJoin: async (event: MeetupEvent): Promise<MeetupEvent> => {
+        const updated = toEvent(event.joined ? await api.events.leave(event.id) : await api.events.join(event.id));
+        dispatch({ type: "putEvent", event: updated });
+        return updated;
+      },
+
+      loadChats,
+
+      /** Opens (or reuses) a chat; resolves to its id */
+      startChat: async (req: StartChatRequest): Promise<string> => {
+        const chat = await api.chats.start(req);
+        dispatch({ type: "putChat", chat: toThread(chat) });
+        return chat.id;
+      },
+
+      loadMessages: async (chatId: string) => {
+        const messages = await api.chats.messages(chatId);
+        dispatch({ type: "setMessages", chatId, messages: messages.map(toMessage) });
+      },
+
+      sendMessage: async (chatId: string, text: string) => {
         const trimmed = text.trim();
         if (!trimmed) return;
-        dispatch({ type: "sendMessage", personId, text: trimmed });
-        queueReply(personId);
+        receiveMessage(await api.chats.send(chatId, trimmed));
+      },
+
+      markRead: async (chatId: string) => {
+        dispatch({ type: "markRead", chatId });
+        await api.chats.markRead(chatId);
+      },
+
+      /** Shows "•••" to the other person */
+      typing: (chatId: string) => realtime.current?.send("Typing", chatId),
+
+      /** Used by the real-time connection */
+      receiveMessage,
+      showTyping: (chatId: string) => {
+        dispatch({ type: "setTyping", chatId });
+        clearTimeout(typingTimer.current);
+        typingTimer.current = setTimeout(() => dispatch({ type: "setTyping", chatId: null }), TYPING_TIMEOUT_MS);
       },
     };
   }, []);
+
+  // Restore the saved session on launch
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const token = await readStored(TOKEN_KEY);
+      if (!token) return dispatch({ type: "booted", session: {} });
+      setToken(token);
+      try {
+        const me = await api.me.get();
+        const avatar = await storedAvatar(me.userId);
+        if (!cancelled) dispatch({ type: "booted", session: { token, me, email: me.email, avatar } });
+      } catch {
+        // Expired token or offline: start from the login screen
+        setToken(null);
+        if (!cancelled) dispatch({ type: "booted", session: {} });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(actions.signOut);
+    return () => setUnauthorizedHandler(null);
+  }, [actions]);
+
+  // Live chat and meetup headcounts while signed in
+  const signedIn = selectSignedIn(state);
+  const token = state.session.token;
+  useEffect(() => {
+    if (!signedIn || !token) return;
+    void actions.loadChats().catch(() => {});
+    const connection = connectRealtime(token, {
+      message: actions.receiveMessage,
+      typing: ({ conversationId }: { conversationId: string }) => actions.showTyping(conversationId),
+      eventGoing: ({ eventId, goingCount }: { eventId: string; goingCount: number }) =>
+        dispatch({ type: "setGoing", eventId, going: goingCount }),
+      eventUpdated: ({ eventId }: { eventId: string }) => {
+        api.events.get(eventId).then((d) => dispatch({ type: "putEvent", event: toEvent(d.summary) }), () => {});
+      },
+      eventCancelled: ({ eventId }: { eventId: string }) => dispatch({ type: "removeEvent", eventId }),
+    });
+    realtime.current = connection;
+    return () => {
+      connection.close();
+      realtime.current = null;
+      clearTimeout(typingTimer.current);
+    };
+  }, [signedIn, token, actions]);
 
   return { state, actions };
 }

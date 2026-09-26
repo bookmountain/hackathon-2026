@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRefreshOnFocus } from "@/api/hooks";
 import { Button, Icon } from "@/components/ui";
 import { CampusMap, MapHint, MapMarker } from "@/features/map";
 import TabScreen from "@/features/shell/TabScreen";
@@ -13,7 +14,8 @@ import { EventCard, EventSheet } from "./EventViews";
 const openHost = () => router.push("/meetups/new");
 
 export default function MeetupsTab() {
-  const { state } = useAppStore();
+  const { state, actions } = useAppStore();
+  const { refreshing, refresh } = useRefreshOnFocus(actions.loadEvents);
   const [view, setView] = useState<TabView>("map");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = state.events.find((e) => e.id === selectedId);
@@ -45,7 +47,10 @@ export default function MeetupsTab() {
           ))}
         </CampusMap>
       ) : (
-        <ScrollView contentContainerStyle={styles.list}>
+        <ScrollView
+          contentContainerStyle={styles.list}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}
+        >
           <View style={styles.banner}>
             <Text style={styles.bannerTitle}>Just walk in.</Text>
             <Text style={styles.bannerText}>
@@ -63,6 +68,9 @@ export default function MeetupsTab() {
           {state.events.map((e) => (
             <EventCard key={e.id} event={e} />
           ))}
+          {state.events.length === 0 && !refreshing && (
+            <Text style={styles.empty}>No meetups this week yet. Host the first one!</Text>
+          )}
         </ScrollView>
       )}
     </TabScreen>
@@ -75,4 +83,5 @@ const styles = StyleSheet.create({
   bannerTitle: { color: colors.surface, ...font(800, 19, 1.25) },
   bannerText: { color: colors.brandLight, ...font(500, 13.5, 1.45) },
   bannerButton: { alignSelf: "flex-start", height: 42, borderRadius: 12 },
+  empty: { textAlign: "center", padding: 30, color: colors.muted, ...font(600, 14) },
 });

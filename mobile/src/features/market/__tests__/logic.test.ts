@@ -1,21 +1,24 @@
-import { ITEMS } from "@/data/seed";
+import { ITEMS } from "@/test/fixtures";
 import {
   availabilityShort,
-  buildItem,
   customPinItems,
   EMPTY_ITEM,
   itemProblem,
+  itemRequest,
   itemsAtPickup,
   listItems,
   openingMessage,
+  type ItemDraft,
 } from "../logic";
 
 const ids = (items: { id: string }[]) => items.map((i) => i.id);
+const photo = { uri: "file:///lamp.jpg", contentType: "image/jpeg" };
+const today = new Date(2026, 8, 27);
 
 describe("listing filters", () => {
   it("keeps sold items in the grid but not on the map", () => {
     expect(ids(listItems(ITEMS, "All"))).toContain("m6");
-    expect(ids(itemsAtPickup(ITEMS, "fcc"))).toEqual(["m3"]);
+    expect(ids(itemsAtPickup(ITEMS, "flinders-city-campus"))).toEqual(["m3"]);
   });
 
   it("filters by category and search text", () => {
@@ -24,11 +27,11 @@ describe("listing filters", () => {
   });
 
   it("counts pickup items per category", () => {
-    expect(itemsAtPickup(ITEMS, "bsl", "Textbooks")).toHaveLength(1);
-    expect(itemsAtPickup(ITEMS, "bsl", "Tech")).toHaveLength(0);
+    expect(itemsAtPickup(ITEMS, "barr-smith-library", "Textbooks")).toHaveLength(1);
+    expect(itemsAtPickup(ITEMS, "barr-smith-library", "Tech")).toHaveLength(0);
   });
 
-  it("shows custom-pin items as map tags", () => {
+  it("shows own-pin items as map tags", () => {
     expect(ids(customPinItems(ITEMS, "All"))).toEqual(["m4", "m5"]);
     expect(ids(customPinItems(ITEMS, "Kitchen"))).toEqual(["m4"]);
   });
@@ -42,31 +45,53 @@ describe("copy", () => {
 });
 
 describe("selling", () => {
-  it("needs a photo, title and price", () => {
-    expect(itemProblem(EMPTY_ITEM)).toBe("Add a photo, title and price");
-    expect(itemProblem({ ...EMPTY_ITEM, photo: true, title: "Lamp", price: "10" })).toBeNull();
+  const ready: ItemDraft = { ...EMPTY_ITEM, photos: [photo], title: " Lamp ", price: "10", category: "Furniture", condition: "LikeNew" };
+
+  it("needs a photo, title, price, category and condition", () => {
+    expect(itemProblem(EMPTY_ITEM, today)).toBe("Add a photo, title and price");
+    expect(itemProblem({ ...ready, category: null }, today)).toBe("Pick a category and condition");
+    expect(itemProblem(ready, today)).toBeNull();
   });
 
-  it("builds a listing at a safe pickup point", () => {
-    const item = buildItem({ ...EMPTY_ITEM, photo: true, title: " Lamp ", price: "10" }, "m-new");
-    expect(item).toMatchObject({ id: "m-new", title: "Lamp", price: 10, loc: "bsl", seller: "me", avail: "Available now" });
+  it("needs a future date for 'From' and a pin for your own spot", () => {
+    expect(itemProblem({ ...ready, avail: "From", from: null }, today)).toBe("Pick a date after today");
+    expect(itemProblem({ ...ready, avail: "From", from: today }, today)).toBe("Pick a date after today");
+    expect(itemProblem({ ...ready, avail: "From", from: new Date(2026, 9, 1) }, today)).toBeNull();
+    expect(itemProblem({ ...ready, pickup: "custom" }, today)).toBe("Drop your pin on the map");
   });
 
-  it("uses the dropped pin and a from-date when chosen", () => {
-    const item = buildItem(
-      {
-        ...EMPTY_ITEM,
-        photo: true,
-        title: "Desk",
-        price: "30",
-        pickup: "custom",
-        pin: { latitude: -34.925, longitude: 138.601 },
-        avail: "Available from",
-        from: new Date(2026, 9, 1),
-      },
-      "m-new",
+  it("posts at a safe pickup point", () => {
+    expect(itemRequest(ready, "item-1", ["items/item-1/a.jpg"])).toEqual({
+      id: "item-1",
+      title: "Lamp",
+      price: 10,
+      description: null,
+      category: "Furniture",
+      condition: "LikeNew",
+      conditionNote: null,
+      availability: "Now",
+      availableFrom: null,
+      pickupPointId: "barr-smith-library",
+      placeName: null,
+      lat: null,
+      lng: null,
+      photoKeys: ["items/item-1/a.jpg"],
+    });
+  });
+
+  it("posts at your own pin with a from-date", () => {
+    const body = itemRequest(
+      { ...ready, pickup: "custom", pin: { latitude: -34.925, longitude: 138.601 }, placeName: " Rundle St ", avail: "From", from: new Date(2026, 9, 1) },
+      "item-1",
+      [],
     );
-    expect(item.loc).toEqual({ name: "Your pinned spot", latitude: -34.925, longitude: 138.601 });
-    expect(item.avail).toBe("Available from 1 Oct");
+    expect(body).toMatchObject({
+      pickupPointId: null,
+      placeName: "Rundle St",
+      lat: -34.925,
+      lng: 138.601,
+      availability: "From",
+      availableFrom: "2026-10-01",
+    });
   });
 });

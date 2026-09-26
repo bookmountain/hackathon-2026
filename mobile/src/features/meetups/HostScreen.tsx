@@ -1,37 +1,49 @@
 import Slider from "@react-native-community/slider";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as api from "@/api/endpoints";
+import { useSubmit } from "@/api/hooks";
 import { useToast } from "@/components/feedback/Toast";
 import { Button, DateField, FieldLabel, Icon, ScreenHeader, Segmented, Switch, TextField } from "@/components/ui";
-import { PICKUPS } from "@/data/seed";
+import { toEvent } from "@/data/adapters";
 import type { EventCategory } from "@/data/types";
 import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
-import { buildEvent, CAPACITY, EMPTY_EVENT, EVENT_CATEGORIES, eventProblem, type EventDraft } from "./logic";
-
-const PLACES = [
-  ...PICKUPS.map((p) => ({ id: p.id, name: p.name, note: "Central" })),
-  { id: "custom", name: "Drop a pin on the map", note: "Any location" },
-];
+import { CAPACITY, EMPTY_EVENT, EVENT_CATEGORIES, eventProblem, eventRequest, type EventDraft } from "./logic";
 
 export default function HostScreen() {
-  const { actions } = useAppStore();
+  const { state, actions } = useAppStore();
   const toast = useToast();
+  const { busy, submit } = useSubmit();
   const [draft, setDraft] = useState<EventDraft>(EMPTY_EVENT);
   const update = (patch: Partial<EventDraft>) => setDraft((d) => ({ ...d, ...patch }));
   const problem = eventProblem(draft);
+  const places = [
+    ...state.pickups.map((p) => ({ id: p.id, name: p.name, note: "Central" })),
+    { id: "custom", name: "Drop a pin on the map", note: "Any location" },
+  ];
+
+  // The preset places are the market's safe pickup points
+  const needPickups = state.pickups.length === 0;
+  useEffect(() => {
+    if (needPickups) actions.loadPickups().catch(() => {});
+  }, [needPickups, actions]);
 
   const publish = () => {
-    if (problem) {
-      toast(problem);
+    const when = draft.when;
+    if (problem || !when) {
+      toast(problem ?? "Pick a date & time");
       return;
     }
-    actions.addEvent(buildEvent(draft, `e${Date.now()}`, new Date()));
-    toast("Published — your identity stays hidden");
-    router.back();
+    void submit(async () => {
+      const created = await api.events.create(eventRequest({ ...draft, when }));
+      actions.putEvent(toEvent(created.summary));
+      toast("Published — your identity stays hidden");
+      router.back();
+    });
   };
 
   return (
@@ -60,10 +72,18 @@ export default function HostScreen() {
             onChange={(when) => update({ when })}
             placeholder="Pick a date & time"
           />
+          <TextField
+            label="What's the plan? (optional)"
+            multiline
+            value={draft.desc}
+            onChangeText={(desc) => update({ desc })}
+            placeholder="e.g. Bring your laptop, we'll grab a table near the windows"
+            maxLength={1000}
+          />
 
           <View style={styles.group}>
             <FieldLabel>Where</FieldLabel>
-            {PLACES.map((p) => {
+            {places.map((p) => {
               const active = draft.where === p.id;
               return (
                 <Pressable
@@ -84,7 +104,7 @@ export default function HostScreen() {
               label="Tap to pin the exact spot"
               onPressPoint={(pin) => update({ where: "custom", pin })}
             >
-              {PICKUPS.map((p) => (
+              {state.pickups.map((p) => (
                 <MapDot
                   key={p.id}
                   latitude={p.latitude}
@@ -146,7 +166,12 @@ export default function HostScreen() {
           </View>
         </ScrollView>
         <View style={styles.footer}>
-          <Button label="Publish event" onPress={publish} inactive={problem !== null} />
+          <Button
+            label={busy ? "Publishing…" : "Publish event"}
+            onPress={publish}
+            inactive={problem !== null}
+            disabled={busy}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

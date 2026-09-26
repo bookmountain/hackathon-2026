@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Pill, Striped } from "@/components/ui";
+import { Photo, Pill } from "@/components/ui";
 import type { Flat } from "@/data/types";
 import { colors, font, shadows } from "@/theme";
 
@@ -7,7 +7,7 @@ import { colors, font, shadows } from "@/theme";
 export default function FlatCard({ flat, onPress }: { flat: Flat; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={styles.card}>
-      <Striped tone={flat.tone} label="room photo" style={styles.photo}>
+      <Photo uri={flat.photo} tone={flat.tone} label="room photo" style={styles.photo}>
         <View style={styles.price}>
           <Text style={styles.priceText}>
             ${flat.price}
@@ -17,7 +17,7 @@ export default function FlatCard({ flat, onPress }: { flat: Flat; onPress: () =>
         <View style={styles.from}>
           <Text style={styles.fromText}>{flat.from}</Text>
         </View>
-      </Striped>
+      </Photo>
       <View style={styles.body}>
         <Text style={styles.title}>{flat.title}</Text>
         <Text style={styles.meta}>

@@ -8,6 +8,7 @@ export { default as FieldLabel } from "./FieldLabel";
 export { default as Icon } from "./Icon";
 export type { IconName } from "./Icon";
 export { default as Logo } from "./Logo";
+export { default as Photo } from "./Photo";
 export { default as Pill } from "./Pill";
 export { PhotoDropzone, Striped } from "./Placeholders";
 export { default as ScreenHeader, BackButton } from "./ScreenHeader";

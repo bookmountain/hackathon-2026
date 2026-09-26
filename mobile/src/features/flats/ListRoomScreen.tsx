@@ -2,6 +2,9 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as api from "@/api/endpoints";
+import { useSubmit } from "@/api/hooks";
+import { pickPhotos, uploadPhotos } from "@/api/photos";
 import { useToast } from "@/components/feedback/Toast";
 import {
   Button,
@@ -11,13 +14,23 @@ import {
   PhotoDropzone,
   ScreenHeader,
   Segmented,
+  SelectField,
   Stepper,
   TextField,
 } from "@/components/ui";
 import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
 import { selectMe, useAppStore } from "@/store";
 import { colors } from "@/theme";
-import { buildFlat, EMPTY_ROOM, FEATURE_OPTIONS, RHYTHM_OPTIONS, roomProblem, type RoomDraft } from "./logic";
+import {
+  EMPTY_ROOM,
+  FEATURE_OPTIONS,
+  flatRequest,
+  MAX_ROOM_PHOTOS,
+  MIN_STAY_OPTIONS,
+  RHYTHM_OPTIONS,
+  roomProblem,
+  type RoomDraft,
+} from "./logic";
 
 const digits = (t: string) => t.replace(/\D/g, "");
 const toggle = (list: string[], value: string) =>
@@ -26,20 +39,31 @@ const toggle = (list: string[], value: string) =>
 export default function ListRoomScreen() {
   const { state, actions } = useAppStore();
   const toast = useToast();
+  const { busy, submit } = useSubmit();
   const [room, setRoom] = useState<RoomDraft>(EMPTY_ROOM);
   const update = (patch: Partial<RoomDraft>) => setRoom((r) => ({ ...r, ...patch }));
   const problem = roomProblem(room);
 
+  const addPhotos = () =>
+    submit(async () => {
+      const picked = await pickPhotos(MAX_ROOM_PHOTOS - room.photos.length);
+      setRoom((r) => ({ ...r, photos: [...r.photos, ...picked].slice(0, MAX_ROOM_PHOTOS) }));
+    });
+
   const publish = () => {
-    if (problem || !room.pin) {
+    const pin = room.pin;
+    if (problem || !pin) {
       toast(problem ?? "Pin your flat on the map");
       return;
     }
-    const flat = buildFlat({ ...room, pin: room.pin }, selectMe(state), `f${Date.now()}`);
-    actions.addFlat(flat);
-    toast("Room published — it's on the map");
-    // Back to the Flats map with the new room's card open
-    router.dismissTo({ pathname: "/flats", params: { focus: flat.id } });
+    void submit(async () => {
+      const { id, keys } = await uploadPhotos(room.photos, api.uploads.flatPhoto, (res) => res.listingId);
+      const created = await api.flats.create(flatRequest({ ...room, pin }, selectMe(state), id, keys));
+      await actions.loadFlats();
+      toast("Room published — it's on the map");
+      // Back to the Flats map with the new room's card open
+      router.dismissTo({ pathname: "/flats", params: { focus: created.summary.id } });
+    });
   };
 
   return (
@@ -48,10 +72,11 @@ export default function ListRoomScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
           <PhotoDropzone
-            added={room.photo}
-            onPress={() => update({ photo: !room.photo })}
+            photos={room.photos.map((p) => p.uri)}
+            max={MAX_ROOM_PHOTOS}
+            onAdd={addPhotos}
+            onRemove={(i) => update({ photos: room.photos.filter((_, j) => j !== i) })}
             emptyText="Add room photos"
-            addedText="3 room photos added · tap to remove"
           />
           <TextField
             label="Listing title"
@@ -70,11 +95,14 @@ export default function ListRoomScreen() {
             >
               {room.pin && <MapDot {...room.pin} />}
             </MiniMap>
-            <TextField
-              value={room.area}
-              onChangeText={(area) => update({ area })}
-              placeholder="Street / suburb, e.g. Frome St, Adelaide"
-            />
+            <View style={styles.row}>
+              <View style={styles.grow}>
+                <TextField value={room.street} onChangeText={(street) => update({ street })} placeholder="Street, e.g. Frome St" />
+              </View>
+              <View style={styles.grow}>
+                <TextField value={room.suburb} onChangeText={(suburb) => update({ suburb })} placeholder="Suburb, e.g. Adelaide" />
+              </View>
+            </View>
           </View>
 
           <View style={styles.row}>
@@ -125,8 +153,8 @@ export default function ListRoomScreen() {
               value={room.toilet}
               onChange={(toilet) => update({ toilet })}
               options={[
-                { value: "Private ensuite", label: "Private ensuite" },
-                { value: "Shared toilet", label: "Shared toilet" },
+                { value: "PrivateEnsuite", label: "Private ensuite" },
+                { value: "Shared", label: "Shared toilet" },
               ]}
             />
           </View>
@@ -136,16 +164,16 @@ export default function ListRoomScreen() {
               value={room.bath}
               onChange={(bath) => update({ bath })}
               options={[
-                { value: "Ensuite shower", label: "Ensuite" },
-                { value: "Shared bathroom", label: "Shared" },
+                { value: "Ensuite", label: "Ensuite" },
+                { value: "Shared", label: "Shared" },
               ]}
             />
           </View>
-          <TextField
+          <SelectField
             label="Minimum stay"
-            value={room.minStay}
-            onChangeText={(minStay) => update({ minStay })}
-            placeholder="e.g. 3 months, or until end of semester"
+            value={MIN_STAY_OPTIONS.find((o) => o.months === room.minStay)?.label ?? "Flexible"}
+            options={MIN_STAY_OPTIONS.map((o) => o.label)}
+            onChange={(label) => update({ minStay: MIN_STAY_OPTIONS.find((o) => o.label === label)?.months ?? null })}
           />
           <View style={styles.group}>
             <FieldLabel>Furnished</FieldLabel>
@@ -153,8 +181,8 @@ export default function ListRoomScreen() {
               value={room.furnished}
               onChange={(furnished) => update({ furnished })}
               options={[
-                { value: "Fully furnished", label: "Fully" },
-                { value: "Partly furnished", label: "Partly" },
+                { value: "Fully", label: "Fully" },
+                { value: "Partly", label: "Partly" },
                 { value: "Unfurnished", label: "None" },
               ]}
             />
@@ -185,10 +213,23 @@ export default function ListRoomScreen() {
             onChangeText={(pref) => update({ pref })}
             placeholder="e.g. Quiet, non-smoker, any uni"
           />
+          <TextField
+            label="About the room (optional)"
+            multiline
+            value={room.desc}
+            onChangeText={(desc) => update({ desc })}
+            placeholder="Light, noise, what's nearby, who you're looking for"
+            maxLength={1000}
+          />
           <DateField label="Available from" value={room.from} onChange={(from) => update({ from })} placeholder="Available now" />
         </ScrollView>
         <View style={styles.footer}>
-          <Button label="Publish room" onPress={publish} inactive={problem !== null} />
+          <Button
+            label={busy ? "Publishing…" : "Publish room"}
+            onPress={publish}
+            inactive={problem !== null}
+            disabled={busy}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

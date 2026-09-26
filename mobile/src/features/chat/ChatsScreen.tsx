@@ -1,34 +1,32 @@
 import { router } from "expo-router";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRefreshOnFocus } from "@/api/hooks";
 import { Avatar, ScreenHeader } from "@/components/ui";
-import { findPerson, useAppStore } from "@/store";
+import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
-import { threadPreview } from "./threadPreview";
 
 export default function ChatsScreen() {
-  const { state } = useAppStore();
-  const threads = Object.keys(state.chats).flatMap((id) => {
-    const person = findPerson(id);
-    return person ? [{ person, preview: threadPreview(state.chats[id]), unread: !!state.unread[id] }] : [];
-  });
+  const { state, actions } = useAppStore();
+  const { refreshing, refresh } = useRefreshOnFocus(actions.loadChats);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
       <ScreenHeader title="Messages" onBack={() => router.back()} />
       <FlatList
-        data={threads}
-        keyExtractor={(t) => t.person.id}
+        data={state.chats}
+        keyExtractor={(c) => c.id}
         contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}
         ListEmptyComponent={
           <Text style={styles.empty}>No chats yet. Tap a listing on the map and send a message.</Text>
         }
-        renderItem={({ item: { person, preview, unread } }) => (
+        renderItem={({ item: { id, person, preview, unread } }) => (
           <Pressable
-            onPress={() => router.push({ pathname: "/chats/[personId]", params: { personId: person.id } })}
+            onPress={() => router.push({ pathname: "/chats/[id]", params: { id } })}
             style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.canvas }]}
           >
-            <Avatar index={person.avatar} nick={person.nick} size={50} />
+            <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} size={50} />
             <View style={styles.text}>
               <View style={styles.topLine}>
                 <Text style={styles.nick}>{person.nick}</Text>
