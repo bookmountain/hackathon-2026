@@ -14,12 +14,12 @@ describe("resolvePlace", () => {
   });
 
   it("keeps custom pins as seller-chosen places", () => {
-    expect(resolvePlace({ name: "Pulteney St", x: 304, y: 528 })).toEqual({
+    expect(resolvePlace({ name: "Pulteney St", latitude: -34.92616, longitude: 138.60583 })).toEqual({
       name: "Pulteney St",
       short: "Pulteney St",
       sub: "",
-      x: 304,
-      y: 528,
+      latitude: -34.92616,
+      longitude: 138.60583,
       central: false,
     });
   });

@@ -60,8 +60,13 @@ export default function FlatsTab() {
           }
         >
           {flats.map((f) => (
-            <MapMarker key={f.id} x={f.x} y={f.y}>
-              <FlatPin flat={f} selected={f.id === selectedId} onPress={() => setSelectedId(f.id)} />
+            <MapMarker
+              key={f.id}
+              coordinate={f}
+              onPress={() => setSelectedId(f.id)}
+              label={`${f.title}, $${f.price} per week`}
+            >
+              <FlatPin flat={f} selected={f.id === selectedId} />
             </MapMarker>
           ))}
         </CampusMap>

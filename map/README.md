@@ -15,7 +15,7 @@ map/
         │                  screen from features/.
         ├── features/      One folder per product area
         │   ├── onboarding/    login → verify → consent → profile setup
-        │   ├── map/           illustrated campus map, pins, bottom sheet
+        │   ├── map/           real map (Apple/Google), custom pins, bottom sheet
         │   ├── flats/         rooms: map, list, detail, "List a room"
         │   ├── market/        items: map, grid, detail, "Sell"
         │   ├── meetups/       events: map, list, detail, "Host"

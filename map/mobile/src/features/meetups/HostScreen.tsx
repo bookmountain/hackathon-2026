@@ -7,7 +7,7 @@ import { useToast } from "@/components/feedback/Toast";
 import { Button, DateField, FieldLabel, Icon, ScreenHeader, Segmented, Switch, TextField } from "@/components/ui";
 import { PICKUPS } from "@/data/seed";
 import type { EventCategory } from "@/data/types";
-import { MapDot, MiniMap, PICKER_VIEWBOX } from "@/features/map";
+import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { buildEvent, CAPACITY, EMPTY_EVENT, EVENT_CATEGORIES, eventProblem, type EventDraft } from "./logic";
@@ -79,17 +79,18 @@ export default function HostScreen() {
               );
             })}
             <MiniMap
-              viewBox={PICKER_VIEWBOX.square}
+              region={CBD_REGION}
+              aspectRatio={1}
               label="Tap to pin the exact spot"
               onPressPoint={(pin) => update({ where: "custom", pin })}
             >
               {PICKUPS.map((p) => (
                 <MapDot
                   key={p.id}
-                  x={p.x}
-                  y={p.y}
+                  latitude={p.latitude}
+                  longitude={p.longitude}
                   halo={0}
-                  radius={draft.where === p.id ? 8 : 5}
+                  size={draft.where === p.id ? 16 : 10}
                   color={draft.where === p.id ? colors.ink : colors.brandMid}
                   strokeWidth={2}
                 />

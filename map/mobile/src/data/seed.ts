@@ -1,4 +1,5 @@
 // Demo data from design/UCompass Demo.dc.html. Replace with API calls once a backend exists.
+// Coordinates are real places (OpenStreetMap / Nominatim lookups, Sep 2026).
 import type { ChatMessage, ChatTopic, Flat, Item, MeetupEvent, Person, Pickup } from "./types";
 
 export const PEOPLE: Person[] = [
@@ -13,9 +14,9 @@ export const PEOPLE: Person[] = [
 ];
 
 export const PICKUPS: Pickup[] = [
-  { id: "rail", name: "Adelaide Railway Station", short: "Railway Stn", sub: "North Tce concourse · staffed, CCTV", x: 72, y: 234 },
-  { id: "fcc", name: "Flinders City Campus", short: "Flinders City", sub: "Festival Plaza entrance", x: 145, y: 222 },
-  { id: "bsl", name: "Barr Smith Library", short: "Barr Smith", sub: "Main entrance, Adelaide Uni", x: 292, y: 212 },
+  { id: "rail", name: "Adelaide Railway Station", short: "Railway Stn", sub: "North Tce concourse · staffed, CCTV", latitude: -34.92153, longitude: 138.5975 },
+  { id: "fcc", name: "Flinders City Campus", short: "Flinders City", sub: "Festival Plaza entrance", latitude: -34.92053, longitude: 138.59804 },
+  { id: "bsl", name: "Barr Smith Library", short: "Barr Smith", sub: "Main entrance, Adelaide Uni", latitude: -34.91888, longitude: 138.60448 },
 ];
 
 export const FLATS: Flat[] = [
@@ -39,8 +40,8 @@ export const FLATS: Flat[] = [
     from: "From 14 Oct",
     tenants: ["Flinders · Law", "Adelaide · Music"],
     rhythm: ["Quiet weeknights", "Sunday dinners"],
-    x: 320,
-    y: 280,
+    latitude: -34.924,
+    longitude: 138.6082,
     tone: "#DCE6FF",
   },
   {
@@ -63,8 +64,8 @@ export const FLATS: Flat[] = [
     from: "Available now",
     tenants: ["Adelaide · Engineering", "Adelaide · Medicine", "Flinders · IT"],
     rhythm: ["Early birds", "Gym crew"],
-    x: 258,
-    y: 94,
+    latitude: -34.90647,
+    longitude: 138.60836,
     tone: "#E3ECFF",
   },
   {
@@ -87,8 +88,8 @@ export const FLATS: Flat[] = [
     from: "From 1 Nov",
     tenants: ["Flinders · Business", "Adelaide · Arts", "Flinders · Nursing"],
     rhythm: ["Social house", "Shared groceries"],
-    x: 296,
-    y: 556,
+    latitude: -34.9304,
+    longitude: 138.5965,
     tone: "#EEF3FF",
   },
   {
@@ -111,8 +112,8 @@ export const FLATS: Flat[] = [
     from: "From 20 Oct",
     tenants: ["Flinders · Nursing"],
     rhythm: ["Quiet weeknights", "Plant parents"],
-    x: 322,
-    y: 436,
+    latitude: -34.92881,
+    longitude: 138.61214,
     tone: "#D6E2FF",
   },
 ];
@@ -164,7 +165,7 @@ export const ITEMS: Item[] = [
     avail: "Available from 1 Oct",
     cond: "Good",
     cat: "Kitchen",
-    loc: { name: "Rundle St East", x: 334, y: 370 },
+    loc: { name: "Rundle St East", latitude: -34.92249, longitude: 138.60937 },
     seller: "p6",
     posted: "1d ago",
     desc: "Works perfectly, includes measuring cup and paddle. Available once I move out on 1 Oct.",
@@ -177,7 +178,7 @@ export const ITEMS: Item[] = [
     avail: "Available now",
     cond: "Good",
     cat: "Furniture",
-    loc: { name: "Pulteney St", x: 304, y: 528 },
+    loc: { name: "Pulteney St", latitude: -34.92616, longitude: 138.60583 },
     seller: "p2",
     posted: "3d ago",
     desc: "Adjustable height, lumbar support. A bit squeaky but comfy for long study nights.",
@@ -207,7 +208,7 @@ export const EVENTS: MeetupEvent[] = [
     date: "29",
     time: "7:00 pm",
     when: "Tue 29 Sep · 7:00–9:30 pm",
-    where: { name: "Barr Smith Library, Level 2", x: 246, y: 228 },
+    where: { name: "Barr Smith Library, Level 2", latitude: -34.9192, longitude: 138.6039 },
     going: 14,
     cap: 30,
     desc: "Bring whatever stats unit you are stuck on. Whiteboards booked, snacks shared. Stay 20 minutes or the whole night.",
@@ -220,7 +221,7 @@ export const EVENTS: MeetupEvent[] = [
     date: "4",
     time: "9:30 am",
     when: "Sun 4 Oct · 9:30 am",
-    where: { name: "Adelaide Railway Station, front steps", x: 60, y: 150 },
+    where: { name: "Adelaide Railway Station, front steps", latitude: -34.9212, longitude: 138.5968 },
     going: 9,
     cap: 20,
     desc: "Easy 40-minute loop along the river, then coffee. Good way to meet people outside your degree.",
@@ -233,7 +234,7 @@ export const EVENTS: MeetupEvent[] = [
     date: "2",
     time: "6:00 pm",
     when: "Fri 2 Oct · 6:00 pm",
-    where: { name: "Flinders City Campus, L1 lounge", x: 176, y: 190 },
+    where: { name: "Flinders City Campus, L1 lounge", latitude: -34.9202, longitude: 138.5987 },
     going: 22,
     cap: 40,
     desc: "Catan, Codenames and way too much pizza. $5 in at the door for food.",
@@ -246,7 +247,7 @@ export const EVENTS: MeetupEvent[] = [
     date: "3",
     time: "5:30 pm",
     when: "Sat 3 Oct · 5:30 pm",
-    where: { name: "Gouger St community kitchen", x: 330, y: 560 },
+    where: { name: "Gouger St community kitchen", latitude: -34.9303, longitude: 138.594 },
     going: 11,
     cap: 16,
     desc: "Bring a dish from home or just come hungry. Ingredients for a shared curry provided.",

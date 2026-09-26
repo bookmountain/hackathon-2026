@@ -88,8 +88,8 @@ export function buildFlat(draft: RoomDraft & { pin: MapPoint }, me: { major: str
     from: draft.from ? `From ${dayMonth(draft.from)}` : "Available now",
     tenants: [`${me.uni} · ${me.major || "Student"} (you)`],
     rhythm: draft.rhythm.length ? draft.rhythm : ["Ask the tenant"],
-    x: draft.pin.x,
-    y: draft.pin.y,
+    latitude: draft.pin.latitude,
+    longitude: draft.pin.longitude,
     tone: "#DCE6FF",
   };
 }

@@ -11,7 +11,7 @@ const event: MeetupEvent = {
   date: "2",
   time: "6:00 pm",
   when: "Fri 2 Oct · 6:00 pm",
-  where: { name: "Barr Smith Library", x: 292, y: 212 },
+  where: { name: "Barr Smith Library", latitude: -34.91888, longitude: 138.60448 },
   going: 0,
   cap: 20,
   desc: "",

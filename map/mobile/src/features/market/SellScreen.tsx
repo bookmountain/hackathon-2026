@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useToast } from "@/components/feedback/Toast";
 import { Button, DateField, FieldLabel, Icon, PhotoDropzone, ScreenHeader, Segmented, TextField } from "@/components/ui";
 import { PICKUPS } from "@/data/seed";
-import { MapDot, MiniMap, PICKER_VIEWBOX } from "@/features/map";
+import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { buildItem, EMPTY_ITEM, itemProblem, type Availability, type ItemDraft } from "./logic";
@@ -100,22 +100,23 @@ export default function SellScreen() {
               );
             })}
             <MiniMap
-              viewBox={PICKER_VIEWBOX.wide}
+              region={CBD_REGION}
+              aspectRatio={1.7}
               label="Or tap the map to drop your own pin"
               onPressPoint={(pin) => update({ pickup: "custom", pin })}
             >
               {PICKUPS.map((p) => (
                 <MapDot
                   key={p.id}
-                  x={p.x}
-                  y={p.y}
+                  latitude={p.latitude}
+                  longitude={p.longitude}
                   halo={0}
-                  radius={draft.pickup === p.id ? 8 : 5}
+                  size={draft.pickup === p.id ? 16 : 10}
                   color={draft.pickup === p.id ? colors.ink : colors.brandMid}
                   strokeWidth={2}
                 />
               ))}
-              {draft.pin && <MapDot {...draft.pin} halo={14} radius={6} strokeWidth={2.5} />}
+              {draft.pin && <MapDot {...draft.pin} halo={28} size={12} strokeWidth={2.5} />}
             </MiniMap>
           </View>
         </ScrollView>

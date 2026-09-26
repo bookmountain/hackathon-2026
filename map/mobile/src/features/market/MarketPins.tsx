@@ -1,50 +1,34 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Icon } from "@/components/ui";
-import type { Item, Pickup } from "@/data/types";
+import type { Item } from "@/data/types";
 import { colors, font, shadows } from "@/theme";
 
 // Safe pickup point: dark disc with a star and a yellow count badge
-export function PickupPin({ pickup, count, selected, onPress }: {
-  pickup: Pickup;
-  count: number;
-  selected: boolean;
-  onPress: () => void;
-}) {
+export function PickupPin({ count, selected }: { count: number; selected: boolean }) {
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${pickup.name}, safe pickup point, ${count} items`}
-      hitSlop={6}
-      style={styles.pickupBox}
-    >
+    <View style={styles.pickupBox}>
       <View style={[styles.pickup, { borderColor: selected ? colors.yellow : colors.surface }]}>
         <Icon name="star" size={14} color={colors.yellow} />
       </View>
       <View style={styles.count}>
         <Text style={styles.countText}>{count}</Text>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
 // Seller's own pin: white "$25" tag with a blue (yellow when selected) outline
-export function ItemTag({ item, selected, onPress }: { item: Item; selected: boolean; onPress: () => void }) {
+export function ItemTag({ item, selected }: { item: Item; selected: boolean }) {
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${item.title}, $${item.price}`}
-      style={[styles.tag, { borderColor: selected ? colors.yellow : colors.brand }]}
-    >
+    <View style={[styles.tag, { borderColor: selected ? colors.yellow : colors.brand }]}>
       <Icon name="tag" size={11} color={colors.brand} />
       <Text style={styles.tagText}>${item.price}</Text>
-    </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Extra room on the top-right so the count badge stays inside the touch area
+  // Extra room on the top-right so the count badge fits inside the marker view
   pickupBox: { paddingTop: 7, paddingRight: 9 },
   pickup: {
     width: 28,

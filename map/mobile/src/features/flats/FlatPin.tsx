@@ -1,20 +1,15 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Icon } from "@/components/ui";
 import type { Flat } from "@/data/types";
 import { colors, font, shadows } from "@/theme";
 
 // "$245/wk" price tag on the map; blue while its sheet is open
-export default function FlatPin({ flat, selected, onPress }: { flat: Flat; selected: boolean; onPress: () => void }) {
+export default function FlatPin({ flat, selected }: { flat: Flat; selected: boolean }) {
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${flat.title}, $${flat.price} per week`}
-      style={[styles.pin, { backgroundColor: selected ? colors.brand : colors.ink }]}
-    >
+    <View style={[styles.pin, { backgroundColor: selected ? colors.brand : colors.ink }]}>
       <Icon name="house" size={12} color={colors.surface} />
       <Text style={styles.text}>${flat.price}/wk</Text>
-    </Pressable>
+    </View>
   );
 }
 

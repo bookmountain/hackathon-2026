@@ -71,22 +71,26 @@ export default function MarketTab() {
           }
         >
           {PICKUPS.map((p) => (
-            <MapMarker key={p.id} x={p.x} y={p.y}>
+            <MapMarker
+              key={p.id}
+              coordinate={p}
+              onPress={() => setSelection({ kind: "pickup", id: p.id })}
+              label={`${p.name}, safe pickup point`}
+            >
               <PickupPin
-                pickup={p}
                 count={itemsAtPickup(state.items, p.id, category).length}
                 selected={selection?.kind === "pickup" && selection.id === p.id}
-                onPress={() => setSelection({ kind: "pickup", id: p.id })}
               />
             </MapMarker>
           ))}
           {customPinItems(state.items, category).map((i) => (
-            <MapMarker key={i.id} x={i.loc.x} y={i.loc.y}>
-              <ItemTag
-                item={i}
-                selected={selection?.kind === "item" && selection.id === i.id}
-                onPress={() => setSelection({ kind: "item", id: i.id })}
-              />
+            <MapMarker
+              key={i.id}
+              coordinate={i.loc}
+              onPress={() => setSelection({ kind: "item", id: i.id })}
+              label={`${i.title}, $${i.price}`}
+            >
+              <ItemTag item={i} selected={selection?.kind === "item" && selection.id === i.id} />
             </MapMarker>
           ))}
         </CampusMap>

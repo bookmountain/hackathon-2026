@@ -1,41 +1,35 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
-import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
+import type { ReactNode } from "react";
+import { Marker } from "react-native-maps";
 import type { MapPoint } from "@/data/types";
 
-/** Screen pixels per map unit, provided by <CampusMap> */
-export const ScaleContext = createContext(1);
+type Props = {
+  coordinate: MapPoint;
+  onPress?: () => void;
+  /** Read out by screen readers */
+  label?: string;
+  zIndex?: number;
+  children: ReactNode;
+};
 
-type MarkerProps = MapPoint & { children: ReactNode; zIndex?: number };
-
-/**
- * Centres its child on a map point (CSS translate(-50%, -50%)). The child is
- * measured first, so it stays inside its own bounds and remains tappable on Android.
- */
-export default function MapMarker({ x, y, children, zIndex = 3 }: MarkerProps) {
-  const scale = useContext(ScaleContext);
-  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
-  const onLayout = (e: LayoutChangeEvent) => {
-    const { width, height } = e.nativeEvent.layout;
-    if (!size || size.width !== width || size.height !== height) setSize({ width, height });
-  };
+// Custom-view pin centred on its coordinate. Taps are handled by the marker
+// itself: touchables inside marker views aren't reliable on the native maps.
+export default function MapMarker({ coordinate, onPress, label, zIndex = 3, children }: Props) {
   return (
-    <View
-      onLayout={onLayout}
-      style={[
-        styles.marker,
-        {
-          left: x * scale - (size?.width ?? 0) / 2,
-          top: y * scale - (size?.height ?? 0) / 2,
-          zIndex,
-          opacity: size ? 1 : 0,
-        },
-      ]}
+    <Marker
+      // Only lat/lng go to the native side; callers may pass whole listings
+      coordinate={{ latitude: coordinate.latitude, longitude: coordinate.longitude }}
+      anchor={{ x: 0.5, y: 0.5 }}
+      zIndex={zIndex}
+      accessibilityLabel={label}
+      onPress={
+        onPress &&
+        ((e) => {
+          e.stopPropagation();
+          onPress();
+        })
+      }
     >
       {children}
-    </View>
+    </Marker>
   );
 }
-
-const styles = StyleSheet.create({
-  marker: { position: "absolute" },
-});

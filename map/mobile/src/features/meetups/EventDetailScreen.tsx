@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, ScreenHeader } from "@/components/ui";
 import type { MeetupEvent } from "@/data/types";
-import { focusViewBox, MapDot, MiniMap } from "@/features/map";
+import { MapDot, MiniMap, regionAround } from "@/features/map";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { fillPercent } from "./logic";
@@ -38,8 +38,16 @@ function EventDetail({ event }: { event: MeetupEvent }) {
           </View>
         </View>
 
-        <MiniMap viewBox={focusViewBox(event.where)}>
-          <MapDot {...event.where} color={colors.yellow} haloOpacity={0.35} radius={6} stroke={colors.ink} strokeWidth={2} />
+        <MiniMap region={regionAround(event.where)}>
+          <MapDot
+            latitude={event.where.latitude}
+            longitude={event.where.longitude}
+            color={colors.yellow}
+            haloOpacity={0.35}
+            size={12}
+            stroke={colors.ink}
+            strokeWidth={2}
+          />
         </MiniMap>
 
         <Text style={styles.desc}>{event.desc}</Text>

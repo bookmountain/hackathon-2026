@@ -18,6 +18,14 @@ export default function AppHeader({ title }: { title: string }) {
       </View>
       <View style={styles.actions}>
         <Pressable
+          onPress={() => router.push("/profile")}
+          accessibilityRole="button"
+          accessibilityLabel="Profile"
+          style={[styles.round, { backgroundColor: look.bg }]}
+        >
+          <Text style={[font(800, 16), { color: look.fg }]}>{look.text}</Text>
+        </Pressable>
+        <Pressable
           onPress={() => router.push("/chats")}
           accessibilityRole="button"
           accessibilityLabel={selectHasUnread(state) ? "Messages, unread" : "Messages"}
@@ -25,14 +33,6 @@ export default function AppHeader({ title }: { title: string }) {
         >
           <Icon name="chat" color={colors.brand} />
           {selectHasUnread(state) && <View style={styles.unread} />}
-        </Pressable>
-        <Pressable
-          onPress={() => router.push("/profile")}
-          accessibilityRole="button"
-          accessibilityLabel="Profile"
-          style={[styles.round, { backgroundColor: look.bg }]}
-        >
-          <Text style={[font(800, 16), { color: look.fg }]}>{look.text}</Text>
         </Pressable>
       </View>
     </View>

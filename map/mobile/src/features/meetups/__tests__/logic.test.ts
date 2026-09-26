@@ -1,4 +1,5 @@
 import { EVENTS } from "@/data/seed";
+import { distanceMeters } from "@/features/map/geometry";
 import { buildEvent, EMPTY_EVENT, eventProblem, fillPercent, goingCount } from "../logic";
 
 describe("headcount", () => {
@@ -29,20 +30,24 @@ describe("buildEvent", () => {
       date: "28",
       time: "4:00 pm",
       when: "Mon 28 Sep · 4:00 pm",
-      where: { name: "Barr Smith Library", x: 306, y: 230 },
+      where: { name: "Barr Smith Library" },
       going: 0,
       cap: 20,
       desc: "Hosted anonymously. Walk-ins welcome.",
     });
+    // About 32 m south-east of the pickup marker, so both pins stay tappable
+    const fromPickup = distanceMeters({ latitude: -34.91888, longitude: 138.60448 }, event.where);
+    expect(fromPickup).toBeGreaterThan(25);
+    expect(fromPickup).toBeLessThan(40);
   });
 
   it("uses a dropped pin and its name", () => {
     const event = buildEvent(
-      { ...EMPTY_EVENT, title: "Picnic", where: "custom", pin: { x: 120, y: 480 }, place: "Rymill Park", walkIn: false },
+      { ...EMPTY_EVENT, title: "Picnic", where: "custom", pin: { latitude: -34.9235, longitude: 138.6155 }, place: "Rymill Park", walkIn: false },
       "e-new",
       now,
     );
-    expect(event.where).toEqual({ name: "Rymill Park", x: 120, y: 480 });
+    expect(event.where).toEqual({ name: "Rymill Park", latitude: -34.9235, longitude: 138.6155 });
     expect(event.desc).toBe("Hosted anonymously. RSVP to join.");
   });
 });

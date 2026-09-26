@@ -60,13 +60,13 @@ describe("selling", () => {
         title: "Desk",
         price: "30",
         pickup: "custom",
-        pin: { x: 200, y: 300 },
+        pin: { latitude: -34.925, longitude: 138.601 },
         avail: "Available from",
         from: new Date(2026, 9, 1),
       },
       "m-new",
     );
-    expect(item.loc).toEqual({ name: "Your pinned spot", x: 200, y: 300 });
+    expect(item.loc).toEqual({ name: "Your pinned spot", latitude: -34.925, longitude: 138.601 });
     expect(item.avail).toBe("Available from 1 Oct");
   });
 });

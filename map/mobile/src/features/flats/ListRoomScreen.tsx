@@ -14,7 +14,7 @@ import {
   Stepper,
   TextField,
 } from "@/components/ui";
-import { MapDot, MiniMap, PICKER_VIEWBOX } from "@/features/map";
+import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
 import { selectMe, useAppStore } from "@/store";
 import { colors } from "@/theme";
 import { buildFlat, EMPTY_ROOM, FEATURE_OPTIONS, RHYTHM_OPTIONS, roomProblem, type RoomDraft } from "./logic";
@@ -63,7 +63,8 @@ export default function ListRoomScreen() {
           <View style={styles.group}>
             <FieldLabel>Location — pin the flat on the map</FieldLabel>
             <MiniMap
-              viewBox={PICKER_VIEWBOX.square}
+              region={CBD_REGION}
+              aspectRatio={1}
               label="Tap to pin your flat · shown to students only"
               onPressPoint={(pin) => update({ pin })}
             >

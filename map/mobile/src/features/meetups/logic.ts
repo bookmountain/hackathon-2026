@@ -1,6 +1,7 @@
 import { PICKUPS } from "@/data/seed";
 import type { EventCategory, MapPoint, MeetupEvent } from "@/data/types";
 import { clockTime, eventWhen, weekdayCaps } from "@/lib/dates";
+import { offsetMeters } from "@/features/map/geometry";
 
 export const EVENT_CATEGORIES: EventCategory[] = ["Study", "Casual", "Social", "Food"];
 
@@ -40,8 +41,8 @@ export const EMPTY_EVENT: EventDraft = {
 
 export const CAPACITY = { min: 4, max: 60 };
 
-/** Events at a central spot sit just off its pickup marker so both stay tappable */
-const OFFSET_FROM_PICKUP = { x: 14, y: 18 };
+/** Events at a central spot sit just off its pickup marker so both stay tappable (metres) */
+const OFFSET_FROM_PICKUP = { south: 20, east: 25 };
 
 export function eventProblem(draft: EventDraft): string | null {
   if (!draft.title.trim()) return "Give your event a name";
@@ -56,11 +57,10 @@ export function buildEvent(draft: EventDraft, id: string, now: Date): MeetupEven
   const where =
     draft.where === "custom" && draft.pin
       ? { name: draft.place.trim() || "Pinned location", ...draft.pin }
-      : {
-          name: pickup?.name ?? "Pinned location",
-          x: (pickup?.x ?? 0) + OFFSET_FROM_PICKUP.x,
-          y: (pickup?.y ?? 0) + OFFSET_FROM_PICKUP.y,
-        };
+      : pickup
+        ? { name: pickup.name, ...offsetMeters(pickup, -OFFSET_FROM_PICKUP.south, OFFSET_FROM_PICKUP.east) }
+        : null;
+  if (!where) throw new Error(`Unknown place "${draft.where}"`);
   return {
     id,
     title: draft.title.trim(),

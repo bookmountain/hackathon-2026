@@ -18,15 +18,15 @@ describe("filterFlats", () => {
 describe("roomProblem", () => {
   it("asks for the pin first, then photos/title/rent", () => {
     expect(roomProblem(EMPTY_ROOM)).toBe("Pin your flat on the map");
-    expect(roomProblem({ ...EMPTY_ROOM, pin: { x: 1, y: 1 } })).toBe("Add photos, title and rent");
-    expect(roomProblem({ ...EMPTY_ROOM, pin: { x: 1, y: 1 }, photo: true, title: "Room", price: "200" })).toBeNull();
+    expect(roomProblem({ ...EMPTY_ROOM, pin: { latitude: -34.92, longitude: 138.6 } })).toBe("Add photos, title and rent");
+    expect(roomProblem({ ...EMPTY_ROOM, pin: { latitude: -34.92, longitude: 138.6 }, photo: true, title: "Room", price: "200" })).toBeNull();
   });
 });
 
 describe("buildFlat", () => {
   it("fills defaults and marks the listing as mine", () => {
     const flat = buildFlat(
-      { ...EMPTY_ROOM, photo: true, title: "  Bright room ", price: "220", pin: { x: 264, y: 195 } },
+      { ...EMPTY_ROOM, photo: true, title: "  Bright room ", price: "220", pin: { latitude: -34.9199, longitude: 138.6043 } },
       { major: "Law", uni: "Flinders Uni" },
       "f-new",
     );
@@ -41,15 +41,16 @@ describe("buildFlat", () => {
       minStay: "Flexible",
       feats: ["Ask the tenant"],
       tenants: ["Flinders Uni · Law (you)"],
+      // Pinned right at Adelaide Uni: the 2-minute minimum
       walkA: 2,
-      x: 264,
-      y: 195,
+      latitude: -34.9199,
+      longitude: 138.6043,
     });
   });
 
   it("formats the move-in date", () => {
     const flat = buildFlat(
-      { ...EMPTY_ROOM, photo: true, title: "Room", price: "200", pin: { x: 1, y: 1 }, from: new Date(2026, 9, 14) },
+      { ...EMPTY_ROOM, photo: true, title: "Room", price: "200", pin: { latitude: -34.92, longitude: 138.6 }, from: new Date(2026, 9, 14) },
       { major: "", uni: "Adelaide Uni" },
       "f-new",
     );

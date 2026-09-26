@@ -1,57 +1,48 @@
-import { useState, type ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from "react-native";
-import Svg from "react-native-svg";
+import type { ReactNode } from "react";
+import { Platform, StyleSheet, Text, View } from "react-native";
+import MapView, { type Region } from "react-native-maps";
 import type { MapPoint } from "@/data/types";
 import { colors, font } from "@/theme";
-import CampusMapArt from "./CampusMapArt";
-import { touchToMap, viewBoxString, type ViewBox } from "./geometry";
 
 type Props = {
-  viewBox: ViewBox;
-  /** SVG shapes drawn over the map in map coordinates (pins, dots) */
+  region: Region;
+  /** Dots and pins (<MapDot>) */
   children?: ReactNode;
-  /** Makes the map a picker: tapping reports the map point */
+  /** Makes the map a picker: pan/zoom enabled, tapping reports the coordinate */
   onPressPoint?: (point: MapPoint) => void;
   /** Floating instruction in the top-left corner ("Tap to pin the exact spot") */
   label?: string;
   footer?: ReactNode;
+  /** Width / height of the map area */
+  aspectRatio?: number;
 };
 
-// Cropped, static view of the campus map for detail screens and pin pickers
-export default function MiniMap({ viewBox, children, onPressPoint, label, footer }: Props) {
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  const onLayout = (e: LayoutChangeEvent) => setSize(e.nativeEvent.layout);
-
-  const map = (
-    <View onLayout={onLayout} style={{ aspectRatio: viewBox.width / viewBox.height }}>
-      <Svg width="100%" height="100%" viewBox={viewBoxString(viewBox)}>
-        <CampusMapArt />
-        {children}
-      </Svg>
-    </View>
-  );
-
+// Small embedded map: a static preview on detail screens, or a tap-to-pin picker in forms
+export default function MiniMap({ region, children, onPressPoint, label, footer, aspectRatio = 2 }: Props) {
+  const picker = !!onPressPoint;
   return (
     <View style={styles.frame}>
-      {onPressPoint ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityHint="Drops a pin where you tap"
-          onPress={(e) => {
-            if (!size.width) return;
-            onPressPoint(touchToMap({ x: e.nativeEvent.locationX, y: e.nativeEvent.locationY }, size, viewBox));
-          }}
+      <View style={{ aspectRatio }}>
+        <MapView
+          style={StyleSheet.absoluteFill}
+          initialRegion={region}
+          scrollEnabled={picker}
+          zoomEnabled={picker}
+          rotateEnabled={false}
+          pitchEnabled={false}
+          toolbarEnabled={false}
+          // Lite mode renders a cheap static image on Android for previews
+          liteMode={!picker && Platform.OS === "android"}
+          onPress={picker ? (e) => onPressPoint(e.nativeEvent.coordinate) : undefined}
         >
-          {map}
-        </Pressable>
-      ) : (
-        map
-      )}
-      {label ? (
-        <View pointerEvents="none" style={styles.label}>
-          <Text style={styles.labelText}>{label}</Text>
-        </View>
-      ) : null}
+          {children}
+        </MapView>
+        {label ? (
+          <View pointerEvents="none" style={styles.label}>
+            <Text style={styles.labelText}>{label}</Text>
+          </View>
+        ) : null}
+      </View>
       {footer}
     </View>
   );

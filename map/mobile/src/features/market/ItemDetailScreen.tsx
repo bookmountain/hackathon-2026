@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar, BackButton, Button, Pill, Striped } from "@/components/ui";
-import { focusViewBox, MapDot, MiniMap } from "@/features/map";
+import { MapDot, MiniMap, regionAround } from "@/features/map";
 import { startChat } from "@/features/chat/startChat";
 import { findPerson, resolvePlace, selectMe, useAppStore } from "@/store";
 import { colors, font } from "@/theme";
@@ -53,7 +53,7 @@ export default function ItemDetailScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Pickup location</Text>
             <MiniMap
-              viewBox={focusViewBox(place)}
+              region={regionAround(place)}
               footer={
                 <View style={styles.placeInfo}>
                   <Text style={styles.placeName}>{place.name}</Text>
@@ -63,7 +63,7 @@ export default function ItemDetailScreen() {
                 </View>
               }
             >
-              <MapDot x={place.x} y={place.y} haloOpacity={0.18} radius={6} strokeWidth={2.5} />
+              <MapDot latitude={place.latitude} longitude={place.longitude} haloOpacity={0.18} size={12} strokeWidth={2.5} />
             </MiniMap>
           </View>
 

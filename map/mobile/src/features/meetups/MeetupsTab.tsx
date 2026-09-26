@@ -39,8 +39,8 @@ export default function MeetupsTab() {
           }
         >
           {state.events.map((e) => (
-            <MapMarker key={e.id} x={e.where.x} y={e.where.y}>
-              <EventPin event={e} selected={e.id === selectedId} onPress={() => setSelectedId(e.id)} />
+            <MapMarker key={e.id} coordinate={e.where} onPress={() => setSelectedId(e.id)} label={e.title}>
+              <EventPin event={e} selected={e.id === selectedId} />
             </MapMarker>
           ))}
         </CampusMap>

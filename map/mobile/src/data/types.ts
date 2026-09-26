@@ -1,4 +1,4 @@
-// Domain types. Map coordinates (x, y) are in the design's 390 × 660 CBD map space.
+// Domain types. Locations are real WGS84 coordinates in the Adelaide CBD.
 
 export type Uni = "Adelaide Uni" | "Flinders Uni";
 
@@ -11,7 +11,7 @@ export type Person = {
   avatar: number;
 };
 
-export type MapPoint = { x: number; y: number };
+export type MapPoint = { latitude: number; longitude: number };
 
 /** Staffed, well-lit spots suggested for handovers and meetups */
 export type Pickup = MapPoint & {
