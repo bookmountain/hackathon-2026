@@ -1,6 +1,7 @@
 [
  {
   "id": "p01",
+  "userId": "ee9726cb-293a-5f25-935d-1f97a6322528",
   "email": "a1900000@adelaide.edu.au",
   "displayName": "Koala_Kai",
   "university": "Adelaide",
@@ -20,10 +21,11 @@
    "hackathons",
    "board-games"
   ],
-  "avatarKey": "seed/avatars/p01.png"
+  "avatarKey": "avatars/ee9726cb-293a-5f25-935d-1f97a6322528/avatar.png"
  },
  {
   "id": "p02",
+  "userId": "225505cd-5cfc-5790-958f-392a52b2316f",
   "email": "mrea0012@flinders.edu.au",
   "displayName": "MiaReads",
   "university": "Flinders",
@@ -43,10 +45,11 @@
    "hiking",
    "volunteering"
   ],
-  "avatarKey": "seed/avatars/p02.png"
+  "avatarKey": "avatars/225505cd-5cfc-5790-958f-392a52b2316f/avatar.png"
  },
  {
   "id": "p03",
+  "userId": "c33da730-8f7e-5c33-a069-8974a2012ad6",
   "email": "a1900001@adelaide.edu.au",
   "displayName": "ArjunBuilds",
   "university": "Adelaide",
@@ -66,10 +69,11 @@
    "food",
    "travel"
   ],
-  "avatarKey": "seed/avatars/p03.png"
+  "avatarKey": "avatars/c33da730-8f7e-5c33-a069-8974a2012ad6/avatar.png"
  },
  {
   "id": "p04",
+  "userId": "31b85f8d-fb39-56b5-8948-9488a9c28c21",
   "email": "lluo0031@flinders.edu.au",
   "displayName": "lena.l",
   "university": "Flinders",
@@ -89,10 +93,11 @@
    "art",
    "hiking"
   ],
-  "avatarKey": "seed/avatars/p04.png"
+  "avatarKey": "avatars/31b85f8d-fb39-56b5-8948-9488a9c28c21/avatar.png"
  },
  {
   "id": "p05",
+  "userId": "9284978f-5440-5e7d-9c1c-84c561147cc5",
   "email": "a1900002@adelaide.edu.au",
   "displayName": "TomTheTutor",
   "university": "Adelaide",
@@ -111,10 +116,11 @@
    "coding",
    "reading"
   ],
-  "avatarKey": "seed/avatars/p05.png"
+  "avatarKey": "avatars/9284978f-5440-5e7d-9c1c-84c561147cc5/avatar.png"
  },
  {
   "id": "p06",
+  "userId": "d81e83fd-c8a9-5341-afa3-6617c46ef5b3",
   "email": "a1900003@adelaide.edu.au",
   "displayName": "ZoeDesigns",
   "university": "Adelaide",
@@ -133,10 +139,11 @@
    "photography",
    "live-gigs"
   ],
-  "avatarKey": "seed/avatars/p06.png"
+  "avatarKey": "avatars/d81e83fd-c8a9-5341-afa3-6617c46ef5b3/avatar.png"
  },
  {
   "id": "p07",
+  "userId": "623761e7-4b00-5a3b-9769-745be1afca55",
   "email": "hkim0044@flinders.edu.au",
   "displayName": "hana_k",
   "university": "Flinders",
@@ -155,10 +162,11 @@
    "language-exchange",
    "travel"
   ],
-  "avatarKey": "seed/avatars/p07.png"
+  "avatarKey": "avatars/623761e7-4b00-5a3b-9769-745be1afca55/avatar.png"
  },
  {
   "id": "p08",
+  "userId": "4781196f-4f5f-5b0c-a5a9-dd096ab4ef44",
   "email": "oali0058@flinders.edu.au",
   "displayName": "OmarOnCampus",
   "university": "Flinders",
@@ -178,10 +186,11 @@
    "food",
    "movies"
   ],
-  "avatarKey": "seed/avatars/p08.png"
+  "avatarKey": "avatars/4781196f-4f5f-5b0c-a5a9-dd096ab4ef44/avatar.png"
  },
  {
   "id": "p09",
+  "userId": "0bdeb1d9-36c6-585b-9183-dede55276db1",
   "email": "a1900004@adelaide.edu.au",
   "displayName": "PriyaCodes",
   "university": "Adelaide",
@@ -201,10 +210,11 @@
    "language-exchange",
    "dance"
   ],
-  "avatarKey": "seed/avatars/p09.png"
+  "avatarKey": "avatars/0bdeb1d9-36c6-585b-9183-dede55276db1/avatar.png"
  },
  {
   "id": "p10",
+  "userId": "8d3b2afc-136f-535b-8a75-19d7b3f3c56a",
   "email": "lrob0067@flinders.edu.au",
   "displayName": "liam.r",
   "university": "Flinders",
@@ -223,10 +233,11 @@
    "hackathons",
    "movies"
   ],
-  "avatarKey": "seed/avatars/p10.png"
+  "avatarKey": "avatars/8d3b2afc-136f-535b-8a75-19d7b3f3c56a/avatar.png"
  },
  {
   "id": "p11",
+  "userId": "c18c4e79-93e8-5450-b5ce-07f845c88d03",
   "email": "sngu0071@flinders.edu.au",
   "displayName": "SophieSurfs",
   "university": "Flinders",
@@ -245,10 +256,11 @@
    "hiking",
    "volunteering"
   ],
-  "avatarKey": "seed/avatars/p11.png"
+  "avatarKey": "avatars/c18c4e79-93e8-5450-b5ce-07f845c88d03/avatar.png"
  },
  {
   "id": "p12",
+  "userId": "3cead273-40f7-5548-a551-fa74d2bd6571",
   "email": "a1900005@adelaide.edu.au",
   "displayName": "minh.t",
   "university": "Adelaide",
@@ -267,10 +279,11 @@
    "coding",
    "food"
   ],
-  "avatarKey": "seed/avatars/p12.png"
+  "avatarKey": "avatars/3cead273-40f7-5548-a551-fa74d2bd6571/avatar.png"
  },
  {
   "id": "p13",
+  "userId": "c9e3f85b-e256-519a-88c1-2075a92a0873",
   "email": "a1900006@adelaide.edu.au",
   "displayName": "GraceOnKeys",
   "university": "Adelaide",
@@ -289,10 +302,11 @@
    "live-gigs",
    "reading"
   ],
-  "avatarKey": "seed/avatars/p13.png"
+  "avatarKey": "avatars/c9e3f85b-e256-519a-88c1-2075a92a0873/avatar.png"
  },
  {
   "id": "p14",
+  "userId": "230b57e6-f4e3-5586-a586-eba89e8e941a",
   "email": "jbro0083@flinders.edu.au",
   "displayName": "jackfromMurray",
   "university": "Flinders",
@@ -311,10 +325,11 @@
    "movies",
    "beach"
   ],
-  "avatarKey": "seed/avatars/p14.png"
+  "avatarKey": "avatars/230b57e6-f4e3-5586-a586-eba89e8e941a/avatar.png"
  },
  {
   "id": "p15",
+  "userId": "6482511b-0065-5a2f-8eeb-7be0b7be4106",
   "email": "akha0091@flinders.edu.au",
   "displayName": "AishaMed",
   "university": "Flinders",
@@ -334,10 +349,11 @@
    "volunteering",
    "reading"
   ],
-  "avatarKey": "seed/avatars/p15.png"
+  "avatarKey": "avatars/6482511b-0065-5a2f-8eeb-7be0b7be4106/avatar.png"
  },
  {
   "id": "p16",
+  "userId": "3a226946-9268-56c8-a6c8-1a2d5b634e46",
   "email": "a1900007@adelaide.edu.au",
   "displayName": "wei.chen",
   "university": "Adelaide",
@@ -357,10 +373,11 @@
    "travel",
    "food"
   ],
-  "avatarKey": "seed/avatars/p16.png"
+  "avatarKey": "avatars/3a226946-9268-56c8-a6c8-1a2d5b634e46/avatar.png"
  },
  {
   "id": "p17",
+  "userId": "b3a8c6f7-8bcf-5517-8bc4-e8a53b16e0a2",
   "email": "a1900008@adelaide.edu.au",
   "displayName": "NoahNorwood",
   "university": "Adelaide",
@@ -379,10 +396,11 @@
    "running",
    "live-gigs"
   ],
-  "avatarKey": "seed/avatars/p17.png"
+  "avatarKey": "avatars/b3a8c6f7-8bcf-5517-8bc4-e8a53b16e0a2/avatar.png"
  },
  {
   "id": "p18",
+  "userId": "d2bba37d-4e84-52f3-838f-19c33e60b98d",
   "email": "imcd0104@flinders.edu.au",
   "displayName": "isla.m",
   "university": "Flinders",
@@ -401,10 +419,11 @@
    "volunteering",
    "board-games"
   ],
-  "avatarKey": "seed/avatars/p18.png"
+  "avatarKey": "avatars/d2bba37d-4e84-52f3-838f-19c33e60b98d/avatar.png"
  },
  {
   "id": "p19",
+  "userId": "40186797-3559-50ce-8cb8-23d18c66cd65",
   "email": "a1900009@adelaide.edu.au",
   "displayName": "Rafa_Physio",
   "university": "Adelaide",
@@ -423,10 +442,11 @@
    "beach",
    "dance"
   ],
-  "avatarKey": "seed/avatars/p19.png"
+  "avatarKey": "avatars/40186797-3559-50ce-8cb8-23d18c66cd65/avatar.png"
  },
  {
   "id": "p20",
+  "userId": "4d331271-ec7b-5d09-a125-14d59edb571b",
   "email": "ysat0116@flinders.edu.au",
   "displayName": "yuki.s",
   "university": "Flinders",
@@ -445,10 +465,11 @@
    "photography",
    "language-exchange"
   ],
-  "avatarKey": "seed/avatars/p20.png"
+  "avatarKey": "avatars/4d331271-ec7b-5d09-a125-14d59edb571b/avatar.png"
  },
  {
   "id": "p21",
+  "userId": "a2093341-a818-5fd3-a029-9cbd9f7aa5e7",
   "email": "dlee0128@flinders.edu.au",
   "displayName": "DanTheDev",
   "university": "Flinders",
@@ -467,10 +488,11 @@
    "hackathons",
    "anime"
   ],
-  "avatarKey": "seed/avatars/p21.png"
+  "avatarKey": "avatars/a2093341-a818-5fd3-a029-9cbd9f7aa5e7/avatar.png"
  },
  {
   "id": "p22",
+  "userId": "ab142d08-1614-556b-b3d0-dd478771ab5e",
   "email": "a1900010@adelaide.edu.au",
   "displayName": "chloe.p",
   "university": "Adelaide",
@@ -489,10 +511,11 @@
    "music",
    "beach"
   ],
-  "avatarKey": "seed/avatars/p22.png"
+  "avatarKey": "avatars/ab142d08-1614-556b-b3d0-dd478771ab5e/avatar.png"
  },
  {
   "id": "p23",
+  "userId": "627decde-1b31-525e-8ebe-2a07f6a53158",
   "email": "a1900011@adelaide.edu.au",
   "displayName": "KofiEng",
   "university": "Adelaide",
@@ -511,10 +534,11 @@
    "music",
    "coding"
   ],
-  "avatarKey": "seed/avatars/p23.png"
+  "avatarKey": "avatars/627decde-1b31-525e-8ebe-2a07f6a53158/avatar.png"
  },
  {
   "id": "p24",
+  "userId": "a475e786-58eb-5aaa-90f3-82adea3f2d73",
   "email": "sjon0133@flinders.edu.au",
   "displayName": "sarah.nutrition",
   "university": "Flinders",
@@ -534,10 +558,11 @@
    "hiking",
    "running"
   ],
-  "avatarKey": "seed/avatars/p24.png"
+  "avatarKey": "avatars/a475e786-58eb-5aaa-90f3-82adea3f2d73/avatar.png"
  },
  {
   "id": "p25",
+  "userId": "32bfab9e-bc9f-529b-959a-021e3fed34d3",
   "email": "a1900012@adelaide.edu.au",
   "displayName": "OliverMakes",
   "university": "Adelaide",
@@ -556,10 +581,11 @@
    "photography",
    "live-gigs"
   ],
-  "avatarKey": "seed/avatars/p25.png"
+  "avatarKey": "avatars/32bfab9e-bc9f-529b-959a-021e3fed34d3/avatar.png"
  },
  {
   "id": "p26",
+  "userId": "0bd75a61-e932-57b7-a474-3ea40e4ca08a",
   "email": "abha0140@flinders.edu.au",
   "displayName": "ananya.b",
   "university": "Flinders",
@@ -578,10 +604,11 @@
    "reading",
    "dance"
   ],
-  "avatarKey": "seed/avatars/p26.png"
+  "avatarKey": "avatars/0bd75a61-e932-57b7-a474-3ea40e4ca08a/avatar.png"
  },
  {
   "id": "p27",
+  "userId": "3d646755-bc5c-53c4-beb9-70f3773966b6",
   "email": "mwil0152@flinders.edu.au",
   "displayName": "MaxSocialWork",
   "university": "Flinders",
@@ -600,10 +627,11 @@
    "live-gigs",
    "hiking"
   ],
-  "avatarKey": "seed/avatars/p27.png"
+  "avatarKey": "avatars/3d646755-bc5c-53c4-beb9-70f3773966b6/avatar.png"
  },
  {
   "id": "p28",
+  "userId": "5288e3df-a5c2-5b97-9ea0-17a2a7fbf28f",
   "email": "a1900013@adelaide.edu.au",
   "displayName": "ruby.health",
   "university": "Adelaide",
@@ -622,10 +650,11 @@
    "beach",
    "travel"
   ],
-  "avatarKey": "seed/avatars/p28.png"
+  "avatarKey": "avatars/5288e3df-a5c2-5b97-9ea0-17a2a7fbf28f/avatar.png"
  },
  {
   "id": "p29",
+  "userId": "6f31ce93-a569-53d0-a215-5b4b3341f2c9",
   "email": "a1900014@adelaide.edu.au",
   "displayName": "TuanPharm",
   "university": "Adelaide",
@@ -644,10 +673,11 @@
    "food",
    "movies"
   ],
-  "avatarKey": "seed/avatars/p29.png"
+  "avatarKey": "avatars/6f31ce93-a569-53d0-a215-5b4b3341f2c9/avatar.png"
  },
  {
   "id": "p30",
+  "userId": "a67804b2-b87b-503a-b45c-fa9b7030113e",
   "email": "ehar0163@flinders.edu.au",
   "displayName": "EmmaMidwife",
   "university": "Flinders",
@@ -666,10 +696,11 @@
    "hiking",
    "music"
   ],
-  "avatarKey": "seed/avatars/p30.png"
+  "avatarKey": "avatars/a67804b2-b87b-503a-b45c-fa9b7030113e/avatar.png"
  },
  {
   "id": "p31",
+  "userId": "73f073e6-fe98-5e6e-b19a-a9e46eb7c4db",
   "email": "stay0171@flinders.edu.au",
   "displayName": "sam.cyber",
   "university": "Flinders",
@@ -688,10 +719,11 @@
    "hackathons",
    "board-games"
   ],
-  "avatarKey": "seed/avatars/p31.png"
+  "avatarKey": "avatars/73f073e6-fe98-5e6e-b19a-a9e46eb7c4db/avatar.png"
  },
  {
   "id": "p32",
+  "userId": "ff3d313f-1e81-5d11-93d9-90dc32870cb2",
   "email": "a1900015@adelaide.edu.au",
   "displayName": "LucasEcon",
   "university": "Adelaide",
@@ -710,10 +742,11 @@
    "travel",
    "basketball"
   ],
-  "avatarKey": "seed/avatars/p32.png"
+  "avatarKey": "avatars/ff3d313f-1e81-5d11-93d9-90dc32870cb2/avatar.png"
  },
  {
   "id": "p33",
+  "userId": "572e80a0-8ed6-5a74-a0b2-4ec5f2d7e745",
   "email": "a1900016@adelaide.edu.au",
   "displayName": "hannah.teach",
   "university": "Adelaide",
@@ -732,10 +765,11 @@
    "volunteering",
    "movies"
   ],
-  "avatarKey": "seed/avatars/p33.png"
+  "avatarKey": "avatars/572e80a0-8ed6-5a74-a0b2-4ec5f2d7e745/avatar.png"
  },
  {
   "id": "p34",
+  "userId": "518b334b-cb4d-5577-8cfc-8ce6ae67358b",
   "email": "bgre0186@flinders.edu.au",
   "displayName": "Ben_Paramedic",
   "university": "Flinders",
@@ -754,10 +788,11 @@
    "running",
    "movies"
   ],
-  "avatarKey": "seed/avatars/p34.png"
+  "avatarKey": "avatars/518b334b-cb4d-5577-8cfc-8ce6ae67358b/avatar.png"
  },
  {
   "id": "p35",
+  "userId": "892b5493-d6f4-56a8-974a-de32a9d5550b",
   "email": "a1900017@adelaide.edu.au",
   "displayName": "leila.arch",
   "university": "Adelaide",
@@ -776,10 +811,11 @@
    "photography",
    "travel"
   ],
-  "avatarKey": "seed/avatars/p35.png"
+  "avatarKey": "avatars/892b5493-d6f4-56a8-974a-de32a9d5550b/avatar.png"
  },
  {
   "id": "p36",
+  "userId": "bec9bb04-71ce-5bc8-9922-efd6b0b9c3b2",
   "email": "gmar0197@flinders.edu.au",
   "displayName": "GabeGames",
   "university": "Flinders",
@@ -798,10 +834,11 @@
    "board-games",
    "football"
   ],
-  "avatarKey": "seed/avatars/p36.png"
+  "avatarKey": "avatars/bec9bb04-71ce-5bc8-9922-efd6b0b9c3b2/avatar.png"
  },
  {
   "id": "p37",
+  "userId": "d264d155-7721-555e-b1f2-5029694b0ec8",
   "email": "a1900018@adelaide.edu.au",
   "displayName": "mei.ling",
   "university": "Adelaide",
@@ -820,10 +857,11 @@
    "language-exchange",
    "dance"
   ],
-  "avatarKey": "seed/avatars/p37.png"
+  "avatarKey": "avatars/d264d155-7721-555e-b1f2-5029694b0ec8/avatar.png"
  },
  {
   "id": "p38",
+  "userId": "b50e6c3d-08a0-5bae-9582-db7d850ac448",
   "email": "a1900019@adelaide.edu.au",
   "displayName": "ethan.bio",
   "university": "Adelaide",
@@ -842,10 +880,11 @@
    "hiking",
    "reading"
   ],
-  "avatarKey": "seed/avatars/p38.png"
+  "avatarKey": "avatars/b50e6c3d-08a0-5bae-9582-db7d850ac448/avatar.png"
  },
  {
   "id": "p39",
+  "userId": "3d728e8a-b51e-5240-9cd5-d520d60cf98d",
   "email": "nabd0205@flinders.edu.au",
   "displayName": "NadiaWrites",
   "university": "Flinders",
@@ -864,10 +903,11 @@
    "live-gigs",
    "art"
   ],
-  "avatarKey": "seed/avatars/p39.png"
+  "avatarKey": "avatars/3d728e8a-b51e-5240-9cd5-d520d60cf98d/avatar.png"
  },
  {
   "id": "p40",
+  "userId": "c62680e7-dd88-5881-bee2-a895494bd573",
   "email": "a1900020@adelaide.edu.au",
   "displayName": "will.ag",
   "university": "Adelaide",
@@ -886,10 +926,11 @@
    "hiking",
    "food"
   ],
-  "avatarKey": "seed/avatars/p40.png"
+  "avatarKey": "avatars/c62680e7-dd88-5881-bee2-a895494bd573/avatar.png"
  },
  {
   "id": "p41",
+  "userId": "7c394b2b-59cf-5ae9-a07b-970de3980479",
   "email": "zhus0214@flinders.edu.au",
   "displayName": "zara.speech",
   "university": "Flinders",
@@ -908,10 +949,11 @@
    "music",
    "food"
   ],
-  "avatarKey": "seed/avatars/p41.png"
+  "avatarKey": "avatars/7c394b2b-59cf-5ae9-a07b-970de3980479/avatar.png"
  },
  {
   "id": "p42",
+  "userId": "90bba9c9-8b15-5c0b-8b56-221afde6943f",
   "email": "a1900021@adelaide.edu.au",
   "displayName": "ChrisOnTheBass",
   "university": "Adelaide",
@@ -930,10 +972,11 @@
    "live-gigs",
    "dance"
   ],
-  "avatarKey": "seed/avatars/p42.png"
+  "avatarKey": "avatars/90bba9c9-8b15-5c0b-8b56-221afde6943f/avatar.png"
  },
  {
   "id": "p43",
+  "userId": "b48a4315-0202-59a6-81a0-6ad92fb57641",
   "email": "fqur0226@flinders.edu.au",
   "displayName": "farah.it",
   "university": "Flinders",
@@ -952,10 +995,11 @@
    "food",
    "language-exchange"
   ],
-  "avatarKey": "seed/avatars/p43.png"
+  "avatarKey": "avatars/b48a4315-0202-59a6-81a0-6ad92fb57641/avatar.png"
  },
  {
   "id": "p44",
+  "userId": "c609ad2c-6d66-5b6f-93a9-66e73760d16d",
   "email": "jwhi0238@flinders.edu.au",
   "displayName": "JoshEnviro",
   "university": "Flinders",
@@ -974,10 +1018,11 @@
    "volunteering",
    "beach"
   ],
-  "avatarKey": "seed/avatars/p44.png"
+  "avatarKey": "avatars/c609ad2c-6d66-5b6f-93a9-66e73760d16d/avatar.png"
  },
  {
   "id": "p45",
+  "userId": "5368b3c9-8065-5575-9bbb-2d3f4a5e9613",
   "email": "a1900022@adelaide.edu.au",
   "displayName": "olivia.media",
   "university": "Adelaide",
@@ -996,10 +1041,11 @@
    "photography",
    "live-gigs"
   ],
-  "avatarKey": "seed/avatars/p45.png"
+  "avatarKey": "avatars/5368b3c9-8065-5575-9bbb-2d3f4a5e9613/avatar.png"
  },
  {
   "id": "p46",
+  "userId": "37707f96-a570-5ce6-b6a5-016e9dbd5305",
   "email": "a1900023@adelaide.edu.au",
   "displayName": "SiddharthMBA",
   "university": "Adelaide",
@@ -1018,10 +1064,11 @@
    "running",
    "food"
   ],
-  "avatarKey": "seed/avatars/p46.png"
+  "avatarKey": "avatars/37707f96-a570-5ce6-b6a5-016e9dbd5305/avatar.png"
  },
  {
   "id": "p47",
+  "userId": "edc9ab4c-17df-57bf-8c25-4417db398d05",
   "email": "kmor0247@flinders.edu.au",
   "displayName": "kate.forensics",
   "university": "Flinders",
@@ -1040,10 +1087,11 @@
    "movies",
    "reading"
   ],
-  "avatarKey": "seed/avatars/p47.png"
+  "avatarKey": "avatars/edc9ab4c-17df-57bf-8c25-4417db398d05/avatar.png"
  },
  {
   "id": "p48",
+  "userId": "f8245ad3-c4f4-5630-81f9-0e3ea6b462a0",
   "email": "a1900024@adelaide.edu.au",
   "displayName": "HenryHistory",
   "university": "Adelaide",
@@ -1062,6 +1110,6 @@
    "food",
    "board-games"
   ],
-  "avatarKey": "seed/avatars/p48.png"
+  "avatarKey": "avatars/f8245ad3-c4f4-5630-81f9-0e3ea6b462a0/avatar.png"
  }
 ]

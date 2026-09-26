@@ -24,8 +24,9 @@ public static class DevSeeder
 
     private static readonly GeometryFactory Geo = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
+    /// <param name="UserId">Fixed user id; the avatar lives in R2 under avatars/{UserId}/, like real users.</param>
     private record SeedStudent(
-        string Id, string Email, string DisplayName, University University, string Degree, Gender Gender,
+        string Id, Guid UserId, string Email, string DisplayName, University University, string Degree, Gender Gender,
         string? Pronouns, int? YearOfStudy, string? Bio, List<string> Habits, List<string> Interests, string? AvatarKey);
 
     /// <param name="Id">Fixed listing id; its photos live in R2 under flats/{Id}/, like real listings.</param>
@@ -45,7 +46,11 @@ public static class DevSeeder
 
     private static async Task SeedStudentsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
     {
-        if (await db.Users.AnyAsync()) return;
+        if (await db.Users.AnyAsync())
+        {
+            await SyncAvatarsAsync(db, logger, students);
+            return;
+        }
 
         var degrees = await db.Degrees.AsNoTracking().ToListAsync();
         var hash = BCrypt.Net.BCrypt.HashPassword(Password); // bcrypt is slow; hash once and reuse
@@ -57,6 +62,7 @@ public static class DevSeeder
 
             db.Users.Add(new User
             {
+                Id = s.UserId,
                 Email = s.Email,
                 PasswordHash = hash,
                 University = s.University,
@@ -80,6 +86,36 @@ public static class DevSeeder
         await db.SaveChangesAsync();
         logger.LogWarning("Seeded {Count} dev students (password: {Password}), e.g. {Email}",
             students.Count, Password, students.FirstOrDefault()?.Email);
+    }
+
+    /// <summary>
+    /// Points already-seeded students at their avatars/{userId}/ key, so images keep loading. Databases
+    /// seeded before user ids were fixed can't change ids in place (other tables reference users.id), so
+    /// they also get a warning to reseed.
+    /// </summary>
+    private static async Task SyncAvatarsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
+    {
+        var byEmail = students.ToDictionary(s => s.Email);
+        var users = await db.Users.Include(u => u.Profile)
+            .Where(u => byEmail.Keys.Contains(u.Email)).ToListAsync();
+
+        var stale = users.Count(u => u.Id != byEmail[u.Email].UserId);
+        if (stale > 0)
+            logger.LogWarning("{Count} seeded students predate fixed user ids. Reseed so their ids match their " +
+                "avatars/{{userId}}/ folders: docker compose down -v && docker compose up -d", stale);
+
+        var updated = 0;
+        foreach (var u in users)
+        {
+            var key = byEmail[u.Email].AvatarKey;
+            if (u.Profile is null || u.Profile.AvatarKey == key) continue;
+            if (u.Profile.AvatarKey is { } current && !current.StartsWith("seed/")) continue; // user's own upload
+            u.Profile.AvatarKey = key;
+            updated++;
+        }
+        if (updated == 0) return;
+        await db.SaveChangesAsync();
+        logger.LogWarning("Updated avatars on {Count} seeded students", updated);
     }
 
     private static async Task SeedFlatsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
