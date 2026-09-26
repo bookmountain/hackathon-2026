@@ -11,8 +11,8 @@ namespace UniMap.Api.Data;
 /// <summary>
 /// Fills an empty database with realistic demo data from Data/Seed/*.json:
 /// 48 fictional students (real degrees, CC0 avatars in R2), 20 room listings on real Adelaide
-/// streets and 21 market items (openly licensed photos in R2). Runs only in Development (or when
-/// Seed:Enabled=true).
+/// streets, 21 market items (openly licensed photos in R2) and 16 walk-in meetups at real places. Runs
+/// only in Development (or when Seed:Enabled=true).
 /// Every seeded user's password is "password123".
 /// </summary>
 public static class DevSeeder
@@ -45,6 +45,17 @@ public static class DevSeeder
         string? ConditionNote, ItemAvailability Availability, int AvailableInDays, string? PickupPointId, string? PlaceName,
         double? Lat, double? Lng, int PostedHoursAgo, string? Description, List<string> Photos);
 
+    /// <param name="Id">Fixed event id. Events have no photos, so nothing is stored in R2.</param>
+    /// <param name="DayOfWeek">The event is on the next such day at Start (Adelaide time), so it's always in the
+    /// coming week. Finished ones are moved on a week by <see cref="RollSeedEventsAsync"/>.</param>
+    /// <param name="End">Optional end time, e.g. "21:30".</param>
+    /// <param name="Going">Headcount, including the host and AlsoGoing. The rest are other seeded students.</param>
+    /// <param name="AlsoGoing">Students who must be going, e.g. p01 so Koala_Kai sees "Going ✓" on one event.</param>
+    private record SeedEvent(
+        Guid Id, string Label, string Host, string Title, EventType Type, DayOfWeek DayOfWeek, string Start, string? End,
+        string? PlaceId, string? PlaceName, double? Lat, double? Lng, int Capacity, int Going, List<string> AlsoGoing,
+        bool WalkInsWelcome, string? Description);
+
     public static async Task SeedAsync(AppDbContext db, ILogger logger)
     {
         var students = Read<List<SeedStudent>>("students.json") ?? [];
@@ -52,6 +63,7 @@ public static class DevSeeder
         await SeedConsentsAsync(db, logger, students);
         await SeedFlatsAsync(db, logger, students);
         await SeedItemsAsync(db, logger, students);
+        await SeedEventsAsync(db, logger, students);
         await SeedChatsAsync(db, logger, students);
         await SeedItemChatAsync(db, logger, students);
     }
@@ -338,6 +350,137 @@ public static class DevSeeder
     /// <summary>Seed photos are numbered (items/{id}/01.jpg); uploads are named by a random guid.</summary>
     private static bool IsSeedItemPhoto(string key, Guid itemId) =>
         System.Text.RegularExpressions.Regex.IsMatch(key, $@"^items/{itemId}/\d{{2}}\.jpg$");
+
+    private static async Task SeedEventsAsync(AppDbContext db, ILogger logger, List<SeedStudent> students)
+    {
+        if (await db.MeetupEvents.AnyAsync())
+        {
+            await RollSeedEventsAsync(db, logger);
+            return;
+        }
+
+        var events = Read<List<SeedEvent>>("events.json") ?? [];
+        var userIds = await SeedUserIdsAsync(db, students);
+        var now = DateTimeOffset.UtcNow;
+        var added = 0;
+        foreach (var (e, i) in events.Select((e, i) => (e, i)))
+        {
+            if (!userIds.TryGetValue(e.Host, out var hostId))
+            {
+                logger.LogWarning("Seed event {Label}: host {Host} not found (reset the database to reseed students)", e.Label, e.Host);
+                continue;
+            }
+            var point = e.PlaceId is { } pid ? PickupPoints.Find(pid) : null;
+            if (e.PlaceId is not null && point is null)
+            {
+                logger.LogWarning("Seed event {Label}: unknown place {Place}", e.Label, e.PlaceId);
+                continue;
+            }
+
+            var (start, end) = NextOccurrence(e, now);
+            var created = now.AddHours(-5 * i - 3); // "hosted" over the last few days
+            var ev = new MeetupEvent
+            {
+                Id = e.Id,
+                HostId = hostId,
+                Title = e.Title,
+                Description = e.Description,
+                Type = e.Type,
+                StartsAt = start,
+                EndsAt = end,
+                PlaceId = point?.Id,
+                PlaceName = e.PlaceName ?? (point is null ? MeetupCatalog.PinnedLocation : null),
+                Location = point is not null
+                    ? Geo.CreatePoint(new Coordinate(point.Lng, point.Lat))
+                    : Geo.CreatePoint(new Coordinate(e.Lng!.Value, e.Lat!.Value)),
+                Capacity = e.Capacity,
+                WalkInsWelcome = e.WalkInsWelcome,
+                CreatedAt = created,
+                UpdatedAt = created,
+            };
+            ev.Attendees.AddRange(SeedAttendees(e, students, userIds).Select(u => new EventAttendee { UserId = u, JoinedAt = created }));
+            db.MeetupEvents.Add(ev);
+            added++;
+        }
+
+        await db.SaveChangesAsync();
+        logger.LogWarning("Seeded {Count} dev meetups", added);
+    }
+
+    /// <summary>
+    /// Moves seeded events that have finished to their next week, and resets who's going to the seeded
+    /// headcount, so the Meetups tab never runs empty in a long-lived demo database. Runs on startup and
+    /// hourly (<see cref="Services.DemoEventsRefresher"/>). Events users host themselves are never touched.
+    /// </summary>
+    public static async Task RollSeedEventsAsync(AppDbContext db, ILogger logger)
+    {
+        var events = (Read<List<SeedEvent>>("events.json") ?? []).ToDictionary(e => e.Id);
+        var students = Read<List<SeedStudent>>("students.json") ?? [];
+        var now = DateTimeOffset.UtcNow;
+        var rows = await db.MeetupEvents.Where(e => events.Keys.Contains(e.Id)).ToListAsync();
+        var finished = rows.Where(e => MeetupCatalog.EndOf(e) <= now).ToList();
+        if (finished.Count == 0) return;
+
+        var userIds = await SeedUserIdsAsync(db, students);
+        var ids = finished.Select(e => e.Id).ToList();
+        await using var tx = await db.Database.BeginTransactionAsync();
+        await db.EventAttendees.Where(a => ids.Contains(a.EventId)).ExecuteDeleteAsync();
+        foreach (var row in finished)
+        {
+            var seed = events[row.Id];
+            (row.StartsAt, row.EndsAt) = NextOccurrence(seed, now);
+            row.UpdatedAt = now;
+            db.EventAttendees.AddRange(SeedAttendees(seed, students, userIds)
+                .Select(u => new EventAttendee { EventId = row.Id, UserId = u, JoinedAt = now }));
+        }
+        await db.SaveChangesAsync();
+        await tx.CommitAsync();
+        logger.LogWarning("Moved {Count} finished seeded meetups to next week", finished.Count);
+    }
+
+    /// <summary>The first time on the event's weekday (Adelaide time) that hasn't finished yet.</summary>
+    private static (DateTimeOffset Start, DateTimeOffset? End) NextOccurrence(SeedEvent e, DateTimeOffset now)
+    {
+        var startTime = TimeOnly.Parse(e.Start);
+        TimeOnly? endTime = e.End is { } t ? TimeOnly.Parse(t) : null;
+        for (var day = AdelaideTime.Today(); ; day = day.AddDays(1))
+        {
+            if (day.DayOfWeek != e.DayOfWeek) continue;
+            var start = AdelaideTime.ToUtc(day, startTime);
+            DateTimeOffset? end = endTime is { } et ? AdelaideTime.ToUtc(day, et) : null;
+            if ((end ?? start + MeetupCatalog.DefaultLength) > now) return (start, end);
+        }
+    }
+
+    /// <summary>
+    /// The host, AlsoGoing, then other students in a fixed pseudo-random order until the headcount is reached.
+    /// Koala_Kai (p01, the demo login) is only included through AlsoGoing, so the demo can tap Join.
+    /// </summary>
+    private static List<Guid> SeedAttendees(SeedEvent e, List<SeedStudent> students, Dictionary<string, Guid> userIds)
+    {
+        var picked = new List<string> { e.Host };
+        picked.AddRange(e.AlsoGoing.Where(id => id != e.Host));
+        picked.AddRange(students.Select(s => s.Id)
+            .Where(id => id != "p01" && !picked.Contains(id))
+            .OrderBy(id => StableHash($"{e.Label}/{id}"))
+            .Take(Math.Max(0, e.Going - picked.Count)));
+        return picked.Where(userIds.ContainsKey).Select(id => userIds[id]).ToList();
+    }
+
+    /// <summary>FNV-1a, so the same students go to the same events on every machine.</summary>
+    private static uint StableHash(string s)
+    {
+        var h = 2166136261;
+        foreach (var c in s) h = (h ^ c) * 16777619;
+        return h;
+    }
+
+    /// <summary>Seed student id (p01…) → user id, for students that exist in this database.</summary>
+    private static async Task<Dictionary<string, Guid>> SeedUserIdsAsync(AppDbContext db, List<SeedStudent> students)
+    {
+        var byEmail = await db.Users.ToDictionaryAsync(u => u.Email, u => u.Id);
+        return students.Where(s => byEmail.ContainsKey(s.Email)).ToDictionary(s => s.Id, s => byEmail[s.Email]);
+    }
 
     /// <summary>
     /// A few chats for Koala_Kai (the Swagger login) so the Messages screen isn't empty in the demo:

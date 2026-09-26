@@ -38,6 +38,8 @@ builder.Services.AddSingleton<TokenService>();
 builder.Services.AddSingleton<VerificationCodeStore>();
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddScoped<ChatService>();
+if (builder.Environment.IsDevelopment() || config.GetValue<bool>("Seed:Enabled"))
+    builder.Services.AddHostedService<DemoEventsRefresher>();
 if (config.GetSection("Email").Get<EmailOptions>()?.IsConfigured == true)
     builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 else
