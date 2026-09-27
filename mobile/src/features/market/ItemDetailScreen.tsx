@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
@@ -13,6 +13,7 @@ import PhotoPager from "@/features/shell/PhotoPager";
 import { useAppStore } from "@/store";
 import { colors, divider, font } from "@/theme";
 import { availabilityColors, isSold, openingMessage } from "./logic";
+import { goBack } from "@/lib/goBack";
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -42,7 +43,7 @@ function ItemDetailView({ item }: { item: ItemDetail }) {
       <ScrollView>
         <PhotoPager photos={item.photos} tone={item.tone} label="product photo" height={290}>
           <View style={styles.back}>
-            <BackButton variant="white" onPress={() => router.back()} />
+            <BackButton variant="white" onPress={() => goBack()} />
           </View>
         </PhotoPager>
 
@@ -62,10 +63,11 @@ function ItemDetailView({ item }: { item: ItemDetail }) {
             <Text style={styles.desc}>{item.desc}</Text>
           </View>
 
-          <View style={styles.section}>
+          <View style={[styles.section, styles.pickup]}>
             <Text style={styles.sectionTitle}>Pickup location</Text>
             <MiniMap
               region={regionAround(place)}
+              height={170}
               footer={
                 <View style={styles.placeInfo}>
                   <Text style={styles.placeName}>{place.name}</Text>
@@ -110,6 +112,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, ...font(800, 19, 1.25) },
   pills: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
   section: { gap: 8 },
+  pickup: { gap: 10 },
   sectionTitle: { color: colors.ink, ...font(800, 16) },
   desc: { color: colors.body, ...font(500, 14.5, 1.55) },
   placeInfo: { paddingHorizontal: 14, paddingVertical: 12, gap: 3 },

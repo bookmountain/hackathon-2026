@@ -17,6 +17,7 @@ import ItemCard from "./ItemCard";
 import { CATEGORIES, customPinItems, inCategory, isSold, itemsAtPickup, listItems, type CategoryFilter } from "./logic";
 import { ItemTag, PickupPin } from "./MarketPins";
 import { ItemSheet, PickupSheet } from "./MarketSheets";
+import PickedForYou from "./PickedForYou";
 
 const openItem = (id: string) => router.push({ pathname: "/market/[id]", params: { id } });
 const sell = () => router.push("/market/new");
@@ -142,7 +143,7 @@ export default function MarketTab() {
                   title={resultsTitle(results.length, "item", search.query, imageQuery ?? undefined)}
                   onClose={() => search.setSheet(null)}
                   emptyText={
-                    imageQuery?.loading ? null : `No matches for “${search.query.trim()}”. Try another word or clear filters.`
+                    imageQuery?.loading ? null : `No matches for “${search.query.trim()}”, mate. Try another word or clear filters.`
                   }
                   rows={results}
                 />
@@ -152,6 +153,7 @@ export default function MarketTab() {
                   key={selectedPickup.id}
                   pickup={selectedPickup}
                   items={itemsAtPickup(state.items, selectedPickup.id)}
+                  onClose={() => search.setSheet(null)}
                 />
               )}
               {selectedItem && <ItemSheet key={selectedItem.id} item={selectedItem} />}
@@ -219,6 +221,8 @@ export default function MarketTab() {
               <View style={styles.listChips}>
                 <ChipRow options={chips} />
               </View>
+              {/* Hidden while searching, so the results come first */}
+              {!listQuery.trim() && <PickedForYou items={state.items} onOpen={openItem} />}
             </View>
           }
           renderItem={({ item }) =>
