@@ -2,7 +2,7 @@ using UniMap.Api.Domain;
 
 namespace UniMap.Api.Contracts;
 
-/// <summary>Today's Dcard, for the "Daily card" screen.</summary>
+/// <summary>Today's daily card, for the "Daily card" screen.</summary>
 /// <param name="Status">Ready ("Draw your card"), Matched ("Your card today") or Missed ("Deck locked").</param>
 /// <param name="Match">With Matched: the student you drew (nickname, major, uni, avatar). Null if they've since
 /// deleted their account.</param>
@@ -25,7 +25,7 @@ public record DailyCardResponse(
     MatchDetails? Details = null);
 
 /// <summary>
-/// The rest of your daily match's card: only your Dcard match sees these, not everyone on the map.
+/// The rest of your daily match's card: only your daily card match sees these, not everyone on the map.
 /// </summary>
 /// <param name="Pronouns">e.g. "she/her"; null if not set.</param>
 /// <param name="YearOfStudy">1 = first year; null if not set.</param>

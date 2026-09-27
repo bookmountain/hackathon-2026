@@ -274,7 +274,7 @@ export type ChatSummaryDto = {
 };
 
 /** Send exactly one of userId, flatId or itemId */
-/** One of userId, flatId, itemId or drawId (your Dcard match, which adds a "Daily card match · 27 Sep" line) */
+/** One of userId, flatId, itemId or drawId (your daily card match, which adds a "Daily card match · 27 Sep" line) */
 export type StartChatRequest = { userId?: string; flatId?: string; itemId?: string; drawId?: string; text?: string };
 
 // Uploads

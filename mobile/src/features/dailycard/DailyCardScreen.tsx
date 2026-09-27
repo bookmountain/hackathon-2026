@@ -213,7 +213,7 @@ export default function DailyCardScreen() {
     try {
       // drawId adds the "Daily card match · 27 Sep" line; the device copy only has the student
       const to = drawId ? { drawId } : { userId: person.id };
-      await startChat(actions, { ...to, text: "Hey! We drew each other on Dcard today" });
+      await startChat(actions, { ...to, text: "Hey! We matched on the Daily card today" });
     } catch (e) {
       toast(errorMessage(e));
     }

@@ -70,7 +70,7 @@ public class OllamaOptions
     public bool IsConfigured => !string.IsNullOrWhiteSpace(BaseUrl);
 }
 
-/// <summary>Dcard settings.</summary>
+/// <summary>Daily card settings.</summary>
 public class DailyCardOptions
 {
     /// <summary>

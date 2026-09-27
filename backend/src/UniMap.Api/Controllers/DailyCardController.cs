@@ -12,7 +12,7 @@ using UniMap.Api.Services;
 namespace UniMap.Api.Controllers;
 
 /// <summary>
-/// Dcard ("Daily card"): draw one card a day to meet a random fellow student. Draws are mutual: the student
+/// Daily card: draw one card a day to meet a random fellow student. Draws are mutual: the student
 /// you draw gets you as their card too. The deck resets at Adelaide midnight. Miss a day and your next
 /// Draw only starts a new session: the deck locks until midnight, then you can draw again.
 /// </summary>
@@ -82,7 +82,7 @@ public class DailyCardController(
             }
             catch (DbUpdateException e) when (e.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
             {
-                log.LogInformation("Dcard draw for {UserId} collided with another draw, retrying", me);
+                log.LogInformation("Daily card draw for {UserId} collided with another draw, retrying", me);
             }
         }
         return Problem("Lots of students are drawing right now. Try again.", statusCode: StatusCodes.Status409Conflict);
@@ -115,7 +115,7 @@ public class DailyCardController(
             });
             await db.SaveChangesAsync();
         }
-        log.LogInformation("Dcard demo reset for {UserId} (missedDay: {MissedDay})", me, missedDay);
+        log.LogInformation("Daily card demo reset for {UserId} (missedDay: {MissedDay})", me, missedDay);
         return await StateAsync(me, today);
     }
 

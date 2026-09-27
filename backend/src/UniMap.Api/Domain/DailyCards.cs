@@ -1,6 +1,6 @@
 namespace UniMap.Api.Domain;
 
-/// <summary>What the Dcard screen shows today.</summary>
+/// <summary>What the Daily card screen shows today.</summary>
 public enum DrawStatus
 {
     /// <summary>"Draw a card". Check missedDay: drawing after a missed day locks the deck until midnight.</summary>
@@ -12,7 +12,7 @@ public enum DrawStatus
 }
 
 /// <summary>
-/// One student's Dcard ("Daily card") for one Adelaide day: one row per student per day. Draws are mutual:
+/// One student's daily card for one Adelaide day: one row per student per day. Draws are mutual:
 /// drawing someone writes a row for both of you. The other student's row has no <see cref="DrawnAt"/> until
 /// they draw too, which reveals you as their card.
 /// </summary>

@@ -57,7 +57,7 @@ services:
       Anthropic__ApiKey: ${ANTHROPIC_API_KEY:-}
       Ollama__BaseUrl: ${OLLAMA_BASE_URL:-}
       Ollama__Model: ${OLLAMA_MODEL:-qwen3-vl:8b-instruct}
-      # Demo server: POST /api/daily-card/reset lets the app's Dcard demo buttons start over.
+      # Demo server: POST /api/daily-card/reset lets the app's Daily card demo buttons start over.
       DailyCard__DemoReset: ${DAILY_CARD_DEMO_RESET:-true}
       # Email goes to the mailpit service above. Set SMTP_* in .env (e.g. Resend) to send for real.
       Email__Host: ${SMTP_HOST:-mailpit}

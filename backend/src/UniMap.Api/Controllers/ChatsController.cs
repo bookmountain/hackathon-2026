@@ -55,7 +55,7 @@ public class ChatsController(AppDbContext db, ChatService chats) : ControllerBas
 
     /// <summary>
     /// Open the chat with a student (userId), a listing's owner (flatId, the "Message tenant" button), an
-    /// item's seller (itemId, the "Message seller" button) or your Dcard match (drawId), optionally with a
+    /// item's seller (itemId, the "Message seller" button) or your daily card match (drawId), optionally with a
     /// first message. Reuses the existing chat if there is one.
     /// </summary>
     [HttpPost]

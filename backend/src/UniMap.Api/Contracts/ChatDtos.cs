@@ -33,7 +33,7 @@ public record ChatSummary(
 /// <param name="UserId">Chat with this student (e.g. from a person pin on the map).</param>
 /// <param name="FlatId">Or: chat with this listing's owner ("Message tenant"). Adds an "About" line.</param>
 /// <param name="ItemId">Or: chat with this item's seller ("Message seller"). Adds an "About" line.</param>
-/// <param name="DrawId">Or: chat with the student on your Dcard ("Send a message to {nick}"), using drawId from
+/// <param name="DrawId">Or: chat with the student on your daily card ("Send a message to {nick}"), using drawId from
 /// GET /api/daily-card. Adds a "Daily card match · 27 Sep" line.</param>
 /// <param name="Text">Optional first message, e.g. "Is it still available?".</param>
 public record StartChatRequest(Guid? UserId, Guid? FlatId, Guid? ItemId, Guid? DrawId, [MaxLength(2000)] string? Text);
