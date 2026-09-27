@@ -1,11 +1,11 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useState, type ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useLoad, useSubmit } from "@/api/hooks";
 import { useToast } from "@/components/feedback/Toast";
-import { BackButton, Button, Pill, TextField } from "@/components/ui";
+import { BackButton, Button, GamePressable, Pill, TextField } from "@/components/ui";
 import { toFlatDetail } from "@/data/adapters";
 import type { FlatDetail } from "@/data/types";
 import CalendarButtons from "@/features/detail/CalendarButtons";
@@ -13,8 +13,9 @@ import { LoadingScreen } from "@/features/shell/LoadingScreen";
 import PhotoPager from "@/features/shell/PhotoPager";
 import { useAppStore } from "@/store";
 import { parseDateOnly } from "@/lib/dates";
-import { brutal, colors, divider, font } from "@/theme";
+import { colors, divider, font } from "@/theme";
 import { messageTenant } from "./messageTenant";
+import { goBack } from "@/lib/goBack";
 
 const QUICK_QUESTIONS = ["Is it still available?", "Can I inspect this week?", "How are bills split?"];
 /** A 20-minute walk fills the bar */
@@ -76,7 +77,7 @@ function FlatDetailView({ flat, availableFrom }: { flat: FlatDetail; availableFr
         <ScrollView keyboardShouldPersistTaps="handled">
           <PhotoPager photos={flat.photos} tone={flat.tone} label="room photos" height={250}>
             <View style={styles.back}>
-              <BackButton variant="white" onPress={() => router.back()} />
+              <BackButton variant="white" onPress={() => goBack()} />
             </View>
           </PhotoPager>
 
@@ -121,10 +122,14 @@ function FlatDetailView({ flat, availableFrom }: { flat: FlatDetail; availableFr
 
             <Section title="The room">
               <View style={styles.grid}>
-                {roomFacts.map((f) => (
-                  <View key={f.k} style={styles.gridCell}>
-                    <Text style={styles.factKey}>{f.k}</Text>
-                    <Text style={styles.factValue}>{f.v}</Text>
+                {[roomFacts.slice(0, 2), roomFacts.slice(2)].map((pair) => (
+                  <View key={pair[0].k} style={styles.gridRow}>
+                    {pair.map((f) => (
+                      <View key={f.k} style={styles.gridCell}>
+                        <Text style={styles.factKey}>{f.k}</Text>
+                        <Text style={styles.factValue}>{f.v}</Text>
+                      </View>
+                    ))}
                   </View>
                 ))}
               </View>
@@ -144,7 +149,9 @@ function FlatDetailView({ flat, availableFrom }: { flat: FlatDetail; availableFr
             <Section title="Features">
               <View style={styles.wrap}>
                 {(flat.feats.length ? flat.feats : ["Ask the tenant"]).map((f) => (
-                  <Pill key={f} label={f} size={13} />
+                  <View key={f} style={styles.feat}>
+                    <Text style={styles.featText}>{f}</Text>
+                  </View>
                 ))}
               </View>
             </Section>
@@ -162,7 +169,9 @@ function FlatDetailView({ flat, availableFrom }: { flat: FlatDetail; availableFr
               </View>
               <View style={styles.wrap}>
                 {(flat.rhythm.length ? flat.rhythm : ["Ask the tenant"]).map((r) => (
-                  <Pill key={r} label={r} dashed size={12.5} />
+                  <View key={r} style={styles.rhythm}>
+                    <Text style={styles.rhythmText}>{r}</Text>
+                  </View>
                 ))}
               </View>
             </Section>
@@ -182,12 +191,17 @@ function FlatDetailView({ flat, availableFrom }: { flat: FlatDetail; availableFr
             {!flat.mine && (
               <View style={styles.messageBox}>
                 <Text style={styles.sectionTitle}>Message {tenant.nick}</Text>
-                <Text style={styles.area}>Current tenant · {tenant.line}</Text>
-                <View style={styles.wrap}>
+                <Text style={styles.tenantLine}>Current tenant · {tenant.line}</Text>
+                <View style={styles.quickWrap}>
                   {QUICK_QUESTIONS.map((q) => (
-                    <Pressable key={q} onPress={() => setMessage(message ? `${message} ${q}` : q)} style={styles.quick}>
+                    <GamePressable
+                      key={q}
+                      kind="sm"
+                      onPress={() => setMessage(message ? `${message} ${q}` : q)}
+                      faceStyle={styles.quick}
+                    >
                       <Text style={styles.quickText}>{q}</Text>
-                    </Pressable>
+                    </GamePressable>
                   ))}
                 </View>
                 <TextField multiline value={message} onChangeText={setMessage} maxLength={2000} />
@@ -215,11 +229,12 @@ const styles = StyleSheet.create({
   back: { position: "absolute", left: 14, top: 14 },
   body: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 20, gap: 20 },
   headline: { gap: 6 },
-  priceRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  priceRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" },
   price: { color: colors.ink, ...font(800, 30, undefined, -0.02) },
   per: { color: colors.muted, ...font(600, 15) },
   title: { color: colors.ink, ...font(800, 18, 1.25) },
   area: { color: colors.muted, ...font(500, 13.5) },
+  tenantLine: { color: colors.muted, ...font(500, 12.5) },
   desc: { color: colors.body, ...font(500, 14.5, 1.55) },
   cost: {
     backgroundColor: colors.ink,
@@ -236,16 +251,28 @@ const styles = StyleSheet.create({
   costSplit: { color: colors.brandLight, textAlign: "right", ...font(600, 12.5, 1.4) },
   section: { gap: 10 },
   sectionTitle: { color: colors.ink, ...font(800, 16) },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  gridCell: { width: "48.5%", backgroundColor: colors.canvas, borderRadius: 14, padding: 12, gap: 3 },
+  grid: { gap: 8 },
+  gridRow: { flexDirection: "row", gap: 8 },
+  gridCell: { flex: 1, backgroundColor: colors.canvas, borderRadius: 14, padding: 12, gap: 3 },
   factKey: { color: colors.muted, ...font(600, 11.5) },
   factValue: { color: colors.ink, ...font(800, 14) },
   table: { borderWidth: 2, borderColor: colors.ink, borderRadius: 16 },
   row: { flexDirection: "row", justifyContent: "space-between", gap: 16, paddingHorizontal: 14, paddingVertical: 12 },
   rowDivider: divider.bottom,
-  rowKey: { color: colors.muted, ...font(600, 13.5) },
+  rowKey: { flexShrink: 0, color: colors.muted, ...font(600, 13.5) },
   rowValue: { flex: 1, textAlign: "right", color: colors.ink, ...font(600, 13.5) },
   wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  feat: { backgroundColor: colors.brandSoft, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
+  featText: { color: colors.brandDeep, ...font(700, 13) },
+  rhythm: {
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: colors.brandLight,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  rhythmText: { color: colors.brandDeep, ...font(700, 12.5) },
   tenant: {
     flexDirection: "row",
     alignItems: "center",
@@ -265,13 +292,8 @@ const styles = StyleSheet.create({
   barFill: { height: "100%", borderRadius: 4, backgroundColor: colors.brand },
   walkValue: { width: 48, textAlign: "right", color: colors.ink, ...font(800, 13) },
   messageBox: { backgroundColor: colors.canvas, borderRadius: 20, padding: 16, gap: 10 },
-  quick: {
-    ...brutal(0),
-    backgroundColor: colors.surface,
-    borderRadius: 999,
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-  },
+  quickWrap: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  quick: { backgroundColor: colors.surface, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 6 },
   quickText: { color: colors.ink, ...font(600, 12) },
   footer: {
     paddingHorizontal: 20,

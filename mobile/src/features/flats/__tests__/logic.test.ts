@@ -1,14 +1,18 @@
 import { FLATS } from "@/test/fixtures";
 import {
+  activeFlatFilters,
+  BILLS_SLIDER,
   countFlatFilters,
   EMPTY_FLAT_FILTERS,
   EMPTY_ROOM,
   filterFlats,
   flatRequest,
   housemateLine,
-  rentBounds,
+  RENT_SLIDER,
   roomProblem,
+  sliderLimit,
   streetOf,
+  type FlatFilters,
   type RoomDraft,
 } from "../logic";
 
@@ -17,32 +21,62 @@ const photo = { uri: "file:///room.jpg", contentType: "image/jpeg" };
 const pin = { latitude: -34.92, longitude: 138.6 };
 
 describe("filterFlats", () => {
+  // The fixtures all have 3 beds and 2 flatmates; vary them here
+  const flats = [FLATS[0], { ...FLATS[1], beds: 1, members: 0 }, { ...FLATS[2], beds: 2, members: 4 }, FLATS[3]];
+  const only = (change: Partial<FlatFilters>) => ids(filterFlats(flats, { ...EMPTY_FLAT_FILTERS, ...change }));
+
   it("returns everything with no filters", () => {
-    expect(ids(filterFlats(FLATS, EMPTY_FLAT_FILTERS))).toEqual(["f1", "f2", "f3", "f4"]);
+    expect(only({})).toEqual(["f1", "f2", "f3", "f4"]);
     expect(countFlatFilters(EMPTY_FLAT_FILTERS)).toBe(0);
   });
 
-  it("keeps rents inside the range, either end optional", () => {
-    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, rentMin: 200, rentMax: 250 }))).toEqual(["f1", "f4"]);
-    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, rentMin: 240 }))).toEqual(["f1", "f2"]);
-    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, rentMax: 230 }))).toEqual(["f3", "f4"]);
+  it("caps rent and bills", () => {
+    expect(only({ maxRent: 240 })).toEqual(["f3", "f4"]);
+    expect(only({ maxBills: 20 })).toEqual(["f2", "f4"]);
   });
 
-  it("combines bills, furnished and ensuite with AND", () => {
-    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, maxBills: 20 }))).toEqual(["f2", "f4"]);
-    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, furnished: true, ensuite: true }))).toEqual(["f1", "f4"]);
-    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, furnished: true, maxBills: 20 }))).toEqual(["f4"]);
+  it("filters bedrooms and flatmates", () => {
+    expect(only({ minBeds: 2 })).toEqual(["f1", "f3", "f4"]);
+    expect(only({ minBeds: 3 })).toEqual(["f1", "f4"]);
+    expect(only({ maxMates: 1 })).toEqual(["f2"]);
+    expect(only({ maxMates: 2 })).toEqual(["f1", "f2", "f4"]);
   });
 
-  it("counts the rent range as one filter", () => {
-    expect(countFlatFilters({ ...EMPTY_FLAT_FILTERS, rentMin: 200, rentMax: 250, ensuite: true })).toBe(2);
+  it("matches furnishing and toilet", () => {
+    expect(only({ furnished: "Partly furnished" })).toEqual(["f2"]);
+    expect(only({ furnished: "Unfurnished" })).toEqual([]);
+    expect(only({ toilet: "Ensuite" })).toEqual(["f1", "f4"]);
+    expect(only({ toilet: "Shared" })).toEqual(["f2", "f3"]);
+  });
+
+  it("combines filters with AND", () => {
+    expect(only({ furnished: "Fully furnished", maxBills: 20 })).toEqual(["f4"]);
+    expect(only({ toilet: "Shared", minBeds: 2 })).toEqual(["f3"]);
   });
 });
 
-describe("rentBounds", () => {
-  it("rounds out to tidy slider ends", () => {
-    expect(rentBounds(FLATS)).toEqual({ min: 180, max: 300 });
-    expect(rentBounds([])).toEqual({ min: 0, max: 500 });
+describe("sliderLimit", () => {
+  it("treats the top of the track as no limit", () => {
+    expect(sliderLimit(250, RENT_SLIDER)).toBe(250);
+    expect(sliderLimit(500, RENT_SLIDER)).toBeNull();
+    expect(sliderLimit(0, BILLS_SLIDER)).toBe(0);
+    expect(sliderLimit(60, BILLS_SLIDER)).toBeNull();
+  });
+});
+
+describe("activeFlatFilters", () => {
+  it("labels one chip per filter, each clearing only itself", () => {
+    const f: FlatFilters = { maxRent: 250, maxBills: 30, minBeds: 2, furnished: "Fully furnished", toilet: "Ensuite", maxMates: 2 };
+    const chips = activeFlatFilters(f);
+    expect(chips.map((c) => c.label)).toEqual(["≤ $250/wk", "Bills ≤ $30", "2+ bed", "Fully furnished", "Ensuite toilet", "≤ 2 flatmates"]);
+    expect(countFlatFilters(f)).toBe(6);
+    expect({ ...f, ...chips[2].clear }).toEqual({ ...f, minBeds: 0 });
+    // Clearing every chip gets back to no filters
+    expect(chips.reduce((acc, c) => ({ ...acc, ...c.clear }), f)).toEqual(EMPTY_FLAT_FILTERS);
+  });
+
+  it("keeps a $0 bills cap and says flatmate for one", () => {
+    expect(activeFlatFilters({ ...EMPTY_FLAT_FILTERS, maxBills: 0, maxMates: 1 }).map((c) => c.label)).toEqual(["Bills ≤ $0", "≤ 1 flatmate"]);
   });
 });
 

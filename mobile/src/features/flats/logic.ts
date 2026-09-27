@@ -3,48 +3,63 @@ import type { BathroomType, FlatRequest, Furnishing, ToiletType } from "@/api/ty
 import type { Flat, MapPoint, Uni } from "@/data/types";
 import { toDateOnly } from "@/lib/dates";
 
-/** The Filters dialog; null = no limit */
+/** "Furnished" choices; the values match `Flat.furnished` */
+export const FURNISHED_OPTIONS = [
+  { label: "Any", value: "Any" },
+  { label: "Fully", value: "Fully furnished" },
+  { label: "Partly", value: "Partly furnished" },
+  { label: "None", value: "Unfurnished" },
+] as const;
+export type FurnishedFilter = (typeof FURNISHED_OPTIONS)[number]["value"];
+export type ToiletFilter = "Any" | "Ensuite" | "Shared";
+
+/** The Filter rooms sheet; null / 0 / "Any" = no limit */
 export type FlatFilters = {
-  rentMin: number | null;
-  rentMax: number | null;
+  maxRent: number | null;
   maxBills: number | null;
-  furnished: boolean;
-  ensuite: boolean;
+  /** Bedrooms at least this many */
+  minBeds: number;
+  furnished: FurnishedFilter;
+  toilet: ToiletFilter;
+  maxMates: number | null;
 };
 
-export const EMPTY_FLAT_FILTERS: FlatFilters = { rentMin: null, rentMax: null, maxBills: null, furnished: false, ensuite: false };
+export const EMPTY_FLAT_FILTERS: FlatFilters = { maxRent: null, maxBills: null, minBeds: 0, furnished: "Any", toilet: "Any", maxMates: null };
 
-/** "Bills per week" choices in the dialog */
-export const BILLS_OPTIONS: { label: string; max: number | null }[] = [
-  { label: "Any", max: null },
-  { label: "Up to $20", max: 20 },
-  { label: "Up to $30", max: 30 },
-  { label: "Up to $40", max: 40 },
-];
+/** The two sliders; the top of each reads "Any" (no limit) */
+export const RENT_SLIDER = { min: 100, max: 500, step: 10 };
+export const BILLS_SLIDER = { min: 0, max: 60, step: 5 };
+
+/** Slider value → filter value: the top of the track means no limit */
+export const sliderLimit = (value: number, slider: { max: number }): number | null => (value >= slider.max ? null : value);
 
 /** Flats matching every filter */
 export function filterFlats(flats: Flat[], f: FlatFilters): Flat[] {
   return flats.filter(
     (flat) =>
-      (f.rentMin === null || flat.price >= f.rentMin) &&
-      (f.rentMax === null || flat.price <= f.rentMax) &&
+      (f.maxRent === null || flat.price <= f.maxRent) &&
       (f.maxBills === null || flat.bills <= f.maxBills) &&
-      (!f.furnished || flat.furnished === "Fully furnished") &&
-      (!f.ensuite || /ensuite/i.test(flat.toilet)),
+      flat.beds >= f.minBeds &&
+      (f.furnished === "Any" || flat.furnished === f.furnished) &&
+      (f.toilet === "Any" || /ensuite/i.test(flat.toilet) === (f.toilet === "Ensuite")) &&
+      (f.maxMates === null || flat.members <= f.maxMates),
   );
 }
 
-/** Badge on the Filters button; the rent range counts once */
-export function countFlatFilters(f: FlatFilters): number {
-  return [f.rentMin !== null || f.rentMax !== null, f.maxBills !== null, f.furnished, f.ensuite].filter(Boolean).length;
+/** One removable map chip per active filter; `clear` resets just that filter */
+export function activeFlatFilters(f: FlatFilters): { label: string; clear: Partial<FlatFilters> }[] {
+  const chips: { label: string; clear: Partial<FlatFilters> }[] = [];
+  if (f.maxRent !== null) chips.push({ label: `≤ $${f.maxRent}/wk`, clear: { maxRent: null } });
+  if (f.maxBills !== null) chips.push({ label: `Bills ≤ $${f.maxBills}`, clear: { maxBills: null } });
+  if (f.minBeds) chips.push({ label: `${f.minBeds}+ bed`, clear: { minBeds: 0 } });
+  if (f.furnished !== "Any") chips.push({ label: f.furnished, clear: { furnished: "Any" } });
+  if (f.toilet !== "Any") chips.push({ label: `${f.toilet} toilet`, clear: { toilet: "Any" } });
+  if (f.maxMates !== null) chips.push({ label: `≤ ${f.maxMates} flatmate${f.maxMates === 1 ? "" : "s"}`, clear: { maxMates: null } });
+  return chips;
 }
 
-/** Ends of the rent slider: the cheapest and dearest room, rounded out */
-export function rentBounds(flats: Flat[]): { min: number; max: number } {
-  if (!flats.length) return { min: 0, max: 500 };
-  const prices = flats.map((f) => f.price);
-  return { min: Math.floor(Math.min(...prices) / 10) * 10, max: Math.ceil(Math.max(...prices) / 50) * 50 };
-}
+/** Badge on the Filters button and chip */
+export const countFlatFilters = (f: FlatFilters): number => activeFlatFilters(f).length;
 
 // Same lists as GET /api/flats/options
 export const FEATURE_OPTIONS = ["Air con", "Double bed", "Kitchenette", "Desk", "Wi-Fi included", "Laundry", "Parking", "Balcony"];

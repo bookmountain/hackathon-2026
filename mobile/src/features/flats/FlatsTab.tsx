@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRefreshOnFocus } from "@/api/hooks";
+import EmptyState from "@/components/feedback/EmptyState";
 import { CampusMap, MapChrome, MapMarker, ResultsSheet } from "@/features/map";
 import ListSearchBar from "@/features/filters/ListSearchBar";
 import { useMapSearch } from "@/features/map/useMapSearch";
@@ -14,7 +15,7 @@ import FlatCard from "./FlatCard";
 import FlatFiltersSheet from "./FlatFiltersSheet";
 import FlatPin from "./FlatPin";
 import FlatSheet from "./FlatSheet";
-import { countFlatFilters, EMPTY_FLAT_FILTERS, filterFlats, rentBounds, type FlatFilters } from "./logic";
+import { activeFlatFilters, EMPTY_FLAT_FILTERS, filterFlats, type FlatFilters } from "./logic";
 
 const openFlat = (id: string) => router.push({ pathname: "/flats/[id]", params: { id } });
 const listRoom = () => router.push("/flats/new");
@@ -41,14 +42,26 @@ export default function FlatsTab() {
   // One search and one set of filters for both the map and the list
   const searched = state.flats.filter((f) => matchesQuery(search.query, f.title, f.area));
   const flats = filterFlats(searched, filters);
-  const filterCount = countFlatFilters(filters);
+  const active = activeFlatFilters(filters);
+  const filterCount = active.length;
   const selectedId = search.selected("flat");
   const selected = state.flats.find((f) => f.id === selectedId);
-  // On the map: the dialog, plus the two most used switches as quick chips
+  const openFilters = () => {
+    search.setSheet(null);
+    setFiltersOpen(true);
+  };
+  // On the map: the sheet, then one chip per active filter that clears it
   const chipOptions = [
-    { label: filterCount ? `Filters · ${filterCount}` : "Filters", active: filterCount > 0, onPress: () => setFiltersOpen(true) },
-    { label: "Furnished", active: filters.furnished, onPress: () => setFilters({ ...filters, furnished: !filters.furnished }) },
-    { label: "Ensuite", active: filters.ensuite, onPress: () => setFilters({ ...filters, ensuite: !filters.ensuite }) },
+    { label: filterCount ? `Filters · ${filterCount}` : "Filters", active: true, onPress: openFilters },
+    ...active.map((c) => ({
+      label: `${c.label}  ✕`,
+      active: false,
+      removable: true,
+      onPress: () => {
+        search.setSheet(null);
+        setFilters({ ...filters, ...c.clear });
+      },
+    })),
   ];
 
   return (
@@ -83,7 +96,7 @@ export default function FlatsTab() {
                 <ResultsSheet
                   title={resultsTitle(flats.length, "room", search.query)}
                   onClose={() => search.setSheet(null)}
-                  emptyText={`No matches for “${search.query.trim()}”. Try another word or clear filters.`}
+                  emptyText={`No matches for “${search.query.trim()}”, mate. Try another word or clear filters.`}
                   rows={flats.map((f) => ({
                     key: f.id,
                     title: f.title,
@@ -125,26 +138,18 @@ export default function FlatsTab() {
             onQueryChange={search.setQuery}
             placeholder="Search rooms or suburbs"
             filterCount={filterCount}
-            onFilters={() => setFiltersOpen(true)}
+            onFilters={openFilters}
           />
           {flats.map((f) => (
             <FlatCard key={f.id} flat={f} onPress={() => openFlat(f.id)} />
           ))}
-          {flats.length === 0 && <Text style={styles.empty}>No rooms match your search or filters.</Text>}
+          {flats.length === 0 && (
+            <EmptyState sticker="roo" title="Strewth, no rooms here!" text="No rooms match those filters. Try loosening them." />
+          )}
         </ScrollView>
       )}
       {filtersOpen && (
-        <FlatFiltersSheet
-          flats={searched}
-          bounds={rentBounds(state.flats)}
-          applied={filters}
-          onApply={(next) => {
-            setFilters(next);
-            setFiltersOpen(false);
-            search.setSheet(null);
-          }}
-          onClose={() => setFiltersOpen(false)}
-        />
+        <FlatFiltersSheet filters={filters} onChange={setFilters} count={flats.length} onClose={() => setFiltersOpen(false)} />
       )}
     </TabScreen>
   );
@@ -155,5 +160,4 @@ const styles = StyleSheet.create({
   intro: { gap: 4 },
   title: { color: colors.ink, ...font(800, 22, 1.2, -0.02) },
   subtitle: { color: colors.muted, ...font(500, 13.5) },
-  empty: { textAlign: "center", padding: 30, color: colors.muted, ...font(600, 14) },
 });
