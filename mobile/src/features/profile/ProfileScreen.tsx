@@ -159,6 +159,10 @@ export default function ProfileScreen() {
         <MyActivity />
 
         <View style={styles.links}>
+          <Pressable onPress={() => router.push("/about")} style={[styles.link, styles.linkDivider]}>
+            <Text style={styles.linkText}>About UCompass</Text>
+            <Text style={styles.linkIcon}>›</Text>
+          </Pressable>
           <Pressable onPress={() => Linking.openURL(PRIVACY_LINKS.app)} style={[styles.link, styles.linkDivider]}>
             <Text style={styles.linkText}>Privacy & consent</Text>
             <ExternalArrow />

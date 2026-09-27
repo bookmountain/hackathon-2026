@@ -5,6 +5,7 @@ import { Animated, Easing, Pressable, StyleSheet, Text, useAnimatedValue, View }
 import { Icon, type IconName } from "@/components/ui";
 import { useDailyCardReady } from "@/features/dailycard/useDailyCard";
 import { TAB_POPS } from "@/features/stickers/pops";
+import { selectHasUnread, useAppStore } from "@/store";
 import { useStickerPop } from "@/features/stickers/StickerPop";
 import { colors, font } from "@/theme";
 import { emitTabSwitch } from "./tabSwitch";
@@ -15,30 +16,37 @@ const TABS: Record<string, { label: string; icon: IconName }> = {
   market: { label: "Market", icon: "tagTab" },
 };
 
-function Slot({ label, icon, color, onPress, selected }: {
+function Slot({ label, icon, color, onPress, selected, dot }: {
   label: string;
   icon: IconName;
   color: string;
   onPress: () => void;
   selected?: boolean;
+  /** Yellow dot on the icon, e.g. unread messages */
+  dot?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="tab"
       accessibilityState={{ selected: !!selected }}
-      accessibilityLabel={label}
+      accessibilityLabel={dot ? `${label}, unread` : label}
       onPress={onPress}
       style={styles.tab}
     >
-      <Icon name={icon} size={24} color={color} strokeWidth={2.1} />
+      <View>
+        <Icon name={icon} size={24} color={color} strokeWidth={2.1} />
+        {dot && <View style={styles.unread} />}
+      </View>
       <Text style={[styles.label, { color }]}>{label}</Text>
     </Pressable>
   );
 }
 
 // Bottom navigation from the design: Meetups, Flats, a gap under the yellow
-// "Draw card" button, Market and More. Active tab in ink.
+// "Draw card" button, Market and Messages. Active tab in ink.
 export default function TabBar({ state, navigation, insets }: BottomTabBarProps) {
+  const { state: app } = useAppStore();
+  const hasUnread = selectHasUnread(app);
   const drawReady = useDailyCardReady();
   const pop = useStickerPop();
   const tabs = state.routes.flatMap((route, index) => {
@@ -68,7 +76,7 @@ export default function TabBar({ state, navigation, insets }: BottomTabBarProps)
       {tabs.slice(0, 2)}
       <View style={styles.tab} />
       {tabs.slice(2)}
-      <Slot label="More" icon="more" color={colors.faint} onPress={() => router.push("/about")} />
+      <Slot label="Messages" icon="chat" color={colors.faint} dot={hasUnread} onPress={() => router.push("/chats")} />
 
       <View pointerEvents="box-none" style={styles.drawRow}>
         <DrawButton ready={drawReady} />
@@ -138,6 +146,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.yellow,
     alignItems: "center",
     justifyContent: "center",
+  },
+  unread: {
+    position: "absolute",
+    top: -2,
+    right: -3,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.yellow,
+    borderWidth: 2,
+    borderColor: colors.surface,
   },
   badge: {
     position: "absolute",
