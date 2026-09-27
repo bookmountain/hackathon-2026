@@ -34,8 +34,10 @@ export async function pickPhotos(limit: number): Promise<LocalPhoto[]> {
 }
 
 async function put(url: string, photo: LocalPhoto) {
-  const file = await (await fetch(photo.uri)).blob();
-  const res = await fetch(url, { method: "PUT", headers: { "Content-Type": photo.contentType }, body: file });
+  // Send raw bytes, not a Blob: Expo's fetch replaces Content-Type with a Blob's own type
+  // (empty for a local file), and the signed upload URL then answers 403
+  const bytes = await new File(photo.uri).bytes();
+  const res = await fetch(url, { method: "PUT", headers: { "Content-Type": photo.contentType }, body: bytes });
   if (!res.ok) throw new ApiError(`Photo upload failed (${res.status}). Try again.`, res.status);
 }
 
