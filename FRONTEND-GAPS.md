@@ -155,10 +155,10 @@ the API requires.
 ## UCompass v4 (2026-09-27)
 
 The design moved to `UCompass Demo v4.dc.html` (in `~/Downloads/UCompass hackathon demo (2).zip`). The app
-was rebuilt for it on `main`, calling four endpoints the API didn't have yet; the `dcard` branch adds them
+was rebuilt for it on `main`, calling four endpoints the API didn't have yet; the card draw feature adds them
 with the paths and fields the app already used. Shapes are in `mobile/src/api/types.ts` and README.
 
-- [x] **Dcard.** `GET /api/daily-card` and `POST /api/daily-card/draw` → `{ status: Ready | Matched |
+- [x] **Daily card draw.** `GET /api/daily-card` and `POST /api/daily-card/draw` → `{ status: Ready | Matched |
       Missed, match, drawnToday, nextChangeAt, missedDay, drawId }`. One draw per Adelaide day, and draws are
       mutual. **A missed day doesn't lock for 48 hours** (the design's wording): the next Draw deals nothing
       and locks the deck until midnight, which starts a new session.
@@ -175,7 +175,7 @@ with the paths and fields the app already used. Shapes are in `mobile/src/api/ty
 - [x] **Search by image.** `POST /api/items/image-search { image }` → `{ category, items, label, keywords }`.
       *App:* Uses `category` and `items`; falls back to guessing from the file name while the endpoint 404s.
 - [x] **Avatar style.** `avatarStyle { mode, text, icon, shape, ring }` on `PUT /api/me/profile`, `/api/me`
-      and every person (chats, flat owners, item sellers, the Dcard match). Values are the API's enum names
+      and every person (chats, flat owners, item sellers, the card match). Values are the API's enum names
       like everywhere else: `Initials`, `Soft`, `Gold`, `Compass`.
       *App:* Draws everyone's avatar with it. Styles saved on the device before (lowercase) are upgraded
       when read.

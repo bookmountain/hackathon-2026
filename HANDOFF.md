@@ -13,8 +13,8 @@ For the next Claude Code session. Read this first, then `README.md` (API and set
 - **UCompass** (hackathon theme "Map"): a campus-map app for **Adelaide University** and **Flinders**
   students with three tabs, **Flats**, **Market** and **Meetups**. Every feature lives on its own map.
 - The **design prototype** is now `UCompass Demo v4.dc.html` in `~/Downloads/UCompass hackathon demo (2).zip`
-  (2026-09-27). It adds Dcard, a search box on every tab, AI photo analysis, address lookup and an
-  avatar builder; the API side is on the `dcard` branch, and FRONTEND-GAPS lists the app's part. The
+  (2026-09-27). It adds the daily card draw, a search box on every tab, AI photo analysis, address lookup
+  and an avatar builder; the API changes are merged, and FRONTEND-GAPS lists the app's part. The
   original (below) was `~/Downloads/UCompass hackathon demo.zip`. Unzip it into your scratchpad.
   `UCompass Demo.dc.html` holds all the UI; its sample data and logic are in the big `<script>` block
   (`class Component`: arrays `P` people, `PK` pickup spots, `F` flats, `state.items`, `state.events`).
