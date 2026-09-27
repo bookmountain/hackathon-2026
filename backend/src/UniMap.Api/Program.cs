@@ -46,7 +46,9 @@ builder.Services.AddHttpClient(PhotoAiService.OllamaClient, (sp, c) =>
     var o = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<OllamaOptions>>().Value;
     if (o.IsConfigured) c.BaseAddress = new Uri(o.BaseUrl!.TrimEnd('/') + "/");
     c.Timeout = TimeSpan.FromSeconds(o.TimeoutSeconds);
-});
+})
+    // A machine that's off or unreachable fails in seconds instead of after the whole timeout
+    .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { ConnectTimeout = TimeSpan.FromSeconds(5) });
 if (builder.Environment.IsDevelopment() || config.GetValue<bool>("Seed:Enabled"))
     builder.Services.AddHostedService<DemoEventsRefresher>();
 if (config.GetSection("Email").Get<EmailOptions>()?.IsConfigured == true)
