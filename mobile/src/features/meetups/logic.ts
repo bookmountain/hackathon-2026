@@ -5,8 +5,60 @@ import type { CalendarEvent } from "@/lib/calendar";
 export const EVENT_CATEGORIES: EventCategory[] = ["Study", "Casual", "Social", "Food"];
 
 /** Chips over the meetups map */
-export const MEETUP_FILTERS = ["All", "Study", "Social", "Casual", "Food"] as const;
-export type MeetupFilter = (typeof MEETUP_FILTERS)[number];
+export type MeetupWhen = "any" | "today" | "weekend" | "week";
+
+export const WHEN_OPTIONS: { label: string; value: MeetupWhen }[] = [
+  { label: "Any time", value: "any" },
+  { label: "Today", value: "today" },
+  { label: "This weekend", value: "weekend" },
+  { label: "Next 7 days", value: "week" },
+];
+
+/** The Filters dialog; no categories = all of them */
+export type MeetupFilters = { categories: EventCategory[]; when: MeetupWhen; walkInsOnly: boolean; spotsLeft: boolean };
+
+export const EMPTY_MEETUP_FILTERS: MeetupFilters = { categories: [], when: "any", walkInsOnly: false, spotsLeft: false };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** [start, end) of a "when" choice on the phone's clock */
+function whenRange(when: MeetupWhen, now: Date): [number, number] | null {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const day = (n: number) => new Date(today.getFullYear(), today.getMonth(), today.getDate() + n).getTime();
+  switch (when) {
+    case "any":
+      return null;
+    case "today":
+      return [today.getTime(), day(1)];
+    case "week":
+      return [today.getTime(), now.getTime() + 7 * DAY_MS];
+    case "weekend": {
+      const weekday = today.getDay(); // 0 = Sunday, 6 = Saturday
+      if (weekday === 0) return [today.getTime(), day(1)];
+      if (weekday === 6) return [today.getTime(), day(2)];
+      return [day(6 - weekday), day(8 - weekday)];
+    }
+  }
+}
+
+/** Events matching every filter */
+export function filterEvents(events: MeetupEvent[], f: MeetupFilters, now: Date = new Date()): MeetupEvent[] {
+  const range = whenRange(f.when, now);
+  return events.filter((e) => {
+    const start = new Date(e.startsAt).getTime();
+    return (
+      (!f.categories.length || f.categories.includes(e.cat)) &&
+      (!range || (start >= range[0] && start < range[1])) &&
+      (!f.walkInsOnly || e.walkIns) &&
+      (!f.spotsLeft || !e.full)
+    );
+  });
+}
+
+/** Badge on the Filters button */
+export function countMeetupFilters(f: MeetupFilters): number {
+  return [f.categories.length > 0, f.when !== "any", f.walkInsOnly, f.spotsLeft].filter(Boolean).length;
+}
 
 export function fillPercent(event: MeetupEvent): number {
   return Math.round((event.going / event.cap) * 100);

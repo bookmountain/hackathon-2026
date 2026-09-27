@@ -4,6 +4,7 @@ import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native
 import { useRefreshOnFocus } from "@/api/hooks";
 import { Button, Icon } from "@/components/ui";
 import { CampusMap, MapChrome, MapMarker, ResultsSheet } from "@/features/map";
+import ListSearchBar from "@/features/filters/ListSearchBar";
 import { useMapSearch } from "@/features/map/useMapSearch";
 import { matchesQuery, resultsTitle } from "@/features/search/query";
 import TabScreen from "@/features/shell/TabScreen";
@@ -12,7 +13,8 @@ import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import EventPin from "./EventPin";
 import { EventCard, EventSheet } from "./EventViews";
-import { MEETUP_FILTERS, type MeetupFilter } from "./logic";
+import { countMeetupFilters, EMPTY_MEETUP_FILTERS, EVENT_CATEGORIES, filterEvents, type MeetupFilters } from "./logic";
+import MeetupFiltersSheet from "./MeetupFiltersSheet";
 
 const openHost = () => router.push("/meetups/new");
 const openEvent = (id: string) => router.push({ pathname: "/meetups/[id]", params: { id } });
@@ -24,23 +26,31 @@ export default function MeetupsTab() {
   const { state, actions } = useAppStore();
   const { refreshing, refresh } = useRefreshOnFocus(actions.loadEvents);
   const [view, setView] = useState<TabView>("map");
-  const [category, setCategory] = useState<MeetupFilter>("All");
+  const [filters, setFilters] = useState<MeetupFilters>(EMPTY_MEETUP_FILTERS);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const { mapRef, recenter, ...search } = useMapSearch<"event">();
   const selectedId = search.selected("event");
   const selected = state.events.find((e) => e.id === selectedId);
 
-  // The chips and search narrow the map and its results; the list shows everything
-  const onMap = state.events.filter(
-    (e) => (category === "All" || e.cat === category) && matchesQuery(search.query, e.title, e.where.name),
-  );
-  const chips = MEETUP_FILTERS.map((c) => ({
-    label: c,
-    active: c === category,
-    onPress: () => {
-      setCategory(c);
-      search.setSheet(null);
-    },
-  }));
+  // One search and one set of filters for both the map and the list
+  const searched = state.events.filter((e) => matchesQuery(search.query, e.title, e.where.name));
+  const events = filterEvents(searched, filters);
+  const filterCount = countMeetupFilters(filters);
+  const setCategories = (categories: MeetupFilters["categories"]) => {
+    setFilters({ ...filters, categories });
+    search.setSheet(null);
+  };
+  // On the map: the dialog, then quick type chips (the same types the dialog sets)
+  const chips = [
+    { label: filterCount ? `Filters · ${filterCount}` : "Filters", active: filterCount > 0, onPress: () => setFiltersOpen(true) },
+    { label: "All", active: filters.categories.length === 0, onPress: () => setCategories([]) },
+    ...EVENT_CATEGORIES.map((c) => ({
+      label: c,
+      active: filters.categories.includes(c),
+      onPress: () =>
+        setCategories(filters.categories.includes(c) ? filters.categories.filter((x) => x !== c) : [...filters.categories, c]),
+    })),
+  ];
 
   return (
     <TabScreen
@@ -72,10 +82,10 @@ export default function MeetupsTab() {
               />
               {search.sheet?.kind === "results" && (
                 <ResultsSheet
-                  title={resultsTitle(onMap.length, "event", search.query)}
+                  title={resultsTitle(events.length, "event", search.query)}
                   onClose={() => search.setSheet(null)}
                   emptyText={`No matches for “${search.query.trim()}”. Try another word or clear filters.`}
-                  rows={onMap.map((e) => ({
+                  rows={events.map((e) => ({
                     key: e.id,
                     title: e.title,
                     sub: `${e.when} · ${e.where.name}`,
@@ -89,7 +99,7 @@ export default function MeetupsTab() {
             </>
           }
         >
-          {onMap.map((e) => (
+          {events.map((e) => (
             <MapMarker
               key={e.id}
               coordinate={e.where}
@@ -104,6 +114,7 @@ export default function MeetupsTab() {
       ) : (
         <ScrollView
           contentContainerStyle={styles.list}
+          keyboardShouldPersistTaps="handled"
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}
         >
           <View style={styles.banner}>
@@ -121,13 +132,34 @@ export default function MeetupsTab() {
               style={styles.bannerButton}
             />
           </View>
-          {state.events.map((e) => (
+          <ListSearchBar
+            query={search.query}
+            onQueryChange={search.setQuery}
+            placeholder="Search meetups or places"
+            filterCount={filterCount}
+            onFilters={() => setFiltersOpen(true)}
+          />
+          {events.map((e) => (
             <EventCard key={e.id} event={e} />
           ))}
-          {state.events.length === 0 && !refreshing && (
-            <Text style={styles.empty}>No meetups this week yet. Host the first one!</Text>
+          {events.length === 0 && !refreshing && (
+            <Text style={styles.empty}>
+              {state.events.length ? "No meetups match your search or filters." : "No meetups this week yet. Host the first one!"}
+            </Text>
           )}
         </ScrollView>
+      )}
+      {filtersOpen && (
+        <MeetupFiltersSheet
+          events={searched}
+          applied={filters}
+          onApply={(next) => {
+            setFilters(next);
+            setFiltersOpen(false);
+            search.setSheet(null);
+          }}
+          onClose={() => setFiltersOpen(false)}
+        />
       )}
     </TabScreen>
   );

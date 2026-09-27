@@ -26,3 +26,4 @@ export type { SegmentOption } from "./Segmented";
 export { default as SelectField } from "./SelectField";
 export { default as TextField } from "./TextField";
 export { TimeField } from "./DateField";
+export { default as RangeSlider } from "./RangeSlider";

@@ -82,6 +82,17 @@ const ICONS = {
     strokeWidth: 2.2,
   },
   close: { body: <Path d="M6 6l12 12M18 6L6 18" />, strokeWidth: 2.4 },
+  /** Sliders: the Filters button */
+  filter: {
+    body: (
+      <>
+        <Path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+        <Circle cx="15" cy="7" r="2.2" />
+        <Circle cx="9" cy="17" r="2.2" />
+      </>
+    ),
+    strokeWidth: 2.2,
+  },
   mail: {
     body: (
       <>

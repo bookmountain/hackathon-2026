@@ -1,5 +1,15 @@
 import { EVENT } from "@/test/fixtures";
-import { calendarEntry, EMPTY_EVENT, eventProblem, eventRequest, fillPercent, joinLabel } from "../logic";
+import {
+  calendarEntry,
+  countMeetupFilters,
+  EMPTY_EVENT,
+  EMPTY_MEETUP_FILTERS,
+  eventProblem,
+  eventRequest,
+  fillPercent,
+  filterEvents,
+  joinLabel,
+} from "../logic";
 
 const now = new Date(2026, 8, 26, 16, 0); // Sat 26 Sep 2026, 4pm
 const later = new Date(2026, 8, 29, 19, 0);
@@ -73,5 +83,47 @@ describe("calendarEntry", () => {
     const entry = calendarEntry({ ...EVENT, startsAt: "2026-09-29T09:30:00Z", endsAt: "2026-09-29T10:00:00Z" });
     expect(entry.end!.toISOString()).toBe("2026-09-29T10:00:00.000Z");
     expect(entry.details).toBe("Walk-in welcome. Host & guests stay anonymous on UCompass.");
+  });
+});
+
+describe("filterEvents", () => {
+  // Tuesday 29 Sep 2026, 10am on the phone's clock
+  const now = new Date(2026, 8, 29, 10, 0);
+  const at = (day: number, hour: number) => new Date(2026, 8, day, hour).toISOString();
+  const events = [
+    { ...EVENT, id: "today", cat: "Study" as const, startsAt: at(29, 18) },
+    { ...EVENT, id: "saturday", cat: "Social" as const, startsAt: at(33, 11), walkIns: false },
+    { ...EVENT, id: "monday", cat: "Food" as const, startsAt: at(35, 12), full: true },
+    { ...EVENT, id: "nextWeek", cat: "Casual" as const, startsAt: at(37, 12) },
+  ];
+  const ids = (list: { id: string }[]) => list.map((e) => e.id);
+
+  it("returns everything with no filters", () => {
+    expect(ids(filterEvents(events, EMPTY_MEETUP_FILTERS, now))).toEqual(["today", "saturday", "monday", "nextWeek"]);
+    expect(countMeetupFilters(EMPTY_MEETUP_FILTERS)).toBe(0);
+  });
+
+  it("narrows by when", () => {
+    expect(ids(filterEvents(events, { ...EMPTY_MEETUP_FILTERS, when: "today" }, now))).toEqual(["today"]);
+    expect(ids(filterEvents(events, { ...EMPTY_MEETUP_FILTERS, when: "weekend" }, now))).toEqual(["saturday"]);
+    expect(ids(filterEvents(events, { ...EMPTY_MEETUP_FILTERS, when: "week" }, now))).toEqual(["today", "saturday", "monday"]);
+  });
+
+  it("counts this weekend from today when it's already the weekend", () => {
+    const sunday = new Date(2026, 9, 4, 9, 0);
+    const sundayEvent = { ...EVENT, id: "sunday", startsAt: new Date(2026, 9, 4, 15).toISOString() };
+    expect(ids(filterEvents([sundayEvent], { ...EMPTY_MEETUP_FILTERS, when: "weekend" }, sunday))).toEqual(["sunday"]);
+  });
+
+  it("matches any picked category, walk-ins and free spots", () => {
+    expect(ids(filterEvents(events, { ...EMPTY_MEETUP_FILTERS, categories: ["Social", "Food"] }, now))).toEqual([
+      "saturday",
+      "monday",
+    ]);
+    expect(ids(filterEvents(events, { ...EMPTY_MEETUP_FILTERS, walkInsOnly: true, spotsLeft: true }, now))).toEqual([
+      "today",
+      "nextWeek",
+    ]);
+    expect(countMeetupFilters({ categories: ["Study"], when: "week", walkInsOnly: true, spotsLeft: false })).toBe(3);
   });
 });
