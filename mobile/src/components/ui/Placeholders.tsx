@@ -47,45 +47,60 @@ type DropzoneProps = {
   max: number;
   onAdd: () => void;
   onRemove: (index: number) => void;
+  /** Pill text before any photo is picked, e.g. "Upload product photo" */
   emptyText: string;
+  /** "Use a demo photo" under the box while it's empty */
+  onDemo?: () => void;
 };
 
-// Dashed "Add photo" box; once photos are picked it shows them (tap one to remove)
-export function PhotoDropzone({ photos, max, onAdd, onRemove, emptyText }: DropzoneProps) {
-  if (photos.length === 0) {
-    return (
-      <Pressable onPress={onAdd} accessibilityRole="button" style={[styles.drop, { borderColor: colors.brandLight }]}>
-        <Icon name="camera" size={26} color={colors.brand} />
-        <Text style={styles.dropText}>{emptyText}</Text>
-      </Pressable>
-    );
-  }
+// Dashed photo box: the cover photo fills it, the rest sit in a row below (tap one to remove)
+export function PhotoDropzone({ photos, max, onAdd, onRemove, emptyText, onDemo }: DropzoneProps) {
+  const cover = photos[0];
+  const full = photos.length >= max;
+  const pill = !cover ? emptyText : full ? `${max} of ${max} photos` : "Add more photos";
   return (
     <View style={styles.picked}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs}>
-        {photos.map((uri, i) => (
-          <Pressable
-            key={uri}
-            onPress={() => onRemove(i)}
-            accessibilityRole="button"
-            accessibilityLabel={`Remove photo ${i + 1}`}
-            style={styles.thumb}
-          >
-            <Image source={{ uri }} style={StyleSheet.absoluteFill} accessibilityIgnoresInvertColors />
-            <View style={styles.remove}>
-              <Text style={styles.removeText}>×</Text>
-            </View>
-          </Pressable>
-        ))}
-        {photos.length < max && (
-          <Pressable onPress={onAdd} accessibilityRole="button" accessibilityLabel="Add photo" style={[styles.thumb, styles.add]}>
-            <Icon name="plus" size={22} color={colors.brand} />
-          </Pressable>
-        )}
-      </ScrollView>
-      <Text style={styles.pickedText}>
-        {photos.length} of {max} photos · the first is the cover · tap one to remove
-      </Text>
+      <Pressable
+        onPress={onAdd}
+        disabled={full}
+        accessibilityRole="button"
+        accessibilityLabel={pill}
+        style={[styles.drop, { borderColor: cover ? colors.brand : colors.brandLight }]}
+      >
+        {cover && <Image source={{ uri: cover }} style={StyleSheet.absoluteFill} accessibilityIgnoresInvertColors />}
+        <View style={styles.dropPill}>
+          <Icon name="camera" size={20} color={colors.brand} />
+          <Text style={styles.dropText}>{pill}</Text>
+        </View>
+      </Pressable>
+      {!cover && onDemo && (
+        <Pressable onPress={onDemo} accessibilityRole="button" style={styles.demo}>
+          <Text style={styles.demoText}>Use a demo photo</Text>
+        </Pressable>
+      )}
+      {cover && (
+        <>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs}>
+            {photos.map((uri, i) => (
+              <Pressable
+                key={uri}
+                onPress={() => onRemove(i)}
+                accessibilityRole="button"
+                accessibilityLabel={`Remove photo ${i + 1}`}
+                style={styles.thumb}
+              >
+                <Image source={{ uri }} style={StyleSheet.absoluteFill} accessibilityIgnoresInvertColors />
+                <View style={styles.remove}>
+                  <Text style={styles.removeText}>×</Text>
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
+          <Text style={styles.pickedText}>
+            {photos.length} of {max} photos · the first is the cover · tap one to remove
+          </Text>
+        </>
+      )}
     </View>
   );
 }
@@ -94,27 +109,36 @@ const styles = StyleSheet.create({
   striped: { overflow: "hidden", alignItems: "center", justifyContent: "center" },
   stripedLabel: { color: colors.muted, fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }), fontSize: 11 },
   drop: {
-    height: 130,
+    height: 150,
     borderRadius: 18,
     borderWidth: 2,
     borderStyle: "dashed",
     backgroundColor: colors.canvas,
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
     overflow: "hidden",
   },
+  dropPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(255,255,255,0.94)",
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
   dropText: { color: colors.brand, ...font(700, 14) },
+  demo: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.brandSoft,
+    borderRadius: 999,
+    paddingHorizontal: 13,
+    paddingVertical: 7,
+  },
+  demoText: { color: colors.brand, ...font(700, 12.5) },
   picked: { gap: 8 },
   thumbs: { gap: 8 },
-  thumb: { width: 104, height: 104, borderRadius: 16, overflow: "hidden", backgroundColor: colors.canvas },
-  add: {
-    borderWidth: 2,
-    borderStyle: "dashed",
-    borderColor: colors.brandLight,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  thumb: { width: 64, height: 64, borderRadius: 12, overflow: "hidden", backgroundColor: colors.canvas },
   remove: {
     position: "absolute",
     top: 6,
@@ -122,7 +146,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "rgba(10,26,63,0.7)",
+    backgroundColor: "rgba(20,20,43,0.72)",
     alignItems: "center",
     justifyContent: "center",
   },

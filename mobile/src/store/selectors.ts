@@ -24,6 +24,7 @@ export function selectMe(state: AppState): Person {
     uni: me ? UNI_LABEL[me.university] : uniOfEmail(email),
     avatar: profile?.avatarPreset ?? -1,
     avatarUrl: profile?.avatarUrl,
+    avatarStyle: profile?.avatarStyle ?? state.localAvatarStyle,
   };
 }
 

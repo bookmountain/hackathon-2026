@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import { Animated, Easing, StyleSheet, useAnimatedValue, View } from "react-native";
 import { colors, shadows } from "@/theme";
 
-// Card that slides up over the bottom of the map when a pin is tapped
+// Sheet docked to the bottom of the map: a pin's card, or search results
 export default function MapSheet({ children }: { children: ReactNode }) {
   const enter = useAnimatedValue(0);
 
@@ -29,17 +29,21 @@ export default function MapSheet({ children }: { children: ReactNode }) {
 const styles = StyleSheet.create({
   sheet: {
     position: "absolute",
-    left: 10,
-    right: 10,
-    bottom: 10,
+    left: 0,
+    right: 0,
+    bottom: 0,
     zIndex: 8,
     backgroundColor: colors.surface,
-    borderRadius: 26,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderWidth: 2,
+    borderBottomWidth: 0,
+    borderColor: colors.ink,
     paddingTop: 10,
     paddingHorizontal: 18,
-    paddingBottom: 18,
+    paddingBottom: 20,
     gap: 14,
     ...shadows.sheet,
   },
-  grabber: { alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: colors.line },
+  grabber: { alignSelf: "center", width: 36, height: 4, borderRadius: 2, backgroundColor: colors.ink },
 });

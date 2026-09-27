@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { colors, font } from "@/theme";
+import { colors, divider, font, shadows } from "@/theme";
 import Icon from "./Icon";
 
 type BackButtonProps = { onPress: () => void; variant?: "soft" | "white" };
@@ -13,7 +13,7 @@ export function BackButton({ onPress, variant = "soft" }: BackButtonProps) {
       accessibilityRole="button"
       accessibilityLabel="Back"
       hitSlop={6}
-      style={[styles.back, { backgroundColor: variant === "soft" ? colors.brandSoft : colors.surface }]}
+      style={[styles.back, { backgroundColor: variant === "soft" ? colors.brandSoft : colors.surface }, variant === "white" && shadows.photoButton]}
     >
       <Icon name="back" color={colors.ink} />
     </Pressable>
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: colors.surface,
   },
-  bordered: { borderBottomWidth: 1, borderBottomColor: colors.lineSoft },
+  bordered: divider.bottom,
   back: {
     width: 40,
     height: 40,

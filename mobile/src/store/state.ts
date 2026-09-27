@@ -1,4 +1,4 @@
-import type { Me } from "@/api/types";
+import type { AvatarStyle, Me } from "@/api/types";
 import type { ChatMessage, ChatThread, Flat, Item, MeetupEvent, Pickup } from "@/data/types";
 
 export type Session = {
@@ -24,6 +24,8 @@ export type AppState = {
   messages: Record<string, ChatMessage[]>;
   /** Conversation whose other person is typing */
   typingIn: string | null;
+  /** Your avatar style saved on this device, until the API stores it */
+  localAvatarStyle: AvatarStyle | null;
 };
 
 export const signedOutSession: Session = { booted: true, token: null, me: null, email: "", devCode: null };
@@ -37,4 +39,5 @@ export const initialState: AppState = {
   chats: [],
   messages: {},
   typingIn: null,
+  localAvatarStyle: null,
 };

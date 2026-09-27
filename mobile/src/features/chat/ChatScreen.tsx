@@ -7,7 +7,7 @@ import { useToast } from "@/components/feedback/Toast";
 import { Avatar, Icon, ScreenHeader } from "@/components/ui";
 import type { ChatMessage } from "@/data/types";
 import { useAppStore } from "@/store";
-import { colors, font } from "@/theme";
+import { colors, divider, font } from "@/theme";
 
 /** Send a typing ping at most this often while the user types */
 const TYPING_PING_MS = 2000;
@@ -45,6 +45,7 @@ export default function ChatScreen() {
   const toast = useToast();
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [focused, setFocused] = useState(false);
   const scroll = useRef<ScrollView>(null);
   const lastPing = useRef(0);
   const chat = state.chats.find((c) => c.id === id);
@@ -128,7 +129,9 @@ export default function ChatScreen() {
             returnKeyType="send"
             onSubmitEditing={send}
             maxLength={2000}
-            style={styles.input}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            style={[styles.input, focused && { borderColor: colors.brand }]}
           />
           <Pressable
             onPress={send}
@@ -166,7 +169,7 @@ const styles = StyleSheet.create({
   context: {
     alignSelf: "center",
     marginVertical: 4,
-    backgroundColor: colors.brandSofter,
+    backgroundColor: colors.yellow,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 5,
@@ -204,15 +207,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 10,
     paddingBottom: 10,
-    borderTopWidth: 1,
-    borderTopColor: colors.lineSoft,
+    ...divider.top,
     backgroundColor: colors.surface,
   },
   input: {
     flex: 1,
     height: 46,
-    borderWidth: 1.5,
-    borderColor: colors.line,
+    borderWidth: 2,
+    borderColor: colors.ink,
     borderRadius: 23,
     paddingHorizontal: 18,
     color: colors.ink,

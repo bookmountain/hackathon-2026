@@ -1,5 +1,16 @@
 import { FLATS } from "@/test/fixtures";
-import { EMPTY_ROOM, filterFlats, flatRequest, housemateLine, roomProblem, streetOf, type RoomDraft } from "../logic";
+import {
+  countFlatFilters,
+  EMPTY_FLAT_FILTERS,
+  EMPTY_ROOM,
+  filterFlats,
+  flatRequest,
+  housemateLine,
+  rentBounds,
+  roomProblem,
+  streetOf,
+  type RoomDraft,
+} from "../logic";
 
 const ids = (flats: { id: string }[]) => flats.map((f) => f.id);
 const photo = { uri: "file:///room.jpg", contentType: "image/jpeg" };
@@ -7,13 +18,31 @@ const pin = { latitude: -34.92, longitude: 138.6 };
 
 describe("filterFlats", () => {
   it("returns everything with no filters", () => {
-    expect(ids(filterFlats(FLATS, []))).toEqual(["f1", "f2", "f3", "f4"]);
+    expect(ids(filterFlats(FLATS, EMPTY_FLAT_FILTERS))).toEqual(["f1", "f2", "f3", "f4"]);
+    expect(countFlatFilters(EMPTY_FLAT_FILTERS)).toBe(0);
   });
 
-  it("combines filters with AND", () => {
-    expect(ids(filterFlats(FLATS, ["Under $250"]))).toEqual(["f1", "f3", "f4"]);
-    expect(ids(filterFlats(FLATS, ["Under $250", "Ensuite"]))).toEqual(["f1", "f4"]);
-    expect(ids(filterFlats(FLATS, ["Furnished", "Bills < $30"]))).toEqual(["f1", "f4"]);
+  it("keeps rents inside the range, either end optional", () => {
+    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, rentMin: 200, rentMax: 250 }))).toEqual(["f1", "f4"]);
+    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, rentMin: 240 }))).toEqual(["f1", "f2"]);
+    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, rentMax: 230 }))).toEqual(["f3", "f4"]);
+  });
+
+  it("combines bills, furnished and ensuite with AND", () => {
+    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, maxBills: 20 }))).toEqual(["f2", "f4"]);
+    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, furnished: true, ensuite: true }))).toEqual(["f1", "f4"]);
+    expect(ids(filterFlats(FLATS, { ...EMPTY_FLAT_FILTERS, furnished: true, maxBills: 20 }))).toEqual(["f4"]);
+  });
+
+  it("counts the rent range as one filter", () => {
+    expect(countFlatFilters({ ...EMPTY_FLAT_FILTERS, rentMin: 200, rentMax: 250, ensuite: true })).toBe(2);
+  });
+});
+
+describe("rentBounds", () => {
+  it("rounds out to tidy slider ends", () => {
+    expect(rentBounds(FLATS)).toEqual({ min: 180, max: 300 });
+    expect(rentBounds([])).toEqual({ min: 0, max: 500 });
   });
 });
 

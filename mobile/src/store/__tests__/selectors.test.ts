@@ -31,7 +31,17 @@ describe("selectMe", () => {
       uni: "Adelaide Uni",
       avatar: 3,
       avatarUrl: ME.profile?.avatarUrl,
+      avatarStyle: null,
     });
+  });
+
+  it("uses the avatar style saved on the device until the API returns one", () => {
+    const style = { mode: "icon", text: "", icon: "paw", shape: "soft", ring: "gold" } as const;
+    expect(selectMe({ ...signedIn, localAvatarStyle: style }).avatarStyle).toEqual(style);
+    const fromApi = { ...style, ring: "sky" } as const;
+    const me = { ...ME, profile: { ...ME.profile!, avatarStyle: fromApi } };
+    const withApi = { ...signedIn, localAvatarStyle: style, session: { ...signedIn.session, me } };
+    expect(selectMe(withApi).avatarStyle).toEqual(fromApi);
   });
 
   it("falls back before the profile exists", () => {

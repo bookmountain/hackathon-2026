@@ -9,7 +9,7 @@ export default function ItemCard({ item, onPress }: { item: Item; onPress: () =>
   const badge = availabilityColors(item.avail);
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={[styles.card, isSold(item) && styles.sold]}>
-      <Photo uri={item.photo} tone={item.tone} stripe={10} label={item.cat} style={styles.photo}>
+      <Photo uri={item.photo} tone={colors.brandSoft} label={item.cat} style={styles.photo}>
         {item.avail !== "Available now" && (
           <View style={[styles.badge, { backgroundColor: badge.bg }]}>
             <Text style={[styles.badgeText, { color: badge.fg }]}>{availabilityShort(item.avail)}</Text>

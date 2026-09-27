@@ -1,4 +1,13 @@
-export { default as Avatar, AnonDots, AVATAR_COLORS, avatarLook } from "./Avatar";
+export {
+  default as Avatar,
+  AnonDots,
+  AVATAR_COLORS,
+  AVATAR_ICONS,
+  AVATAR_RINGS,
+  AVATAR_SHAPES,
+  avatarLook,
+  DEFAULT_AVATAR_STYLE,
+} from "./Avatar";
 export { default as AvatarPicker } from "./AvatarPicker";
 export { default as Button } from "./Button";
 export { Chip, ChipRow, ChipWrap } from "./Chip";
@@ -16,3 +25,5 @@ export { default as Segmented } from "./Segmented";
 export type { SegmentOption } from "./Segmented";
 export { default as SelectField } from "./SelectField";
 export { default as TextField } from "./TextField";
+export { TimeField } from "./DateField";
+export { default as RangeSlider } from "./RangeSlider";

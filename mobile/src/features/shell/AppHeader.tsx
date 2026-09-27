@@ -2,9 +2,9 @@ import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Avatar, Icon, Logo } from "@/components/ui";
 import { selectHasUnread, selectMe, useAppStore } from "@/store";
-import { colors, font } from "@/theme";
+import { colors, divider, font } from "@/theme";
 
-// Top bar of each tab: logo + title, messages (yellow dot when unread) and your avatar
+// Top bar of each tab's list view: logo + title, messages (yellow dot when unread), then your avatar
 export default function AppHeader({ title }: { title: string }) {
   const { state } = useAppStore();
   const me = selectMe(state);
@@ -17,14 +17,6 @@ export default function AppHeader({ title }: { title: string }) {
       </View>
       <View style={styles.actions}>
         <Pressable
-          onPress={() => router.push("/profile")}
-          accessibilityRole="button"
-          accessibilityLabel="Profile"
-          style={styles.round}
-        >
-          <Avatar index={me.avatar} nick={me.nick} url={me.avatarUrl} size={40} />
-        </Pressable>
-        <Pressable
           onPress={() => router.push("/chats")}
           accessibilityRole="button"
           accessibilityLabel={selectHasUnread(state) ? "Messages, unread" : "Messages"}
@@ -32,6 +24,14 @@ export default function AppHeader({ title }: { title: string }) {
         >
           <Icon name="chat" color={colors.brand} />
           {selectHasUnread(state) && <View style={styles.unread} />}
+        </Pressable>
+        <Pressable
+          onPress={() => router.push("/profile")}
+          accessibilityRole="button"
+          accessibilityLabel="Profile"
+          style={styles.round}
+        >
+          <Avatar index={me.avatar} nick={me.nick} url={me.avatarUrl} look={me.avatarStyle} size={40} />
         </Pressable>
       </View>
     </View>
@@ -46,8 +46,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 18,
     backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lineSoft,
+    ...divider.bottom,
   },
   brand: { flexDirection: "row", alignItems: "center", gap: 9 },
   title: { color: colors.ink, ...font(800, 20, undefined, -0.02) },

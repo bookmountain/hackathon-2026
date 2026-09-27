@@ -3,19 +3,47 @@ import type { BathroomType, FlatRequest, Furnishing, ToiletType } from "@/api/ty
 import type { Flat, MapPoint, Uni } from "@/data/types";
 import { toDateOnly } from "@/lib/dates";
 
-export const FLAT_FILTERS = ["Under $250", "Furnished", "Ensuite", "Bills < $30"] as const;
-export type FlatFilter = (typeof FLAT_FILTERS)[number];
-
-const MATCHES: Record<FlatFilter, (f: Flat) => boolean> = {
-  "Under $250": (f) => f.price < 250,
-  Furnished: (f) => f.furnished === "Fully furnished",
-  Ensuite: (f) => /ensuite/i.test(f.toilet),
-  "Bills < $30": (f) => f.bills < 30,
+/** The Filters dialog; null = no limit */
+export type FlatFilters = {
+  rentMin: number | null;
+  rentMax: number | null;
+  maxBills: number | null;
+  furnished: boolean;
+  ensuite: boolean;
 };
 
-/** Flats matching every active filter */
-export function filterFlats(flats: Flat[], active: FlatFilter[]): Flat[] {
-  return flats.filter((f) => active.every((filter) => MATCHES[filter](f)));
+export const EMPTY_FLAT_FILTERS: FlatFilters = { rentMin: null, rentMax: null, maxBills: null, furnished: false, ensuite: false };
+
+/** "Bills per week" choices in the dialog */
+export const BILLS_OPTIONS: { label: string; max: number | null }[] = [
+  { label: "Any", max: null },
+  { label: "Up to $20", max: 20 },
+  { label: "Up to $30", max: 30 },
+  { label: "Up to $40", max: 40 },
+];
+
+/** Flats matching every filter */
+export function filterFlats(flats: Flat[], f: FlatFilters): Flat[] {
+  return flats.filter(
+    (flat) =>
+      (f.rentMin === null || flat.price >= f.rentMin) &&
+      (f.rentMax === null || flat.price <= f.rentMax) &&
+      (f.maxBills === null || flat.bills <= f.maxBills) &&
+      (!f.furnished || flat.furnished === "Fully furnished") &&
+      (!f.ensuite || /ensuite/i.test(flat.toilet)),
+  );
+}
+
+/** Badge on the Filters button; the rent range counts once */
+export function countFlatFilters(f: FlatFilters): number {
+  return [f.rentMin !== null || f.rentMax !== null, f.maxBills !== null, f.furnished, f.ensuite].filter(Boolean).length;
+}
+
+/** Ends of the rent slider: the cheapest and dearest room, rounded out */
+export function rentBounds(flats: Flat[]): { min: number; max: number } {
+  if (!flats.length) return { min: 0, max: 500 };
+  const prices = flats.map((f) => f.price);
+  return { min: Math.floor(Math.min(...prices) / 10) * 10, max: Math.ceil(Math.max(...prices) / 50) * 50 };
 }
 
 // Same lists as GET /api/flats/options
@@ -24,15 +52,6 @@ export const RHYTHM_OPTIONS = ["Quiet weeknights", "Social house", "Early birds"
 
 export const MAX_ROOM_PHOTOS = 5;
 export const RENT = { min: 50, max: 2000 };
-
-/** "Minimum stay" picker: months, or null for flexible */
-export const MIN_STAY_OPTIONS: { label: string; months: number | null }[] = [
-  { label: "Flexible", months: null },
-  { label: "1 month", months: 1 },
-  { label: "3 months", months: 3 },
-  { label: "6 months", months: 6 },
-  { label: "12 months", months: 12 },
-];
 
 /** Values collected by the "List a room" form */
 export type RoomDraft = {

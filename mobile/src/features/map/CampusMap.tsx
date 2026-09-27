@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView from "react-native-maps";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CBD_REGION } from "./geometry";
 import YouMarker from "./YouMarker";
 
@@ -9,24 +10,32 @@ type Props = {
   children?: ReactNode;
   /** Tapping empty map, e.g. to close the bottom sheet */
   onBackgroundPress?: () => void;
-  /** Floating UI over the map (chips, hint, sheet) */
+  /** Floating UI over the map (search, chips, buttons, sheet) */
   overlay?: ReactNode;
+  /** For recentering (animateToRegion) */
+  ref?: Ref<MapView>;
 };
 
-// Full-screen map of the CBD campuses: Apple Maps on iOS, Google Maps on Android.
+/** Search bar + chip row at the top, buttons at the bottom */
+const CHROME_TOP = 112;
+const CHROME_BOTTOM = 80;
+
+// Full-bleed map of the CBD campuses: Apple Maps on iOS, Google Maps on Android.
 // Pinch to zoom, drag to pan.
-export default function CampusMap({ children, onBackgroundPress, overlay }: Props) {
+export default function CampusMap({ children, onBackgroundPress, overlay, ref }: Props) {
+  const insets = useSafeAreaInsets();
   return (
     <View style={styles.viewport}>
       <MapView
+        ref={ref}
         style={StyleSheet.absoluteFill}
         initialRegion={CBD_REGION}
         rotateEnabled={false}
         pitchEnabled={false}
         toolbarEnabled={false}
         showsCompass={false}
-        // Leave room for the floating chips and the hint/sheet
-        mapPadding={{ top: 48, right: 0, bottom: 56, left: 0 }}
+        // Keep pins clear of the floating search, chips and buttons
+        mapPadding={{ top: insets.top + CHROME_TOP, right: 0, bottom: CHROME_BOTTOM, left: 0 }}
         onPress={(e) => {
           // Android also reports marker taps here
           if (e.nativeEvent.action !== "marker-press") onBackgroundPress?.();

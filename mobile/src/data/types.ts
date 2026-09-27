@@ -1,3 +1,4 @@
+import type { AvatarStyle } from "@/api/types";
 // Domain types used by the screens. They're built from API responses by
 // data/adapters.ts. Locations are real WGS84 coordinates.
 
@@ -12,6 +13,8 @@ export type Person = {
   avatar: number;
   /** Uploaded photo avatar; shown instead of the preset when set */
   avatarUrl?: string | null;
+  /** Your own avatar's shape, ring and initials/icon */
+  avatarStyle?: AvatarStyle | null;
 };
 
 export type MapPoint = { latitude: number; longitude: number };
@@ -101,6 +104,9 @@ export type MeetupEvent = {
   date: string;
   time: string;
   when: string;
+  /** UTC instants, for "Add to calendar"; no end = open-ended */
+  startsAt: string;
+  endsAt: string | null;
   where: MapPoint & { name: string };
   /** Headcount including you (and the host) */
   going: number;

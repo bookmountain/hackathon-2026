@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   group: { gap: 8 },
   field: {
     height: 52,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.line,
     borderRadius: 14,
     paddingHorizontal: 16,
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   value: { flex: 1, color: colors.ink, ...font(600, 15) },
-  backdrop: { flex: 1, backgroundColor: "rgba(10,26,63,0.3)" },
+  backdrop: { flex: 1, backgroundColor: colors.scrim },
   sheet: {
     height: "80%",
     backgroundColor: colors.surface,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     height: 46,
     marginHorizontal: 4,
     borderRadius: 14,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.line,
     flexDirection: "row",
     alignItems: "center",

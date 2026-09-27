@@ -14,8 +14,10 @@ type Props = {
   children: ReactNode;
 };
 
-// Frame shared by the Flats, Market and Meetups tabs
+// Frame shared by the Flats, Market and Meetups tabs. The map is full-bleed with
+// its own floating controls; the list gets the header and the Map/List bar.
 export default function TabScreen({ title, action, view, onViewChange, children }: Props) {
+  if (view === "map") return <View style={styles.map}>{children}</View>;
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
       <AppHeader title={title} />
@@ -26,6 +28,7 @@ export default function TabScreen({ title, action, view, onViewChange, children 
 }
 
 const styles = StyleSheet.create({
+  map: { flex: 1, backgroundColor: colors.canvas },
   screen: { flex: 1, backgroundColor: colors.surface },
   content: { flex: 1, backgroundColor: colors.canvas },
 });

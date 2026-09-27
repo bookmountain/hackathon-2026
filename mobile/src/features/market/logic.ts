@@ -53,7 +53,7 @@ export function customPinItems(items: Item[], category: CategoryFilter): Item[] 
 export function availabilityColors(avail: string): { bg: string; fg: string } {
   if (avail === "Sold") return { bg: colors.soldSoft, fg: colors.muted };
   if (avail === "Pending") return { bg: colors.yellowSoft, fg: colors.yellowInk };
-  return { bg: colors.brandSofter, fg: colors.brandDeep };
+  return { bg: colors.yellow, fg: colors.brandDeep };
 }
 
 /** Short badge text for grid cards: "Available from 1 Oct" → "From 1 Oct" */

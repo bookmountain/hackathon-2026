@@ -1,6 +1,8 @@
 // Pick photos from the library and upload them to R2 with presigned URLs.
 // Flow (same for rooms and items): the first presign issues the listing/item id,
 // later ones reuse it, then the create call sends the id and every key.
+import { File, Paths } from "expo-file-system";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { ApiError } from "./client";
 import type { PhotoUploadResponse } from "./types";
@@ -55,4 +57,23 @@ export async function uploadPhotos(
     keys.push(res.key);
   }
   return { id, keys };
+}
+
+/** Downloads a sample photo (the forms' "Use a demo photo") so it uploads like a picked one */
+export async function downloadPhoto(url: string): Promise<LocalPhoto> {
+  const target = new File(Paths.cache, `demo-${Date.now()}.jpg`);
+  const file = await File.downloadFileAsync(url, target, { idempotent: true });
+  return { uri: file.uri, contentType: "image/jpeg" };
+}
+
+/** Base64 JPEG, longest side at most `maxSide`, for photo analysis and image search */
+export async function jpegBase64(uri: string, maxSide = 640, quality = 0.82): Promise<string> {
+  const original = await ImageManipulator.manipulate(uri).renderAsync();
+  const context = ImageManipulator.manipulate(uri);
+  if (Math.max(original.width, original.height) > maxSide) {
+    context.resize(original.width >= original.height ? { width: maxSide } : { height: maxSide });
+  }
+  const image = await (await context.renderAsync()).saveAsync({ format: SaveFormat.JPEG, compress: quality, base64: true });
+  if (!image.base64) throw new Error("Couldn't read the photo");
+  return image.base64;
 }

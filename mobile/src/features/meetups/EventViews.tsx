@@ -1,9 +1,13 @@
 import { router } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { AnonDots, Button } from "@/components/ui";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { errorMessage } from "@/api/client";
+import { useToast } from "@/components/feedback/Toast";
+import { AnonDots, Button, Icon } from "@/components/ui";
 import type { MeetupEvent } from "@/data/types";
 import { MapSheet } from "@/features/map";
-import { colors, font, shadows } from "@/theme";
+import { googleCalendarUrl } from "@/lib/calendar";
+import { brutal, colors, font, shadows } from "@/theme";
+import { calendarEntry } from "./logic";
 import { useJoin } from "./useJoin";
 
 const openEvent = (id: string) => router.push({ pathname: "/meetups/[id]", params: { id } });
@@ -32,7 +36,7 @@ export function EventSheet({ event }: { event: MeetupEvent }) {
           inactive={event.full && !joined}
           disabled={busy}
           onPress={toggle}
-          style={styles.grow}
+          style={[styles.grow, joined && brutal(3)]}
         />
         <Button label="Details" size="md" variant="outline" weight={700} onPress={() => openEvent(event.id)} />
       </View>
@@ -43,6 +47,8 @@ export function EventSheet({ event }: { event: MeetupEvent }) {
 // Row in the Meetups list
 export function EventCard({ event }: { event: MeetupEvent }) {
   const { joined, going, label, busy, toggle } = useJoin(event);
+  const toast = useToast();
+  const addToCalendar = () => Linking.openURL(googleCalendarUrl(calendarEntry(event))).catch((e) => toast(errorMessage(e)));
   return (
     <View style={styles.card}>
       <Pressable onPress={() => openEvent(event.id)} accessibilityRole="button" style={styles.cardTop}>
@@ -53,7 +59,7 @@ export function EventCard({ event }: { event: MeetupEvent }) {
         <View style={styles.cardText}>
           <Text style={styles.cardKicker}>{event.cat}</Text>
           <Text style={styles.cardTitle}>{event.title}</Text>
-          <Text style={styles.meta}>
+          <Text style={styles.cardMeta}>
             {event.time} · {event.where.name}
           </Text>
         </View>
@@ -65,14 +71,26 @@ export function EventCard({ event }: { event: MeetupEvent }) {
             {going}/{event.cap}
           </Text>
         </View>
-        <Button
-          label={label}
-          size="sm"
-          variant={joined ? "soft" : "primary"}
-          inactive={event.full && !joined}
-          disabled={busy}
-          onPress={toggle}
-        />
+        <View style={styles.cardActions}>
+          <Pressable
+            onPress={addToCalendar}
+            accessibilityRole="button"
+            accessibilityLabel="Add to Google Calendar"
+            style={({ pressed }) => [styles.calendar, pressed && { backgroundColor: colors.brandSoft }]}
+          >
+            <Icon name="calendarCheck" size={18} color={colors.brand} />
+          </Pressable>
+          <Button
+            label={label}
+            size="sm"
+            variant={joined ? "soft" : "primary"}
+            shadow={2}
+            inactive={event.full && !joined}
+            disabled={busy}
+            onPress={toggle}
+            style={joined && brutal(2)}
+          />
+        </View>
       </View>
     </View>
   );
@@ -101,5 +119,16 @@ const styles = StyleSheet.create({
   cardText: { flex: 1, minWidth: 0, gap: 3 },
   cardKicker: { color: colors.brand, textTransform: "uppercase", ...font(700, 11, undefined, 0.06) },
   cardTitle: { color: colors.ink, ...font(800, 15.5, 1.25) },
+  cardMeta: { color: colors.muted, ...font(500, 12.5) },
   cardBottom: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
+  cardActions: { flexDirection: "row", alignItems: "center", gap: 8 },
+  calendar: {
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });

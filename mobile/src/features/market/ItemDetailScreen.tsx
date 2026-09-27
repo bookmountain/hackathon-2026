@@ -11,7 +11,7 @@ import { MapDot, MiniMap, regionAround } from "@/features/map";
 import { LoadingScreen } from "@/features/shell/LoadingScreen";
 import PhotoPager from "@/features/shell/PhotoPager";
 import { useAppStore } from "@/store";
-import { colors, font } from "@/theme";
+import { colors, divider, font } from "@/theme";
 import { availabilityColors, isSold, openingMessage } from "./logic";
 
 export default function ItemDetailScreen() {
@@ -38,12 +38,12 @@ function ItemDetailView({ item }: { item: ItemDetail }) {
   };
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView edges={["top"]} style={styles.screen}>
       <ScrollView>
         <PhotoPager photos={item.photos} tone={item.tone} label="product photo" height={290}>
-          <SafeAreaView edges={["top"]} style={styles.back}>
+          <View style={styles.back}>
             <BackButton variant="white" onPress={() => router.back()} />
-          </SafeAreaView>
+          </View>
         </PhotoPager>
 
         <View style={styles.body}>
@@ -70,7 +70,7 @@ function ItemDetailView({ item }: { item: ItemDetail }) {
                 <View style={styles.placeInfo}>
                   <Text style={styles.placeName}>{place.name}</Text>
                   <Text style={[styles.placeSub, { color: central ? colors.brand : colors.muted }]}>
-                    {central ? `Suggested safe pickup point · ${place.sub}` : "Seller's own pinned location · approximate"}
+                    {central ? `Suggested safe pickup point · ${place.sub}` : "Seller's own pinned location"}
                   </Text>
                 </View>
               }
@@ -97,7 +97,7 @@ function ItemDetailView({ item }: { item: ItemDetail }) {
       <SafeAreaView edges={["bottom"]} style={styles.footer}>
         <Button label={cta} onPress={message} inactive={mine || isSold(item)} disabled={busy} />
       </SafeAreaView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -123,8 +123,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.lineSoft,
+    ...divider.top,
     backgroundColor: colors.surface,
   },
 });

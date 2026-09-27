@@ -17,6 +17,7 @@ describe("profileRequest", () => {
       interests: ["coding"],
       avatarKey: `avatars/${ME.userId}/avatar.png`,
       avatarPreset: 3,
+      avatarStyle: null,
     });
   });
 
@@ -39,6 +40,7 @@ describe("profileRequest", () => {
       interests: [],
       avatarKey: null,
       avatarPreset: 2,
+      avatarStyle: null,
     });
   });
 });

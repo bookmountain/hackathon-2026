@@ -1,14 +1,17 @@
 import { StyleSheet, Text, View } from "react-native";
-import { Icon } from "@/components/ui";
+import Svg, { Path } from "react-native-svg";
 import type { Item } from "@/data/types";
-import { colors, font, shadows } from "@/theme";
+import { colors, font } from "@/theme";
 
-// Safe pickup point: dark disc with a star and a yellow count badge
+// Safe pickup point: ink disc with a shopping bag and a coral count badge
 export function PickupPin({ count, selected }: { count: number; selected: boolean }) {
   return (
     <View style={styles.pickupBox}>
-      <View style={[styles.pickup, { borderColor: selected ? colors.yellow : colors.surface }]}>
-        <Icon name="star" size={14} color={colors.yellow} />
+      <View style={[styles.pickup, { borderColor: selected ? colors.coral : colors.surface }]}>
+        <Svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={colors.surface} strokeWidth={2.2} strokeLinejoin="round">
+          <Path d="M6 8h12l-1 12H7z" />
+          <Path d="M9 8a3 3 0 0 1 6 0" />
+        </Svg>
       </View>
       <View style={styles.count}>
         <Text style={styles.countText}>{count}</Text>
@@ -17,28 +20,27 @@ export function PickupPin({ count, selected }: { count: number; selected: boolea
   );
 }
 
-// Seller's own pin: white "$25" tag with a blue (yellow when selected) outline
+// Seller's own pin: white "$25" pill, ink when selected
 export function ItemTag({ item, selected }: { item: Item; selected: boolean }) {
   return (
-    <View style={[styles.tag, { borderColor: selected ? colors.yellow : colors.brand }]}>
-      <Icon name="tag" size={11} color={colors.brand} />
-      <Text style={styles.tagText}>${item.price}</Text>
+    <View style={[styles.tag, { backgroundColor: selected ? colors.ink : colors.surface }]}>
+      <Text style={[styles.tagText, { color: selected ? colors.surface : colors.ink }]}>${item.price}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   // Extra room on the top-right so the count badge fits inside the marker view
-  pickupBox: { paddingTop: 7, paddingRight: 9 },
+  pickupBox: { paddingTop: 8, paddingRight: 10 },
   pickup: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: colors.ink,
     borderWidth: 2.5,
     alignItems: "center",
     justifyContent: "center",
-    ...shadows.pin,
+    boxShadow: "0 3px 8px rgba(20,20,43,0.35)",
   },
   count: {
     position: "absolute",
@@ -48,7 +50,7 @@ const styles = StyleSheet.create({
     height: 17,
     borderRadius: 9,
     paddingHorizontal: 4,
-    backgroundColor: colors.yellow,
+    backgroundColor: colors.coral,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -57,16 +59,9 @@ const styles = StyleSheet.create({
     height: 26,
     paddingHorizontal: 9,
     borderRadius: 13,
-    borderWidth: 2,
-    backgroundColor: colors.surface,
-    flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    shadowColor: colors.ink,
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+    justifyContent: "center",
+    boxShadow: "0 4px 12px rgba(20,20,43,0.3)",
   },
-  tagText: { color: colors.brand, ...font(800, 12) },
+  tagText: { ...font(800, 12) },
 });

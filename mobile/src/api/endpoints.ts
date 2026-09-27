@@ -2,6 +2,10 @@
 import { api } from "./client";
 import type {
   AuthResponse,
+  DailyCardDto,
+  ImageSearchResponse,
+  ItemPhotoAnalysis,
+  RoomPhotoAnalysis,
   ChatMessageDto,
   ChatSummaryDto,
   ConsentsRequest,
@@ -87,4 +91,22 @@ export const uploads = {
     api<PhotoUploadResponse>("/api/uploads/flat-photo", { method: "POST", body: { contentType, listingId } }),
   itemPhoto: (contentType: string, itemId: string | null) =>
     api<PhotoUploadResponse>("/api/uploads/item-photo", { method: "POST", body: { contentType, itemId } }),
+};
+
+// Not built in the API yet: these 404 until they are. Callers fall back (isNotBuilt).
+
+export const ai = {
+  analyseItemPhoto: (image: string) =>
+    api<ItemPhotoAnalysis>("/api/ai/photo-analysis", { method: "POST", body: { kind: "Item", image } }),
+  analyseRoomPhoto: (image: string) =>
+    api<RoomPhotoAnalysis>("/api/ai/photo-analysis", { method: "POST", body: { kind: "Room", image } }),
+};
+
+export const imageSearch = {
+  items: (image: string) => api<ImageSearchResponse>("/api/items/image-search", { method: "POST", body: { image } }),
+};
+
+export const dailyCard = {
+  get: () => api<DailyCardDto>("/api/daily-card"),
+  draw: () => api<DailyCardDto>("/api/daily-card/draw", { method: "POST" }),
 };

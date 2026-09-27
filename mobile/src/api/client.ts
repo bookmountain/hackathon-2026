@@ -16,6 +16,11 @@ export class ApiError extends Error {
   }
 }
 
+/** The endpoint doesn't exist on this API yet (404 / 405), so the caller should use its fallback */
+export function isNotBuilt(error: unknown): boolean {
+  return error instanceof ApiError && (error.status === 404 || error.status === 405);
+}
+
 type Query = Record<string, string | number | boolean | null | undefined>;
 
 let token: string | null = null;

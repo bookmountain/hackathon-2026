@@ -7,7 +7,7 @@ import { colors, font, shadows } from "@/theme";
 export default function FlatCard({ flat, onPress }: { flat: Flat; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={styles.card}>
-      <Photo uri={flat.photo} tone={flat.tone} label="room photo" style={styles.photo}>
+      <Photo uri={flat.photo} tone={colors.brandSoft} label="room photo" style={styles.photo}>
         <View style={styles.price}>
           <Text style={styles.priceText}>
             ${flat.price}
@@ -34,7 +34,7 @@ export default function FlatCard({ flat, onPress }: { flat: Flat; onPress: () =>
 
 const styles = StyleSheet.create({
   card: { backgroundColor: colors.surface, borderRadius: 22, overflow: "hidden", ...shadows.card },
-  photo: { height: 150 },
+  photo: { aspectRatio: 16 / 9 },
   price: {
     position: "absolute",
     left: 12,

@@ -41,7 +41,7 @@ export function ItemSheet({ item }: { item: Item }) {
   return (
     <MapSheet>
       <View style={styles.itemHead}>
-        <Photo uri={item.photo} tone={item.tone} stripe={8} base={colors.surface} label="photo" style={styles.thumb} />
+        <Photo uri={item.photo} tone={colors.brandSoft} label="photo" style={styles.thumb} />
         <View style={styles.itemText}>
           <Text style={styles.itemPrice}>${item.price}</Text>
           <Text style={styles.itemTitle}>{item.title}</Text>

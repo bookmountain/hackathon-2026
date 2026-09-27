@@ -6,21 +6,38 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
 import { useToast } from "@/components/feedback/Toast";
-import { Button, DateField, FieldLabel, Icon, ScreenHeader, Segmented, Switch, TextField } from "@/components/ui";
+import { Button, DateField, FieldLabel, Icon, ScreenHeader, Segmented, Switch, TextField, TimeField } from "@/components/ui";
 import { toEvent } from "@/data/adapters";
-import type { EventCategory } from "@/data/types";
+import type { EventCategory, MapPoint } from "@/data/types";
+import AddressSearch from "@/features/forms/AddressSearch";
+import { atTime, parseAuDate } from "@/lib/auDate";
+import { useAddressSearch } from "@/features/forms/useAddressSearch";
 import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
 import { useAppStore } from "@/store";
-import { colors, font } from "@/theme";
+import { colors, divider, font } from "@/theme";
 import { CAPACITY, EMPTY_EVENT, EVENT_CATEGORIES, eventProblem, eventRequest, type EventDraft } from "./logic";
+
+const HOST_REGION = { ...CBD_REGION, latitude: -34.9215, longitude: 138.601 };
 
 export default function HostScreen() {
   const { state, actions } = useAppStore();
   const toast = useToast();
   const { busy, submit } = useSubmit();
   const [draft, setDraft] = useState<EventDraft>(EMPTY_EVENT);
+  const [dateText, setDateText] = useState("");
+  const [time, setTime] = useState("");
+  const [focus, setFocus] = useState<MapPoint | null>(null);
   const update = (patch: Partial<EventDraft>) => setDraft((d) => ({ ...d, ...patch }));
-  const problem = eventProblem(draft);
+  const address = useAddressSearch((r) => {
+    update({ where: "custom", pin: { latitude: r.latitude, longitude: r.longitude } });
+    setFocus({ latitude: r.latitude, longitude: r.longitude });
+  });
+
+  // Date typed as DD/MM/YYYY plus a time (6pm when left blank)
+  const day = parseAuDate(dateText);
+  const when = day ? atTime(day, time) : null;
+  const dateInvalid = dateText.length === 10 && !day;
+  const problem = dateText && !day ? "Enter the date as DD/MM/YYYY" : eventProblem({ ...draft, when });
   const places = [
     ...state.pickups.map((p) => ({ id: p.id, name: p.name, note: "Central" })),
     { id: "custom", name: "Drop a pin on the map", note: "Any location" },
@@ -33,13 +50,14 @@ export default function HostScreen() {
   }, [needPickups, actions]);
 
   const publish = () => {
-    const when = draft.when;
     if (problem || !when) {
       toast(problem ?? "Pick a date & time");
       return;
     }
+    // An unnamed pin placed from a typed address is called by that address
+    const place = draft.place.trim() || (focus ? address.text.trim() : "");
     void submit(async () => {
-      const created = await api.events.create(eventRequest({ ...draft, when }));
+      const created = await api.events.create(eventRequest({ ...draft, place, when }));
       actions.putEvent(toEvent(created.summary));
       toast("Published — your identity stays hidden");
       router.back();
@@ -65,13 +83,17 @@ export default function HostScreen() {
               options={EVENT_CATEGORIES.map((c) => ({ value: c, label: c }))}
             />
           </View>
-          <DateField
-            label="When"
-            mode="datetime"
-            value={draft.when}
-            onChange={(when) => update({ when })}
-            placeholder="Pick a date & time"
-          />
+          <View style={styles.group}>
+            <FieldLabel>When</FieldLabel>
+            <View style={styles.row}>
+              <View style={styles.date}>
+                <DateField value={dateText} onChange={setDateText} error={dateInvalid ? "That date doesn't exist" : null} />
+              </View>
+              <View style={styles.time}>
+                <TimeField value={time} onChange={setTime} />
+              </View>
+            </View>
+          </View>
           <TextField
             label="What's the plan? (optional)"
             multiline
@@ -98,24 +120,31 @@ export default function HostScreen() {
                 </Pressable>
               );
             })}
+            <FieldLabel>Or type the venue address</FieldLabel>
+            <AddressSearch search={address} placeholder="e.g. 10 Rundle Mall" />
             <MiniMap
-              region={CBD_REGION}
-              aspectRatio={1}
-              label="Tap to pin the exact spot"
-              onPressPoint={(pin) => update({ where: "custom", pin })}
+              region={HOST_REGION}
+              height={220}
+              focus={focus}
+              label="Unknown address? Tap the map to pin it"
+              onPressPoint={(pin) => {
+                update({ where: "custom", pin });
+                setFocus(null);
+                address.mapTapped();
+              }}
             >
               {state.pickups.map((p) => (
                 <MapDot
                   key={p.id}
+                  kind="dot"
                   latitude={p.latitude}
                   longitude={p.longitude}
-                  halo={0}
-                  size={draft.where === p.id ? 16 : 10}
-                  color={draft.where === p.id ? colors.ink : colors.brandMid}
-                  strokeWidth={2}
+                  selected={draft.where === p.id}
+                  label={p.name}
+                  onPress={() => update({ where: p.id })}
                 />
               ))}
-              {draft.where === "custom" && draft.pin && <MapDot {...draft.pin} />}
+              {draft.where === "custom" && draft.pin && <MapDot kind="evpin" {...draft.pin} />}
             </MiniMap>
             {draft.where === "custom" && (
               <TextField
@@ -138,7 +167,7 @@ export default function HostScreen() {
               value={draft.cap}
               onValueChange={(cap) => update({ cap })}
               minimumTrackTintColor={colors.brand}
-              maximumTrackTintColor={colors.line}
+              maximumTrackTintColor={colors.lineNeutral}
               thumbTintColor={Platform.OS === "android" ? colors.brand : undefined}
             />
           </View>
@@ -188,18 +217,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: colors.lineSoft,
+    borderColor: colors.lineNeutral,
     backgroundColor: colors.surface,
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
-  placeActive: { borderColor: colors.brand, backgroundColor: colors.brandSelected },
+  placeActive: { borderColor: colors.brand, backgroundColor: colors.brandSoft },
+  row: { flexDirection: "row", gap: 10 },
+  date: { flex: 1.4 },
+  time: { flex: 1 },
   placeName: { color: colors.ink, ...font(700, 14) },
   placeNote: { color: colors.muted, ...font(600, 12) },
   capacityRow: { flexDirection: "row", justifyContent: "space-between" },
   capacityValue: { color: colors.ink, ...font(700, 13) },
-  toggles: { gap: 1, backgroundColor: colors.lineSoft, borderRadius: 16, overflow: "hidden" },
+  toggles: { gap: 1, backgroundColor: colors.lineNeutral, borderRadius: 16, overflow: "hidden" },
   toggle: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -210,5 +242,5 @@ const styles = StyleSheet.create({
   },
   toggleTitle: { color: colors.ink, ...font(800, 14) },
   toggleSub: { color: colors.muted, ...font(500, 12) },
-  footer: { paddingHorizontal: 20, paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.lineSoft },
+  footer: { paddingHorizontal: 20, paddingVertical: 12, ...divider.top },
 });

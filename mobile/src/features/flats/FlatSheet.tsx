@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import * as api from "@/api/endpoints";
 import { useLoad, useSubmit } from "@/api/hooks";
 import { useToast } from "@/components/feedback/Toast";
-import { Button, Pill } from "@/components/ui";
+import { Button, Photo, Pill } from "@/components/ui";
 import { minStayLabel } from "@/data/adapters";
 import type { Flat } from "@/data/types";
 import { MapSheet } from "@/features/map";
@@ -29,6 +29,7 @@ export default function FlatSheet({ flat }: { flat: Flat }) {
 
   return (
     <MapSheet>
+      <Photo uri={flat.photo} tone={colors.brandSoft} label="room photo" style={styles.photo} />
       <View style={styles.head}>
         <View style={styles.headText}>
           <Text style={styles.price}>
@@ -76,6 +77,7 @@ export default function FlatSheet({ flat }: { flat: Flat }) {
 }
 
 const styles = StyleSheet.create({
+  photo: { aspectRatio: 16 / 9, borderRadius: 16 },
   head: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 10 },
   headText: { flex: 1, gap: 3 },
   price: { color: colors.ink, ...font(800, 24, undefined, -0.02) },

@@ -2,16 +2,22 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRefreshOnFocus } from "@/api/hooks";
-import { ChipRow } from "@/components/ui";
-import { CampusMap, MapHint, MapMarker } from "@/features/map";
+import { CampusMap, MapChrome, MapMarker, ResultsSheet } from "@/features/map";
+import ListSearchBar from "@/features/filters/ListSearchBar";
+import { useMapSearch } from "@/features/map/useMapSearch";
+import { matchesQuery, resultsTitle } from "@/features/search/query";
 import TabScreen from "@/features/shell/TabScreen";
 import type { TabView } from "@/features/shell/ViewToolbar";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import FlatCard from "./FlatCard";
+import FlatFiltersSheet from "./FlatFiltersSheet";
 import FlatPin from "./FlatPin";
 import FlatSheet from "./FlatSheet";
-import { FLAT_FILTERS, filterFlats, type FlatFilter } from "./logic";
+import { countFlatFilters, EMPTY_FLAT_FILTERS, filterFlats, rentBounds, type FlatFilters } from "./logic";
+
+const openFlat = (id: string) => router.push({ pathname: "/flats/[id]", params: { id } });
+const listRoom = () => router.push("/flats/new");
 
 export default function FlatsTab() {
   const { state, actions } = useAppStore();
@@ -20,43 +26,74 @@ export default function FlatsTab() {
   const { focus } = useLocalSearchParams<{ focus?: string }>();
   const [handledFocus, setHandledFocus] = useState<string | undefined>();
   const [view, setView] = useState<TabView>("map");
-  const [filters, setFilters] = useState<FlatFilter[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FlatFilters>(EMPTY_FLAT_FILTERS);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const { mapRef, recenter, ...search } = useMapSearch<"flat">();
 
   if (focus && focus !== handledFocus) {
     setHandledFocus(focus);
     setView("map");
-    setFilters([]);
-    setSelectedId(focus);
+    setFilters(EMPTY_FLAT_FILTERS);
+    search.setQuery("");
+    search.setSheet({ kind: "flat", id: focus });
   }
 
-  const flats = filterFlats(state.flats, filters);
+  // One search and one set of filters for both the map and the list
+  const searched = state.flats.filter((f) => matchesQuery(search.query, f.title, f.area));
+  const flats = filterFlats(searched, filters);
+  const filterCount = countFlatFilters(filters);
+  const selectedId = search.selected("flat");
   const selected = state.flats.find((f) => f.id === selectedId);
-  const chipOptions = FLAT_FILTERS.map((f) => ({
-    label: f,
-    active: filters.includes(f),
-    onPress: () => setFilters(filters.includes(f) ? filters.filter((x) => x !== f) : [...filters, f]),
-  }));
+  // On the map: the dialog, plus the two most used switches as quick chips
+  const chipOptions = [
+    { label: filterCount ? `Filters · ${filterCount}` : "Filters", active: filterCount > 0, onPress: () => setFiltersOpen(true) },
+    { label: "Furnished", active: filters.furnished, onPress: () => setFilters({ ...filters, furnished: !filters.furnished }) },
+    { label: "Ensuite", active: filters.ensuite, onPress: () => setFilters({ ...filters, ensuite: !filters.ensuite }) },
+  ];
 
   return (
     <TabScreen
       title="Flatmates"
-      action={{ label: "List a room", onPress: () => router.push("/flats/new") }}
+      action={{ label: "List a room", onPress: listRoom }}
       view={view}
       onViewChange={(v) => {
         setView(v);
-        setSelectedId(null);
+        search.setSheet(null);
       }}
     >
       {view === "map" ? (
         <CampusMap
-          onBackgroundPress={() => setSelectedId(null)}
+          ref={mapRef}
+          onBackgroundPress={() => search.setSheet(null)}
           overlay={
             <>
-              <View style={styles.chips}>
-                <ChipRow options={chipOptions} floating height={34} inset={14} />
-              </View>
-              <MapHint text="Rooms listed by students · tap a price" />
+              <MapChrome
+                placeholder="Search rooms near campus"
+                query={search.query}
+                onQueryChange={search.setQuery}
+                onSearch={search.showResults}
+                chips={chipOptions}
+                sheetOpen={!!search.sheet}
+                onRecenter={recenter}
+                listLabel="List of rooms"
+                onList={() => setView("list")}
+                action={{ label: "List a room", onPress: listRoom }}
+              />
+              {search.sheet?.kind === "results" && (
+                <ResultsSheet
+                  title={resultsTitle(flats.length, "room", search.query)}
+                  onClose={() => search.setSheet(null)}
+                  emptyText={`No matches for “${search.query.trim()}”. Try another word or clear filters.`}
+                  rows={flats.map((f) => ({
+                    key: f.id,
+                    title: f.title,
+                    sub: `${f.area} · ${f.beds} bed`,
+                    right: `$${f.price}/wk`,
+                    image: f.photo,
+                    onPress: () => openFlat(f.id),
+                  }))}
+                />
+              )}
               {selected && <FlatSheet key={selected.id} flat={selected} />}
             </>
           }
@@ -65,8 +102,9 @@ export default function FlatsTab() {
             <MapMarker
               key={f.id}
               coordinate={f}
-              onPress={() => setSelectedId(f.id)}
+              onPress={() => search.setSheet({ kind: "flat", id: f.id })}
               label={`${f.title}, $${f.price} per week`}
+              zIndex={f.id === selectedId ? 10 : 3}
             >
               <FlatPin flat={f} selected={f.id === selectedId} />
             </MapMarker>
@@ -75,31 +113,47 @@ export default function FlatsTab() {
       ) : (
         <ScrollView
           contentContainerStyle={styles.list}
+          keyboardShouldPersistTaps="handled"
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}
         >
           <View style={styles.intro}>
             <Text style={styles.title}>Rooms from fellow students</Text>
             <Text style={styles.subtitle}>Every tenant is uni-verified. See who lives there before you message.</Text>
           </View>
-          <View style={styles.listChips}>
-            <ChipRow options={chipOptions} />
-          </View>
+          <ListSearchBar
+            query={search.query}
+            onQueryChange={search.setQuery}
+            placeholder="Search rooms or suburbs"
+            filterCount={filterCount}
+            onFilters={() => setFiltersOpen(true)}
+          />
           {flats.map((f) => (
-            <FlatCard key={f.id} flat={f} onPress={() => router.push({ pathname: "/flats/[id]", params: { id: f.id } })} />
+            <FlatCard key={f.id} flat={f} onPress={() => openFlat(f.id)} />
           ))}
-          {flats.length === 0 && <Text style={styles.empty}>No rooms match those filters.</Text>}
+          {flats.length === 0 && <Text style={styles.empty}>No rooms match your search or filters.</Text>}
         </ScrollView>
+      )}
+      {filtersOpen && (
+        <FlatFiltersSheet
+          flats={searched}
+          bounds={rentBounds(state.flats)}
+          applied={filters}
+          onApply={(next) => {
+            setFilters(next);
+            setFiltersOpen(false);
+            search.setSheet(null);
+          }}
+          onClose={() => setFiltersOpen(false)}
+        />
       )}
     </TabScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  chips: { position: "absolute", top: 2, left: 0, right: 0, zIndex: 6 },
   list: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 24, gap: 16 },
   intro: { gap: 4 },
   title: { color: colors.ink, ...font(800, 22, 1.2, -0.02) },
   subtitle: { color: colors.muted, ...font(500, 13.5) },
-  listChips: { marginHorizontal: -18 },
   empty: { textAlign: "center", padding: 30, color: colors.muted, ...font(600, 14) },
 });
