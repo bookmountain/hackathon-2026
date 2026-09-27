@@ -14,8 +14,17 @@ async function openIcs(event: CalendarEvent) {
   await Sharing.shareAsync(file.uri, { mimeType: "text/calendar", UTI: "com.apple.ical.ics", dialogTitle: event.title });
 }
 
+
+type Props = {
+  /** Heading above the buttons; none on list cards */
+  label?: string;
+  event: CalendarEvent;
+  /** Smaller, light-bordered buttons for list cards */
+  compact?: boolean;
+};
+
 // "Add to calendar": Google Calendar link and Apple Calendar (.ics) side by side
-export default function CalendarButtons({ label, event }: { label: string; event: CalendarEvent }) {
+export default function CalendarButtons({ label, event, compact = false }: Props) {
   const toast = useToast();
 
   const google = () => Linking.openURL(googleCalendarUrl(event)).catch(() => toast("Couldn't open Google Calendar"));
@@ -28,25 +37,31 @@ export default function CalendarButtons({ label, event }: { label: string; event
     }
   };
 
+  const icon = compact ? "calendar" : "calendarCheck";
+  const iconSize = compact ? 15 : 18;
   return (
     <View style={styles.group}>
-      <FieldLabel>{label}</FieldLabel>
+      {label ? <FieldLabel>{label}</FieldLabel> : null}
       <View style={styles.row}>
         <Pressable
           onPress={google}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.button, pressed && { borderColor: colors.brand, backgroundColor: colors.brandSoft }]}
+          style={({ pressed }) => [
+            styles.button,
+            compact && styles.compact,
+            pressed && { borderColor: colors.brand, backgroundColor: colors.brandSoft },
+          ]}
         >
-          <Icon name="calendarCheck" size={18} color={colors.brand} />
-          <Text style={styles.text}>Google Calendar</Text>
+          <Icon name={icon} size={iconSize} color={colors.brand} />
+          <Text style={compact ? styles.compactText : styles.text}>Google Calendar</Text>
         </Pressable>
         <Pressable
           onPress={apple}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.button, pressed && { backgroundColor: colors.canvas }]}
+          style={({ pressed }) => [styles.button, compact && styles.compact, pressed && { backgroundColor: colors.canvas }]}
         >
-          <Icon name="calendarCheck" size={18} color={colors.appleRed} />
-          <Text style={styles.text}>Apple Calendar</Text>
+          <Icon name={icon} size={iconSize} color={colors.appleRed} />
+          <Text style={compact ? styles.compactText : styles.text}>Apple Calendar</Text>
         </Pressable>
       </View>
     </View>
@@ -69,4 +84,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   text: { color: colors.ink, ...font(700, 13.5) },
+  compact: { height: 38, borderRadius: 11, borderWidth: 1.5, borderColor: colors.lineLight, gap: 6 },
+  compactText: { color: colors.ink, ...font(700, 12.5) },
 });

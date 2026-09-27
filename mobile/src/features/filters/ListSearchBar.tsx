@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { Icon } from "@/components/ui";
+import { GamePressable, Icon } from "@/components/ui";
 import { brutal, colors, font } from "@/theme";
 
 type Props = {
@@ -32,11 +32,12 @@ export default function ListSearchBar({ query, onQueryChange, placeholder, filte
           </Pressable>
         ) : null}
       </View>
-      <Pressable
+      <GamePressable
+        kind="sm"
         onPress={onFilters}
         accessibilityRole="button"
         accessibilityLabel={filterCount ? `Filters, ${filterCount} on` : "Filters"}
-        style={({ pressed }) => [styles.filters, (pressed || filterCount > 0) && { backgroundColor: colors.brandSoft }]}
+        faceStyle={(pressed) => [styles.filters, (pressed || filterCount > 0) && { backgroundColor: colors.brandSoft }]}
       >
         <Icon name="filter" size={18} color={colors.ink} />
         <Text style={styles.filtersText}>Filters</Text>
@@ -45,7 +46,7 @@ export default function ListSearchBar({ query, onQueryChange, placeholder, filte
             <Text style={styles.badgeText}>{filterCount}</Text>
           </View>
         )}
-      </Pressable>
+      </GamePressable>
     </View>
   );
 }
@@ -67,7 +68,6 @@ const styles = StyleSheet.create({
   filters: {
     height: 46,
     borderRadius: 14,
-    ...brutal(2),
     backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",

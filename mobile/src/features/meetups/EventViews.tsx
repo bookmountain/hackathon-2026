@@ -4,11 +4,16 @@ import { errorMessage } from "@/api/client";
 import { useToast } from "@/components/feedback/Toast";
 import { AnonDots, Button, Icon } from "@/components/ui";
 import type { MeetupEvent } from "@/data/types";
+import CalendarButtons from "@/features/detail/CalendarButtons";
 import { MapSheet } from "@/features/map";
 import { googleCalendarUrl } from "@/lib/calendar";
-import { brutal, colors, font, shadows } from "@/theme";
+import { colors, font } from "@/theme";
 import { calendarEntry } from "./logic";
+import ReminderPills from "./ReminderPills";
+import { reminderAlarms } from "./reminders";
 import { useJoin } from "./useJoin";
+import { useEventReminders } from "./useReminders";
+
 
 const openEvent = (id: string) => router.push({ pathname: "/meetups/[id]", params: { id } });
 
@@ -36,7 +41,7 @@ export function EventSheet({ event }: { event: MeetupEvent }) {
           inactive={event.full && !joined}
           disabled={busy}
           onPress={toggle}
-          style={[styles.grow, joined && brutal(3)]}
+          style={styles.grow}
         />
         <Button label="Details" size="md" variant="outline" weight={700} onPress={() => openEvent(event.id)} />
       </View>
@@ -44,8 +49,8 @@ export function EventSheet({ event }: { event: MeetupEvent }) {
   );
 }
 
-// Row in the Meetups list
-export function EventCard({ event }: { event: MeetupEvent }) {
+// Row in the Meetups list; in the Going view, joined events also get reminders and calendar buttons
+export function EventCard({ event, showReminders = false }: { event: MeetupEvent; showReminders?: boolean }) {
   const { joined, going, label, busy, toggle } = useJoin(event);
   const toast = useToast();
   const addToCalendar = () => Linking.openURL(googleCalendarUrl(calendarEntry(event))).catch((e) => toast(errorMessage(e)));
@@ -84,14 +89,27 @@ export function EventCard({ event }: { event: MeetupEvent }) {
             label={label}
             size="sm"
             variant={joined ? "soft" : "primary"}
-            shadow={2}
             inactive={event.full && !joined}
             disabled={busy}
             onPress={toggle}
-            style={joined && brutal(2)}
           />
         </View>
       </View>
+      {showReminders && joined && <CardReminders event={event} />}
+    </View>
+  );
+}
+
+function CardReminders({ event }: { event: MeetupEvent }) {
+  const alarms = reminderAlarms(useEventReminders(event.id));
+  return (
+    <View style={styles.reminders}>
+      {/* One-sided dashed borders don't draw on iOS: clip the top edge of a dashed box */}
+      <View style={styles.ruleClip}>
+        <View style={styles.rule} />
+      </View>
+      <ReminderPills eventId={event.id} layout="inline" />
+      <CalendarButtons compact event={calendarEntry(event, "", alarms)} />
     </View>
   );
 }
@@ -104,7 +122,8 @@ const styles = StyleSheet.create({
   headcount: { flexDirection: "row", alignItems: "center", gap: 8 },
   actions: { flexDirection: "row", gap: 8 },
   grow: { flex: 1 },
-  card: { backgroundColor: colors.surface, borderRadius: 20, padding: 14, gap: 12, ...shadows.card },
+  // Plain white card, no border (the design only outlines buttons)
+  card: { backgroundColor: colors.surface, borderRadius: 20, padding: 14, gap: 12 },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 14 },
   date: {
     width: 52,
@@ -122,6 +141,9 @@ const styles = StyleSheet.create({
   cardMeta: { color: colors.muted, ...font(500, 12.5) },
   cardBottom: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   cardActions: { flexDirection: "row", alignItems: "center", gap: 8 },
+  reminders: { gap: 10 },
+  ruleClip: { height: 1.5, overflow: "hidden", marginBottom: 2 },
+  rule: { height: 6, borderWidth: 1.5, borderStyle: "dashed", borderColor: colors.lineLight },
   calendar: {
     width: 38,
     height: 38,
