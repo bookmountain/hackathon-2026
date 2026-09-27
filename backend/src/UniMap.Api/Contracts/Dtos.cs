@@ -28,7 +28,7 @@ public record AuthResponse(string AccessToken, DateTimeOffset ExpiresAt, bool Co
 /// profile's current avatarKey to keep it, or null to remove it.</param>
 /// <param name="AvatarPreset">The design's preset avatar colour, 0–7; null for none ("?", the builder's
 /// "Anonymous").</param>
-/// <param name="AvatarDesign">The rest of the avatar builder. Null resets it to initials in a circle.</param>
+/// <param name="AvatarStyle">The rest of the avatar builder. Null resets it to initials in a circle.</param>
 public record UpsertProfileRequest(
     [Required, MaxLength(64)] string DisplayName,
     int? DegreeId,
@@ -43,20 +43,20 @@ public record UpsertProfileRequest(
     [MaxLength(20)] List<string> Interests,
     string? AvatarKey,
     [Range(0, Catalog.MaxAvatarPreset)] int? AvatarPreset = null,
-    AvatarDesign? AvatarDesign = null);
+    AvatarStyle? AvatarStyle = null);
 
 /// <summary>
 /// The avatar builder's choices, drawn in the avatarPreset colour. Show it when there's no photo and
 /// avatarPreset isn't null.
 /// </summary>
-/// <param name="Style">Initials, or Icon.</param>
-/// <param name="Initials">With Initials: one or two letters; null shows the nickname's first letter.</param>
+/// <param name="Mode">Initials, or Icon.</param>
+/// <param name="Text">With Initials: one or two letters; "" shows the nickname's first letter.</param>
 /// <param name="Icon">With Icon: which icon.</param>
-/// <param name="Shape">Circle, Squircle ("Soft") or Square.</param>
+/// <param name="Shape">Circle, Soft or Square.</param>
 /// <param name="Ring">Ring colour around the avatar, or None.</param>
-public record AvatarDesign(
-    AvatarStyle Style,
-    [RegularExpression("^[A-Za-z]{1,2}$", ErrorMessage = "Initials are one or two letters.")] string? Initials,
+public record AvatarStyle(
+    AvatarMode Mode,
+    [RegularExpression("^[A-Za-z]{0,2}$", ErrorMessage = "Initials are one or two letters.")] string? Text,
     AvatarIcon Icon,
     AvatarShape Shape,
     AvatarRing Ring);
@@ -64,7 +64,7 @@ public record AvatarDesign(
 /// <param name="AvatarUrl">Photo avatar, valid for 24 hours.</param>
 /// <param name="AvatarKey">The photo's R2 key. Send it back on PUT /api/me/profile to keep the photo.</param>
 /// <param name="AvatarPreset">Preset avatar colour, 0–7, or null. Shown when there's no photo.</param>
-/// <param name="AvatarDesign">How to draw the preset avatar (initials or icon, shape, ring).</param>
+/// <param name="AvatarStyle">How to draw the preset avatar (initials or icon, shape, ring).</param>
 public record ProfileDto(
     Guid UserId,
     string DisplayName,
@@ -80,7 +80,7 @@ public record ProfileDto(
     string? AvatarUrl,
     string? AvatarKey,
     int? AvatarPreset,
-    AvatarDesign AvatarDesign);
+    AvatarStyle AvatarStyle);
 
 public record MeResponse(Guid UserId, string Email, University University, bool ConsentComplete, ProfileDto? Profile);
 

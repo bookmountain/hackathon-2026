@@ -8,7 +8,7 @@ public enum DrawStatus
     /// <summary>"Your card today": you've drawn and been matched.</summary>
     Matched,
     /// <summary>"Deck locked": you pressed Draw after missing a day. A new session starts at midnight.</summary>
-    Locked,
+    Missed,
 }
 
 /// <summary>
@@ -54,6 +54,6 @@ public static class DailyCardRules
     public static bool CanDraw(DateOnly? lastPressed, DateOnly day) =>
         lastPressed is null || lastPressed == day.AddDays(-1);
 
-    /// <summary>The next Adelaide midnight, when the deck resets.</summary>
-    public static DateTimeOffset ResetsAt(DateOnly day) => AdelaideTime.ToUtc(day.AddDays(1), TimeOnly.MinValue);
+    /// <summary>The next Adelaide midnight, when the deck resets (and a missed-day lock ends).</summary>
+    public static DateTimeOffset NextChangeAt(DateOnly day) => AdelaideTime.ToUtc(day.AddDays(1), TimeOnly.MinValue);
 }

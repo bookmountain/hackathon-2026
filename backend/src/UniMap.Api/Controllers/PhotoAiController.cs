@@ -10,41 +10,37 @@ namespace UniMap.Api.Controllers;
 
 /// <summary>
 /// Photo analysis with Claude: pre-fill the Sell and "List a room" forms from a photo, and search the
-/// market by photo. Send the photo as multipart/form-data field "photo". It's only sent to Claude, never
-/// stored; upload listing photos to R2 as usual. 503 when the server has no Anthropic API key.
+/// market by photo. The photo is base64 in the JSON body. It's only sent to Claude, never stored; upload
+/// listing photos to R2 as usual. 503 when the server has no Anthropic API key.
 /// </summary>
 [ApiController]
 [Authorize]
-[RequestSizeLimit(4 * 1024 * 1024)]
+[RequestSizeLimit(6 * 1024 * 1024)]
 public class PhotoAiController(PhotoAiService ai, AppDbContext db, StorageService storage) : ControllerBase
 {
     /// <summary>
-    /// The Sell form's photo: title, category, condition, colour, texture, suggested price, description and
-    /// benefits. The prototype writes the description as the description, then "Colour: … · Texture: … ·
-    /// Condition: …" and the benefits as "• " lines.
+    /// The "AI photo analysis" card. For kind Item (Sell): title, category, condition, colour, texture,
+    /// suggested price, description and benefits. For kind Room ("List a room"): title, style, colours,
+    /// furnished, features, description and benefits.
     /// </summary>
-    [HttpPost("api/items/analyse-photo")]
-    public Task<ActionResult<ItemPhotoAnalysis>> AnalyseItem([FromForm] PhotoUploadForm form, CancellationToken ct) =>
-        Run(form, photo => ai.AnalyseItemAsync(photo, ct), ct);
+    [HttpPost("api/ai/photo-analysis")]
+    [ProducesResponseType<ItemPhotoAnalysis>(StatusCodes.Status200OK)]
+    [ProducesResponseType<RoomPhotoAnalysis>(StatusCodes.Status200OK)]
+    public Task<IActionResult> Analyse(PhotoAnalysisRequest req, CancellationToken ct) =>
+        Run(req.Image, async photo => req.Kind == PhotoAnalysisKind.Room
+            ? Ok(await ai.AnalyseRoomAsync(photo, ct))
+            : Ok(await ai.AnalyseItemAsync(photo, ct)));
 
     /// <summary>
-    /// The "List a room" form's photo: title, style, colours, furnished, features, description and benefits.
-    /// The prototype adds the features to the ones already picked, and the benefits to the description as
-    /// "• " lines.
-    /// </summary>
-    [HttpPost("api/flats/analyse-photo")]
-    public Task<ActionResult<RoomPhotoAnalysis>> AnalyseRoom([FromForm] PhotoUploadForm form, CancellationToken ct) =>
-        Run(form, photo => ai.AnalyseRoomAsync(photo, ct), ct);
-
-    /// <summary>
-    /// Search the market with a photo (the camera button in the search box): what it looks like, and the
-    /// closest unsold items, those in the same category whose title or description has the most keywords first.
+    /// Search the market with a photo (the camera button in the search box): the category it belongs to and
+    /// the closest unsold items, those in that category whose title or description has the most keywords
+    /// first. Also what it looks like ("Looks like: …").
     /// </summary>
     /// <param name="limit">How many items to return (the prototype shows up to 5).</param>
-    [HttpPost("api/items/search-by-photo")]
-    public Task<ActionResult<PhotoSearchResponse>> SearchByPhoto(
-        [FromForm] PhotoUploadForm form, CancellationToken ct, [FromQuery] int limit = 5) =>
-        Run(form, async photo =>
+    [HttpPost("api/items/image-search")]
+    [ProducesResponseType<ImageSearchResponse>(StatusCodes.Status200OK)]
+    public Task<IActionResult> ImageSearch(ImageSearchRequest req, CancellationToken ct, [FromQuery] int limit = 5) =>
+        Run(req.Image, async photo =>
         {
             var terms = await ai.SearchTermsAsync(photo, ct);
             ItemCategory? category = Enum.TryParse<ItemCategory>(terms.Category, out var c) ? c : null;
@@ -68,16 +64,17 @@ public class PhotoAiController(PhotoAiService ai, AppDbContext db, StorageServic
                 .Take(Math.Clamp(limit, 1, 50))
                 .Select(x => ItemMapper.ToSummary(x.Item, me, storage))
                 .ToList();
-            return new PhotoSearchResponse(terms.Label, category, keywords, items);
-        }, ct);
+            return Ok(new ImageSearchResponse(category, items, terms.Label, keywords));
+        });
 
-    private async Task<ActionResult<T>> Run<T>(PhotoUploadForm form, Func<Photo, Task<T>> analyse, CancellationToken ct)
+    private async Task<IActionResult> Run(string image, Func<Photo, Task<IActionResult>> analyse)
     {
         if (!ai.IsConfigured)
             return Problem("Photo analysis isn't set up on this server (Anthropic:ApiKey).",
                 statusCode: StatusCodes.Status503ServiceUnavailable);
-        if (await Photo.ReadAsync(form.Photo, ct) is not { } photo)
-            return Problem("Send a JPEG, PNG, GIF or WebP photo of up to 3.75 MB.", statusCode: StatusCodes.Status400BadRequest);
+        if (Photo.FromBase64(image) is not { } photo)
+            return Problem("Send image as a base64 JPEG, PNG, GIF or WebP of up to 3.75 MB.",
+                statusCode: StatusCodes.Status400BadRequest);
         try
         {
             return await analyse(photo);

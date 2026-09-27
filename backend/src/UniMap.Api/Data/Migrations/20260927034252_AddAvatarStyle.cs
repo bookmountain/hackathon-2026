@@ -5,7 +5,7 @@
 namespace UniMap.Api.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddAvatarDesign : Migration
+    public partial class AddAvatarStyle : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,11 +20,12 @@ namespace UniMap.Api.Data.Migrations
                 defaultValue: "Compass");
 
             migrationBuilder.AddColumn<string>(
-                name: "avatar_initials",
+                name: "avatar_mode",
                 table: "profiles",
-                type: "character varying(2)",
-                maxLength: 2,
-                nullable: true);
+                type: "character varying(16)",
+                maxLength: 16,
+                nullable: false,
+                defaultValue: "Initials");
 
             migrationBuilder.AddColumn<string>(
                 name: "avatar_ring",
@@ -43,12 +44,11 @@ namespace UniMap.Api.Data.Migrations
                 defaultValue: "Circle");
 
             migrationBuilder.AddColumn<string>(
-                name: "avatar_style",
+                name: "avatar_text",
                 table: "profiles",
-                type: "character varying(16)",
-                maxLength: 16,
-                nullable: false,
-                defaultValue: "Initials");
+                type: "character varying(2)",
+                maxLength: 2,
+                nullable: true);
         }
 
         /// <inheritdoc />
@@ -59,7 +59,7 @@ namespace UniMap.Api.Data.Migrations
                 table: "profiles");
 
             migrationBuilder.DropColumn(
-                name: "avatar_initials",
+                name: "avatar_mode",
                 table: "profiles");
 
             migrationBuilder.DropColumn(
@@ -71,7 +71,7 @@ namespace UniMap.Api.Data.Migrations
                 table: "profiles");
 
             migrationBuilder.DropColumn(
-                name: "avatar_style",
+                name: "avatar_text",
                 table: "profiles");
         }
     }

@@ -638,14 +638,15 @@ namespace UniMap.Api.Data.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("avatar_icon");
 
-                    b.Property<string>("AvatarInitials")
-                        .HasMaxLength(2)
-                        .HasColumnType("character varying(2)")
-                        .HasColumnName("avatar_initials");
-
                     b.Property<string>("AvatarKey")
                         .HasColumnType("text")
                         .HasColumnName("avatar_key");
+
+                    b.Property<string>("AvatarMode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("avatar_mode");
 
                     b.Property<int?>("AvatarPreset")
                         .HasColumnType("integer")
@@ -663,11 +664,10 @@ namespace UniMap.Api.Data.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("avatar_shape");
 
-                    b.Property<string>("AvatarStyle")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("avatar_style");
+                    b.Property<string>("AvatarText")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)")
+                        .HasColumnName("avatar_text");
 
                     b.Property<string>("Bio")
                         .HasMaxLength(500)

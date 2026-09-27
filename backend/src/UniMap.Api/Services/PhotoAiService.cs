@@ -186,13 +186,21 @@ public record Photo(string Base64, MediaType MediaType)
     /// <summary>Claude takes up to 5 MB per image once base64-encoded, which is about 3.75 MB of file.</summary>
     public const long MaxBytes = 3_750_000;
 
-    /// <summary>Reads a JPEG, PNG, GIF or WebP by its first bytes (phones don't always send a Content-Type).</summary>
-    public static async Task<Photo?> ReadAsync(IFormFile file, CancellationToken ct)
+    /// <summary>
+    /// Reads base64 (optionally a data: URL) holding a JPEG, PNG, GIF or WebP, recognised by its first bytes.
+    /// Null if it's none of those, or too big.
+    /// </summary>
+    public static Photo? FromBase64(string? image)
     {
-        if (file.Length is 0 or > MaxBytes) return null;
-        using var ms = new MemoryStream();
-        await file.CopyToAsync(ms, ct);
-        var b = ms.GetBuffer().AsSpan(0, (int)ms.Length);
+        if (string.IsNullOrWhiteSpace(image)) return null;
+        var comma = image.StartsWith("data:", StringComparison.Ordinal) ? image.IndexOf(',') : -1;
+        var base64 = comma >= 0 ? image[(comma + 1)..] : image;
+        if (base64.Length > MaxBytes * 4 / 3 + 4) return null;
+        byte[] bytes;
+        try { bytes = Convert.FromBase64String(base64); }
+        catch (FormatException) { return null; }
+        if (bytes.Length is 0 or > (int)MaxBytes) return null;
+        var b = bytes.AsSpan();
 
         MediaType? type =
             b.StartsWith((byte[])[0xFF, 0xD8, 0xFF]) ? MediaType.ImageJpeg :
@@ -200,6 +208,6 @@ public record Photo(string Base64, MediaType MediaType)
             b.StartsWith("GIF8"u8) ? MediaType.ImageGif :
             b.Length > 12 && b.StartsWith("RIFF"u8) && b[8..12].SequenceEqual("WEBP"u8) ? MediaType.ImageWebP :
             null;
-        return type is { } t ? new Photo(Convert.ToBase64String(b), t) : null;
+        return type is { } t ? new Photo(base64, t) : null;
     }
 }

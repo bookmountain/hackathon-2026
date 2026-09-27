@@ -88,5 +88,5 @@ public class ChatService(AppDbContext db, StorageService storage, IHubContext<Ch
     public ChatPerson ToPerson(User u) => new(
         u.Id, u.Profile?.DisplayName ?? "Student", u.Profile?.Degree?.Name ?? u.Profile?.Department,
         u.University, storage.ReadUrl(u.Profile?.AvatarKey), u.Profile?.AvatarPreset,
-        ProfileMapper.DesignOrNull(u.Profile));
+        ProfileMapper.StyleOrNull(u.Profile));
 }

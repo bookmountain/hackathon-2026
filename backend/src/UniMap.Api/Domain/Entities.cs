@@ -17,13 +17,13 @@ public enum AgeRange
 }
 
 /// <summary>The avatar builder's mode. Its third mode, "Anonymous", is <see cref="Profile.AvatarPreset"/> = null.</summary>
-public enum AvatarStyle { Initials, Icon }
+public enum AvatarMode { Initials, Icon }
 
 /// <summary>The avatar builder's icons, in the design's order.</summary>
 public enum AvatarIcon { Compass, Book, Coffee, Music, Code, Leaf, Camera, Ball, Paw, Rocket }
 
-/// <summary>The avatar builder's shapes: "Circle", "Soft" (Squircle) and "Square".</summary>
-public enum AvatarShape { Circle, Squircle, Square }
+/// <summary>The avatar builder's shapes.</summary>
+public enum AvatarShape { Circle, Soft, Square }
 
 /// <summary>The avatar builder's ring colour around the avatar.</summary>
 public enum AvatarRing { None, Gold, Blue, Navy, Sky }
@@ -94,9 +94,9 @@ public class Profile
     public int? AvatarPreset { get; set; }
 
     // The rest of the design's avatar builder, drawn with AvatarPreset's colour
-    public AvatarStyle AvatarStyle { get; set; }
-    /// <summary>One or two capital letters for the Initials style. Null: the nickname's first letter.</summary>
-    public string? AvatarInitials { get; set; }
+    public AvatarMode AvatarMode { get; set; }
+    /// <summary>One or two capital letters for the Initials mode. Null: the nickname's first letter.</summary>
+    public string? AvatarText { get; set; }
     public AvatarIcon AvatarIcon { get; set; }
     public AvatarShape AvatarShape { get; set; }
     public AvatarRing AvatarRing { get; set; }

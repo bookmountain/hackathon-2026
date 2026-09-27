@@ -10,11 +10,11 @@ public static class ProfileMapper
         p.UserId, p.DisplayName, p.User.University,
         p.Degree is null ? null : new DegreeSummary(p.Degree.Id, p.Degree.Name, p.Degree.Level, p.Degree.College),
         p.Department, p.Gender, p.Pronouns, p.YearOfStudy, p.Bio,
-        p.Habits, p.Interests, storage.ReadUrl(p.AvatarKey), p.AvatarKey, p.AvatarPreset, Design(p));
+        p.Habits, p.Interests, storage.ReadUrl(p.AvatarKey), p.AvatarKey, p.AvatarPreset, Style(p));
 
-    public static AvatarDesign Design(Profile p) =>
-        new(p.AvatarStyle, p.AvatarInitials, p.AvatarIcon, p.AvatarShape, p.AvatarRing);
+    public static AvatarStyle Style(Profile p) =>
+        new(p.AvatarMode, p.AvatarText ?? "", p.AvatarIcon, p.AvatarShape, p.AvatarRing);
 
     /// <summary>For other people's cards: null when they have no profile.</summary>
-    public static AvatarDesign? DesignOrNull(Profile? p) => p is null ? null : Design(p);
+    public static AvatarStyle? StyleOrNull(Profile? p) => p is null ? null : Style(p);
 }

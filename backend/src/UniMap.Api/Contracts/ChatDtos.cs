@@ -5,10 +5,10 @@ namespace UniMap.Api.Contracts;
 
 /// <summary>What another student sees of you in chat: nickname, major, uni, avatar. Never email.</summary>
 /// <param name="AvatarPreset">Preset avatar colour, 0–7, or null. Shown when there's no photo.</param>
-/// <param name="AvatarDesign">How to draw the preset avatar (initials or icon, shape, ring).</param>
+/// <param name="AvatarStyle">How to draw the preset avatar (initials or icon, shape, ring).</param>
 public record ChatPerson(
     Guid UserId, string DisplayName, string? Major, University University, string? AvatarUrl, int? AvatarPreset,
-    AvatarDesign? AvatarDesign);
+    AvatarStyle? AvatarStyle);
 
 public record ChatAbout(ChatAboutType Type, Guid Id);
 
@@ -34,7 +34,7 @@ public record ChatSummary(
 /// <param name="FlatId">Or: chat with this listing's owner ("Message tenant"). Adds an "About" line.</param>
 /// <param name="ItemId">Or: chat with this item's seller ("Message seller"). Adds an "About" line.</param>
 /// <param name="DrawId">Or: chat with the student on your Dcard ("Send a message to {nick}"), using drawId from
-/// GET /api/draw/today. Adds a "Daily card match · 27 Sep" line.</param>
+/// GET /api/daily-card. Adds a "Daily card match · 27 Sep" line.</param>
 /// <param name="Text">Optional first message, e.g. "Is it still available?".</param>
 public record StartChatRequest(Guid? UserId, Guid? FlatId, Guid? ItemId, Guid? DrawId, [MaxLength(2000)] string? Text);
 

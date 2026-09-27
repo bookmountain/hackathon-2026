@@ -36,10 +36,10 @@ public record FlatSummary(
     DateTimeOffset CreatedAt);
 
 /// <param name="AvatarPreset">Preset avatar colour, 0–7, or null. Shown when there's no photo.</param>
-/// <param name="AvatarDesign">How to draw the preset avatar (initials or icon, shape, ring).</param>
+/// <param name="AvatarStyle">How to draw the preset avatar (initials or icon, shape, ring).</param>
 public record FlatOwner(
     Guid UserId, string DisplayName, University University, string? Major, string? AvatarUrl, int? AvatarPreset,
-    AvatarDesign? AvatarDesign);
+    AvatarStyle? AvatarStyle);
 
 /// <summary>Room detail page.</summary>
 public record FlatDetail(

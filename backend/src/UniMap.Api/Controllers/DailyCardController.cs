@@ -16,23 +16,24 @@ namespace UniMap.Api.Controllers;
 /// </summary>
 [ApiController]
 [Authorize]
-[Route("api/draw")]
+[Route("api/daily-card")]
 public class DailyCardController(
     AppDbContext db,
     ChatService chats,
     ConsentService consents,
     ILogger<DailyCardController> log) : ControllerBase
 {
-    /// <summary>Today's card: Ready, Matched (with the student you drew) or Locked, plus the clocks.</summary>
-    [HttpGet("today")]
+    /// <summary>Today's card: Ready, Matched (with the student you drew) or Missed, plus the clock.</summary>
+    [HttpGet]
     public Task<DailyCardResponse> Today() => StateAsync(User.UserId(), AdelaideTime.Today());
 
     /// <summary>
     /// The "Draw a card" button. Deals you a student who hasn't drawn yet today, or reveals the student who
-    /// already drew you. After a missed day (missedDay on GET /api/draw/today) it deals nothing and locks the
-    /// deck until midnight instead. Does nothing if you've already drawn today. 409 if nobody is left to draw.
+    /// already drew you. After a missed day (missedDay on GET /api/daily-card) it deals nothing and locks the
+    /// deck until midnight instead (status Missed). Does nothing if you've already drawn today. 409 if nobody
+    /// is left to draw.
     /// </summary>
-    [HttpPost]
+    [HttpPost("draw")]
     public async Task<ActionResult<DailyCardResponse>> Draw()
     {
         var me = User.UserId();
@@ -90,17 +91,17 @@ public class DailyCardController(
             .Include(d => d.MatchedUser).ThenInclude(u => u!.Profile).ThenInclude(p => p!.Degree)
             .FirstOrDefaultAsync(d => d.UserId == me && d.Day == today && d.DrawnAt != null);
         var drawnToday = await db.DailyDraws.CountAsync(d => d.Day == today && d.DrawnAt != null && !d.SessionRestart);
-        var resetsAt = DailyCardRules.ResetsAt(today);
+        var nextChangeAt = DailyCardRules.NextChangeAt(today);
 
         if (mine is null)
         {
             var missed = !DailyCardRules.CanDraw(await LastPressedAsync(me, today), today);
-            return new(DrawStatus.Ready, today, drawnToday, resetsAt, missed, null, null, null);
+            return new(DrawStatus.Ready, null, drawnToday, nextChangeAt, missed, null);
         }
         if (mine.SessionRestart)
-            return new(DrawStatus.Locked, today, drawnToday, resetsAt, false, null, null, mine.DrawnAt);
-        return new(DrawStatus.Matched, today, drawnToday, resetsAt, false, mine.Id,
-            mine.MatchedUser is { } u ? chats.ToPerson(u) : null, mine.DrawnAt);
+            return new(DrawStatus.Missed, null, drawnToday, nextChangeAt, false, null);
+        return new(DrawStatus.Matched, mine.MatchedUser is { } u ? chats.ToPerson(u) : null,
+            drawnToday, nextChangeAt, false, mine.Id);
     }
 
     /// <summary>The last day before today on which the student pressed Draw, or null if they never have.</summary>

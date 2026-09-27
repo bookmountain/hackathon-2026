@@ -3,11 +3,18 @@ using UniMap.Api.Domain;
 
 namespace UniMap.Api.Contracts;
 
-/// <summary>A photo to analyse: JPEG, PNG, GIF or WebP, up to 3.75 MB (resize to about 1500 px first).</summary>
-public class PhotoUploadForm
-{
-    [Required] public IFormFile Photo { get; set; } = null!;
-}
+/// <summary>Which form the photo is for.</summary>
+public enum PhotoAnalysisKind { Item, Room }
+
+/// <summary>A photo for Claude to look at.</summary>
+/// <param name="Kind">Item (the Sell form) or Room ("List a room").</param>
+/// <param name="Image">Base64 JPEG, PNG, GIF or WebP (a data: URL works too), up to 3.75 MB. The app sends a
+/// JPEG with its longest side at 640 px.</param>
+public record PhotoAnalysisRequest([Required] PhotoAnalysisKind? Kind, [Required] string Image);
+
+/// <summary>A photo to search the market with.</summary>
+/// <param name="Image">Base64 JPEG, PNG, GIF or WebP, as for photo analysis.</param>
+public record ImageSearchRequest([Required] string Image);
 
 /// <summary>What Claude sees in an item photo, to pre-fill the Sell form (the prototype's "AI" card).</summary>
 /// <param name="Title">At most 6 words.</param>
@@ -46,8 +53,8 @@ public record RoomPhotoAnalysis(
 public record PhotoSearchTerms(string Label, string Category, List<string> Keywords);
 
 /// <summary>Market items that look like the photo.</summary>
-/// <param name="Label">What the photo shows, e.g. "Desk lamp": "Looks like: …".</param>
 /// <param name="Category">The category it belongs to, or null if none fits.</param>
-/// <param name="Keywords">The words the items were matched on.</param>
 /// <param name="Items">Closest matches first. Sold items are left out.</param>
-public record PhotoSearchResponse(string Label, ItemCategory? Category, List<string> Keywords, List<ItemSummary> Items);
+/// <param name="Label">What the photo shows, e.g. "Desk lamp": "Looks like: …".</param>
+/// <param name="Keywords">The words the items were matched on.</param>
+public record ImageSearchResponse(ItemCategory? Category, List<ItemSummary> Items, string Label, List<string> Keywords);
