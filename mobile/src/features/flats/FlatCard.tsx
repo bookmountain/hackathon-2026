@@ -34,7 +34,7 @@ export default function FlatCard({ flat, onPress }: { flat: Flat; onPress: () =>
 
 const styles = StyleSheet.create({
   card: { backgroundColor: colors.surface, borderRadius: 22, overflow: "hidden", ...shadows.card },
-  photo: { height: 150 },
+  photo: { aspectRatio: 16 / 9 },
   price: {
     position: "absolute",
     left: 12,

@@ -77,7 +77,7 @@ export default function FlatSheet({ flat }: { flat: Flat }) {
 }
 
 const styles = StyleSheet.create({
-  photo: { height: 120, borderRadius: 16 },
+  photo: { aspectRatio: 16 / 9, borderRadius: 16 },
   head: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 10 },
   headText: { flex: 1, gap: 3 },
   price: { color: colors.ink, ...font(800, 24, undefined, -0.02) },
