@@ -1,25 +1,39 @@
 import { router, useNavigation } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
 import type { AvatarStyle, Degree } from "@/api/types";
 import { useToast } from "@/components/feedback/Toast";
-import { Avatar, AvatarPicker, DEFAULT_AVATAR_STYLE, FieldLabel, ScreenHeader, TextField } from "@/components/ui";
+import {
+  Avatar,
+  AvatarPicker,
+  DEFAULT_AVATAR_STYLE,
+  FieldLabel,
+  GamePressable,
+  Icon,
+  ScreenHeader,
+  TextField,
+} from "@/components/ui";
 import { majorLabel } from "@/data/adapters";
+import { ExternalArrow } from "@/features/about/AboutScreen";
 import { NICKNAME_MAX, PRIVACY_LINKS } from "@/features/onboarding/constants";
 import { selectMe, useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import DegreeField from "./DegreeField";
+import DeleteAccountSheet from "./DeleteAccountSheet";
+import MyActivity from "./MyActivity";
 import { presetOf, profileRequest } from "./profileRequest";
+import { goBack } from "@/lib/goBack";
 
 // Like the design there's no save button: the nickname saves when you leave the
 // field, the major as soon as you pick it
 export default function ProfileScreen() {
   const { state, actions } = useAppStore();
   const toast = useToast();
-  const { submit } = useSubmit();
+  const { busy, submit } = useSubmit();
+  const [deleting, setDeleting] = useState(false);
   const me = selectMe(state);
   const profile = state.session.me?.profile ?? null;
   const [nick, setNick] = useState(profile?.displayName ?? "");
@@ -77,38 +91,27 @@ export default function ProfileScreen() {
   });
   useEffect(() => navigation.addListener("beforeRemove", () => saveOnLeave.current()), [navigation]);
 
-  const confirmDelete = () =>
-    Alert.alert(
-      "Delete your account?",
-      "Your profile, rooms, items, meetups and chats are deleted for good. This can't be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete account",
-          style: "destructive",
-          // Signing out flips the (app) guard, which redirects to login
-          onPress: () =>
-            void submit(async () => {
-              await actions.deleteAccount();
-              toast("Your account and data have been deleted");
-            }),
-        },
-      ],
-    );
+  // Signing out flips the (app) guard, which redirects to login
+  const deleteAccount = () =>
+    void submit(async () => {
+      await actions.deleteAccount();
+      setDeleting(false);
+      toast("Account deleted. Sorry to see you go.");
+    });
 
-  const pickerLabel = picking ? "Done" : avatar < 0 ? "Add avatar (optional)" : "Customise avatar";
+  const pickerLabel = picking ? "Done" : avatar < 0 ? "Add avatar" : "Customise avatar";
 
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
-      <ScreenHeader title="Profile" onBack={() => router.back()} />
+      <ScreenHeader title="Profile" onBack={() => goBack()} />
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         <View style={styles.avatarBlock}>
           <Avatar index={avatar} nick={me.nick} url={me.avatarUrl} size={104} look={look} />
           {/* A preset colour; an uploaded photo is shown instead when there is one */}
           {!hasPhoto && (
-            <Pressable onPress={picking ? saveAvatar : openPicker} style={styles.avatarButton}>
+            <GamePressable kind="sm" onPress={picking ? saveAvatar : openPicker} faceStyle={styles.avatarButton}>
               <Text style={styles.avatarButtonText}>{pickerLabel}</Text>
-            </Pressable>
+            </GamePressable>
           )}
         </View>
         {picking && !hasPhoto && (
@@ -153,31 +156,38 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        <MyActivity />
+
         <View style={styles.links}>
           <Pressable onPress={() => Linking.openURL(PRIVACY_LINKS.app)} style={[styles.link, styles.linkDivider]}>
-            <Text style={styles.linkText}>Privacy & consent (APP)</Text>
-            <Text style={styles.linkIcon}>↗</Text>
+            <Text style={styles.linkText}>Privacy & consent</Text>
+            <ExternalArrow />
           </Pressable>
           <Pressable onPress={() => router.push("/consent")} style={[styles.link, styles.linkDivider]}>
             <Text style={styles.linkText}>Review my consents</Text>
             <Text style={styles.linkIcon}>›</Text>
           </Pressable>
           {/* Signing out flips the (app) guard, which redirects to login */}
-          <Pressable onPress={actions.signOut} style={[styles.link, styles.linkDivider]}>
-            <Text style={[styles.linkText, { color: colors.danger }]}>Sign out</Text>
-          </Pressable>
-          <Pressable onPress={confirmDelete} style={styles.link}>
-            <Text style={[styles.linkText, { color: colors.danger }]}>Delete account</Text>
+          <Pressable onPress={actions.signOut} style={styles.link}>
+            <Text style={styles.linkText}>Sign out</Text>
           </Pressable>
         </View>
+        <View style={styles.deleteBlock}>
+          <GamePressable kind="cta" onPress={() => setDeleting(true)} accessibilityRole="button" faceStyle={styles.deleteButton}>
+            <Icon name="trash" size={16} color={colors.danger} />
+            <Text style={styles.deleteText}>Delete account</Text>
+          </GamePressable>
+          <Text style={styles.deleteNote}>Permanently removes your profile, listings, chats and location history.</Text>
+        </View>
       </ScrollView>
+      <DeleteAccountSheet visible={deleting} busy={busy} onDelete={deleteAccount} onClose={() => setDeleting(false)} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  body: { padding: 20, gap: 20 },
+  body: { padding: 20, paddingBottom: 40, gap: 20 },
   avatarBlock: { alignItems: "center", gap: 10 },
   avatarButton: { backgroundColor: colors.brandSoft, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 7 },
   avatarButtonText: { color: colors.brand, ...font(700, 13) },
@@ -200,8 +210,21 @@ const styles = StyleSheet.create({
   previewNick: { color: colors.surface, ...font(800, 15) },
   previewMeta: { color: colors.brandLight, ...font(500, 12.5) },
   links: { borderWidth: 2, borderColor: colors.ink, borderRadius: 16 },
-  link: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 14 },
+  link: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14 },
   linkDivider: { borderBottomWidth: 2, borderBottomColor: colors.ink },
   linkText: { color: colors.ink, ...font(700, 14) },
   linkIcon: { color: colors.brand, ...font(700, 14) },
+  deleteBlock: { gap: 20 },
+  deleteButton: {
+    height: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 14,
+    backgroundColor: "#FFF5F5",
+  },
+  // The game CTA look: Bricolage 800 17
+  deleteText: { color: colors.danger, ...font(800, 17) },
+  deleteNote: { color: colors.faint, textAlign: "center", ...font(500, 12, 1.45) },
 });

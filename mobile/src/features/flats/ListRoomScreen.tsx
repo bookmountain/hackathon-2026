@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
@@ -22,12 +22,14 @@ import type { MapPoint } from "@/data/types";
 import AddressSearch from "@/features/forms/AddressSearch";
 import AiPhotoPanel from "@/features/forms/AiPhotoPanel";
 import { roomAutofill, toFurnishing } from "@/features/forms/aiAutofill";
+import { photoKeysFor, roomForm } from "@/features/forms/prefill";
 import { parseAuDate } from "@/lib/auDate";
 import { useAddressSearch } from "@/features/forms/useAddressSearch";
+import { useEditPrefill } from "@/features/forms/useEditPrefill";
 import { usePhotoAnalysis } from "@/features/forms/usePhotoAnalysis";
 import { MapDot, MiniMap } from "@/features/map";
 import { selectMe, useAppStore } from "@/store";
-import { colors, divider } from "@/theme";
+import { colors, divider, font } from "@/theme";
 import {
   EMPTY_ROOM,
   FEATURE_OPTIONS,
@@ -37,6 +39,7 @@ import {
   roomProblem,
   type RoomDraft,
 } from "./logic";
+import { goBack } from "@/lib/goBack";
 
 const DEMO_PHOTO = "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&h=600&q=70&auto=format&fit=crop";
 /** A little wider than the other forms (zoom 14): flats can be anywhere near the city */
@@ -57,7 +60,19 @@ export default function ListRoomScreen() {
   const [fromText, setFromText] = useState("");
   const [stayText, setStayText] = useState("");
   const [focus, setFocus] = useState<MapPoint | null>(null);
+  // Editing: storage keys of the photos already on the room, and who lives there (sent back unchanged)
+  const [photoKeys, setPhotoKeys] = useState<Record<string, string>>({});
+  const [housemates, setHousemates] = useState<string[] | null>(null);
   const update = (patch: Partial<RoomDraft>) => setRoom((r) => ({ ...r, ...patch }));
+  const { editId, editing, loading } = useEditPrefill(api.flats.get, (detail) => {
+    const form = roomForm(detail);
+    setRoom(form.draft);
+    setFromText(form.fromText);
+    setStayText(form.stayText);
+    setPhotoKeys(form.keys);
+    setHousemates(form.housemates);
+    setFocus(form.draft.pin);
+  });
 
   const analysis = usePhotoAnalysis(api.ai.analyseRoomPhoto, (a: RoomPhotoAnalysis) =>
     setRoom((r) => ({ ...r, ...roomAutofill(r, a) })),
@@ -75,8 +90,9 @@ export default function ListRoomScreen() {
 
   const stay = stayText ? Number(stayText) : null;
   const fromInvalid = fromText.length === 10 && !parseAuDate(fromText);
-  const problem =
-    stay !== null && (stay < 1 || stay > MAX_STAY)
+  const problem = loading
+    ? "Loading your room…"
+    : stay !== null && (stay < 1 || stay > MAX_STAY)
       ? `Minimum stay is 1–${MAX_STAY} months`
       : fromText && !parseAuDate(fromText)
         ? "Enter the date as DD/MM/YYYY"
@@ -84,15 +100,15 @@ export default function ListRoomScreen() {
 
   const addPhotos = (picked: LocalPhoto[]) => {
     if (!picked.length) return;
-    // The first photo is the one the AI looks at
-    if (!room.photos.length) void analysis.run(picked[0].uri);
+    // The first photo is the one the AI looks at (not when editing: the listing is already written)
+    if (!room.photos.length && !editing) void analysis.run(picked[0].uri);
     setRoom((r) => ({ ...r, photos: [...r.photos, ...picked].slice(0, MAX_ROOM_PHOTOS) }));
   };
 
   const removePhoto = (i: number) => {
     const photos = room.photos.filter((_, j) => j !== i);
     update({ photos });
-    if (i === 0) {
+    if (i === 0 && !editing) {
       if (photos[0]) void analysis.run(photos[0].uri);
       else analysis.reset();
     }
@@ -105,6 +121,18 @@ export default function ListRoomScreen() {
       return;
     }
     void submit(async () => {
+      if (editId) {
+        // Photos already on the room keep their key; new ones are uploaded into its folder
+        const keys = await photoKeysFor(room.photos, photoKeys, async (photo) => {
+          const upload = await uploadPhotos([photo], (type) => api.uploads.flatPhoto(type, editId), () => editId);
+          return upload.keys[0];
+        });
+        const request = flatRequest({ ...room, pin }, selectMe(state), editId, keys);
+        await actions.updateFlat(editId, housemates ? { ...request, housemates } : request);
+        toast("Room updated");
+        goBack();
+        return;
+      }
       const { id, keys } = await uploadPhotos(room.photos, api.uploads.flatPhoto, (res) => res.listingId);
       const created = await api.flats.create(flatRequest({ ...room, pin }, selectMe(state), id, keys));
       await actions.loadFlats();
@@ -116,7 +144,7 @@ export default function ListRoomScreen() {
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
-      <ScreenHeader title="List a room" onBack={() => router.back()} />
+      <ScreenHeader title={editing ? "Edit room" : "List a room"} onBack={() => goBack()} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
           <PhotoDropzone
@@ -147,6 +175,15 @@ export default function ListRoomScreen() {
             value={room.title}
             onChangeText={(title) => update({ title })}
             placeholder="e.g. Bright room near North Tce"
+          />
+          <TextField
+            label="Description"
+            multiline
+            rows={4}
+            value={room.desc}
+            onChangeText={(desc) => update({ desc })}
+            placeholder="What's the room like? Upload a photo and AI will draft this."
+            maxLength={1000}
           />
 
           <View style={styles.group}>
@@ -249,7 +286,7 @@ export default function ListRoomScreen() {
               setStayText(text);
               update({ minStay: text ? Number(text) : null });
             }}
-            placeholder="e.g. 6 (blank = flexible)"
+            placeholder="e.g. 6"
             keyboardType="number-pad"
             maxLength={2}
             suffix={stayText === "1" ? "month" : "months"}
@@ -267,7 +304,9 @@ export default function ListRoomScreen() {
             />
           </View>
           <View style={styles.group}>
-            <FieldLabel>Features</FieldLabel>
+            <FieldLabel>
+              Features <Text style={styles.optional}>(optional)</Text>
+            </FieldLabel>
             <ChipWrap
               options={FEATURE_OPTIONS.map((f) => ({
                 label: f,
@@ -277,7 +316,9 @@ export default function ListRoomScreen() {
             />
           </View>
           <View style={styles.group}>
-            <FieldLabel>House rhythm</FieldLabel>
+            <FieldLabel>
+              House rhythm <Text style={styles.optional}>(optional)</Text>
+            </FieldLabel>
             <ChipWrap
               options={RHYTHM_OPTIONS.map((r) => ({
                 label: r,
@@ -292,17 +333,8 @@ export default function ListRoomScreen() {
             onChangeText={(pref) => update({ pref })}
             placeholder="e.g. Quiet, non-smoker, any uni"
           />
-          <TextField
-            label="Description"
-            multiline
-            rows={4}
-            value={room.desc}
-            onChangeText={(desc) => update({ desc })}
-            placeholder="What's the room like? Upload a photo and AI will draft this."
-            maxLength={1000}
-          />
           <DateField
-            label="Available from (blank = now)"
+            label="Available from"
             value={fromText}
             onChange={(text) => {
               setFromText(text);
@@ -313,7 +345,7 @@ export default function ListRoomScreen() {
         </ScrollView>
         <View style={styles.footer}>
           <Button
-            label={busy ? "Publishing…" : "Publish room"}
+            label={editing ? (busy ? "Saving…" : "Save changes") : busy ? "Publishing…" : "Publish room"}
             onPress={publish}
             inactive={problem !== null}
             disabled={busy}
@@ -331,5 +363,6 @@ const styles = StyleSheet.create({
   group: { gap: 8 },
   row: { flexDirection: "row", gap: 10 },
   grow: { flex: 1 },
+  optional: { color: colors.faint, ...font(500, 13) },
   footer: { paddingHorizontal: 20, paddingVertical: 12, ...divider.top },
 });

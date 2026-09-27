@@ -1,21 +1,37 @@
 import Slider from "@react-native-community/slider";
-import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
 import { useToast } from "@/components/feedback/Toast";
-import { Button, DateField, FieldLabel, Icon, ScreenHeader, Segmented, Switch, TextField, TimeField } from "@/components/ui";
+import {
+  Button,
+  ChipWrap,
+  DateField,
+  FieldLabel,
+  GamePressable,
+  Icon,
+  ScreenHeader,
+  Segmented,
+  Switch,
+  TextField,
+  TimeField,
+} from "@/components/ui";
 import { toEvent } from "@/data/adapters";
 import type { EventCategory, MapPoint } from "@/data/types";
 import AddressSearch from "@/features/forms/AddressSearch";
+import { eventForm } from "@/features/forms/prefill";
+import { EVERYONE, STUDY_LEVELS, toggleLevel } from "@/features/forms/studyLevels";
 import { atTime, parseAuDate } from "@/lib/auDate";
 import { useAddressSearch } from "@/features/forms/useAddressSearch";
+import { useEditPrefill } from "@/features/forms/useEditPrefill";
 import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
 import { useAppStore } from "@/store";
 import { colors, divider, font } from "@/theme";
+import { getEventLevels, setEventLevels, useEventLevels } from "./eventLevels";
 import { CAPACITY, EMPTY_EVENT, EVENT_CATEGORIES, eventProblem, eventRequest, type EventDraft } from "./logic";
+import { goBack } from "@/lib/goBack";
 
 const HOST_REGION = { ...CBD_REGION, latitude: -34.9215, longitude: 138.601 };
 
@@ -27,7 +43,22 @@ export default function HostScreen() {
   const [dateText, setDateText] = useState("");
   const [time, setTime] = useState("");
   const [focus, setFocus] = useState<MapPoint | null>(null);
+  const [levels, setLevels] = useState<string[]>([EVERYONE]);
+  // Editing: an event that has started can still be saved if its start time stays the same
+  const [originalStart, setOriginalStart] = useState<number | null>(null);
   const update = (patch: Partial<EventDraft>) => setDraft((d) => ({ ...d, ...patch }));
+  const { editId, editing, loading } = useEditPrefill(api.events.get, (detail) => {
+    const known = [...state.events, ...(state.mine?.events ?? [])].find((e) => e.id === detail.summary.id);
+    const form = eventForm(detail, known?.levels ?? getEventLevels(detail.summary.id));
+    setDraft(form.draft);
+    setDateText(form.dateText);
+    setTime(form.time);
+    setLevels(form.levels);
+    setFocus(form.draft.pin);
+    setOriginalStart(form.draft.when?.getTime() ?? null);
+  });
+  // Loads the levels kept on this phone before the event arrives
+  useEventLevels(editId ?? undefined);
   const address = useAddressSearch((r) => {
     update({ where: "custom", pin: { latitude: r.latitude, longitude: r.longitude } });
     setFocus({ latitude: r.latitude, longitude: r.longitude });
@@ -37,7 +68,12 @@ export default function HostScreen() {
   const day = parseAuDate(dateText);
   const when = day ? atTime(day, time) : null;
   const dateInvalid = dateText.length === 10 && !day;
-  const problem = dateText && !day ? "Enter the date as DD/MM/YYYY" : eventProblem({ ...draft, when });
+  const keptStart = editing && when?.getTime() === originalStart;
+  const problem = loading
+    ? "Loading your event…"
+    : dateText && !day
+      ? "Enter the date as DD/MM/YYYY"
+      : eventProblem({ ...draft, when }, keptStart ? new Date(0) : undefined);
   const places = [
     ...state.pickups.map((p) => ({ id: p.id, name: p.name, note: "Central" })),
     { id: "custom", name: "Drop a pin on the map", note: "Any location" },
@@ -56,17 +92,27 @@ export default function HostScreen() {
     }
     // An unnamed pin placed from a typed address is called by that address
     const place = draft.place.trim() || (focus ? address.text.trim() : "");
+    const request = eventRequest({ ...draft, place, when });
+    // Only Study events say who they're for; kept on this phone (the API has no field for it)
+    const forLevels = draft.cat === "Study" ? levels : undefined;
     void submit(async () => {
-      const created = await api.events.create(eventRequest({ ...draft, place, when }));
-      actions.putEvent(toEvent(created.summary));
-      toast("Published — your identity stays hidden");
-      router.back();
+      if (editId) {
+        await actions.updateEvent(editId, request, forLevels);
+        setEventLevels(editId, forLevels);
+        toast("Event updated");
+      } else {
+        const created = await api.events.create(request);
+        actions.putEvent({ ...toEvent(created.summary), ...(forLevels && { levels: forLevels }) });
+        setEventLevels(created.summary.id, forLevels);
+        toast("Published — your identity stays hidden");
+      }
+      goBack();
     });
   };
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
-      <ScreenHeader title="Host an event" onBack={() => router.back()} />
+      <ScreenHeader title={editing ? "Edit event" : "Host an event"} onBack={() => goBack()} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
           <TextField
@@ -83,6 +129,28 @@ export default function HostScreen() {
               options={EVENT_CATEGORIES.map((c) => ({ value: c, label: c }))}
             />
           </View>
+          {draft.cat === "Study" && (
+            <View style={styles.group}>
+              <FieldLabel>{"Who's it for?"}</FieldLabel>
+              <Text style={styles.hint}>Pick one or more study levels</Text>
+              <ChipWrap
+                options={STUDY_LEVELS.map((level) => ({
+                  label: level,
+                  active: levels.includes(level),
+                  onPress: () => setLevels((l) => toggleLevel(l, level)),
+                }))}
+              />
+            </View>
+          )}
+          <TextField
+            label="Description"
+            multiline
+            rows={4}
+            value={draft.desc}
+            onChangeText={(desc) => update({ desc })}
+            placeholder="What's happening, what to bring, who'd enjoy it…"
+            maxLength={1000}
+          />
           <View style={styles.group}>
             <FieldLabel>When</FieldLabel>
             <View style={styles.row}>
@@ -94,34 +162,26 @@ export default function HostScreen() {
               </View>
             </View>
           </View>
-          <TextField
-            label="What's the plan? (optional)"
-            multiline
-            value={draft.desc}
-            onChangeText={(desc) => update({ desc })}
-            placeholder="e.g. Bring your laptop, we'll grab a table near the windows"
-            maxLength={1000}
-          />
 
           <View style={styles.group}>
             <FieldLabel>Where</FieldLabel>
             {places.map((p) => {
               const active = draft.where === p.id;
               return (
-                <Pressable
+                <GamePressable
+                  kind="row"
                   key={p.id}
                   onPress={() => update({ where: p.id })}
                   accessibilityRole="radio"
                   accessibilityState={{ selected: active }}
-                  style={[styles.place, active && styles.placeActive]}
+                  faceStyle={[styles.place, active && styles.placeActive]}
                 >
                   <Text style={styles.placeName}>{p.name}</Text>
                   <Text style={styles.placeNote}>{p.note}</Text>
-                </Pressable>
+                </GamePressable>
               );
             })}
-            <FieldLabel>Or type the venue address</FieldLabel>
-            <AddressSearch search={address} placeholder="e.g. 10 Rundle Mall" />
+            <AddressSearch search={address} placeholder="Or type the venue address" />
             <MiniMap
               region={HOST_REGION}
               height={220}
@@ -173,18 +233,20 @@ export default function HostScreen() {
           </View>
 
           <View style={styles.toggles}>
-            <Pressable
+            {/* Its ink ledge shows as the dark rule between the two rows, like the design */}
+            <GamePressable
+              kind="row"
               onPress={() => update({ walkIn: !draft.walkIn })}
               accessibilityRole="switch"
               accessibilityState={{ checked: draft.walkIn }}
-              style={styles.toggle}
+              faceStyle={styles.toggle}
             >
               <View>
                 <Text style={styles.toggleTitle}>Walk-ins welcome</Text>
                 <Text style={styles.toggleSub}>No RSVP needed to turn up</Text>
               </View>
               <Switch on={draft.walkIn} />
-            </Pressable>
+            </GamePressable>
             <View style={styles.toggle}>
               <View>
                 <Text style={styles.toggleTitle}>Host anonymously</Text>
@@ -196,7 +258,7 @@ export default function HostScreen() {
         </ScrollView>
         <View style={styles.footer}>
           <Button
-            label={busy ? "Publishing…" : "Publish event"}
+            label={editing ? (busy ? "Saving…" : "Save changes") : busy ? "Publishing…" : "Publish event"}
             onPress={publish}
             inactive={problem !== null}
             disabled={busy}
@@ -224,6 +286,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   placeActive: { borderColor: colors.brand, backgroundColor: colors.brandSoft },
+  hint: { color: colors.faint, marginTop: -4, ...font(500, 12) },
   row: { flexDirection: "row", gap: 10 },
   date: { flex: 1.4 },
   time: { flex: 1 },

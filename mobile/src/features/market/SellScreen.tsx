@@ -1,17 +1,18 @@
 import { router } from "expo-router";
-import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
 import { downloadPhoto, pickPhotos, uploadPhotos, type LocalPhoto } from "@/api/photos";
-import type { ItemPhotoAnalysis } from "@/api/types";
+import type { ItemAvailability, ItemPhotoAnalysis } from "@/api/types";
 import { useToast } from "@/components/feedback/Toast";
 import {
   Button,
   ChipWrap,
   DateField,
   FieldLabel,
+  GamePressable,
   Icon,
   PhotoDropzone,
   ScreenHeader,
@@ -22,8 +23,10 @@ import type { MapPoint } from "@/data/types";
 import AddressSearch from "@/features/forms/AddressSearch";
 import AiPhotoPanel from "@/features/forms/AiPhotoPanel";
 import { categoryLabel, conditionLabel, itemAutofill, toCategory, toCondition } from "@/features/forms/aiAutofill";
+import { itemForm, photoKeysFor } from "@/features/forms/prefill";
 import { parseAuDate } from "@/lib/auDate";
 import { useAddressSearch } from "@/features/forms/useAddressSearch";
+import { useEditPrefill } from "@/features/forms/useEditPrefill";
 import { usePhotoAnalysis } from "@/features/forms/usePhotoAnalysis";
 import { CBD_REGION, MapDot, MiniMap } from "@/features/map";
 import { useAppStore } from "@/store";
@@ -35,9 +38,9 @@ import {
   itemProblem,
   itemRequest,
   MAX_ITEM_PHOTOS,
-  type Availability,
   type ItemDraft,
 } from "./logic";
+import { goBack } from "@/lib/goBack";
 
 const DEMO_PHOTO = "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=640&h=640&q=70&auto=format&fit=crop";
 const SELL_REGION = { ...CBD_REGION, latitude: -34.9205, longitude: 138.6005 };
@@ -49,7 +52,18 @@ export default function SellScreen() {
   const [draft, setDraft] = useState<ItemDraft>(EMPTY_ITEM);
   const [fromText, setFromText] = useState("");
   const [focus, setFocus] = useState<MapPoint | null>(null);
+  // Editing: storage keys of the photos already on the item, and whether it's sold
+  const [photoKeys, setPhotoKeys] = useState<Record<string, string>>({});
+  const [sold, setSold] = useState(false);
   const update = (patch: Partial<ItemDraft>) => setDraft((d) => ({ ...d, ...patch }));
+  const { editId, editing, loading } = useEditPrefill(api.items.get, (detail) => {
+    const form = itemForm(detail);
+    setDraft(form.draft);
+    setFromText(form.fromText);
+    setPhotoKeys(form.keys);
+    setSold(form.sold);
+    setFocus(form.draft.pin);
+  });
 
   const analysis = usePhotoAnalysis(api.ai.analyseItemPhoto, (a: ItemPhotoAnalysis) =>
     setDraft((d) => ({ ...d, ...itemAutofill(d, a) })),
@@ -59,21 +73,30 @@ export default function SellScreen() {
     setFocus({ latitude: r.latitude, longitude: r.longitude });
   });
 
+  // The suggested safe spots (loaded here too when Sell is opened before anything else needed them)
+  const needPickups = state.pickups.length === 0;
+  useEffect(() => {
+    if (needPickups) actions.loadPickups().catch(() => {});
+  }, [needPickups, actions]);
+
   const fromInvalid = fromText.length === 10 && !parseAuDate(fromText);
-  const problem =
-    draft.avail === "From" && fromText && !parseAuDate(fromText) ? "Enter the date as DD/MM/YYYY" : itemProblem(draft);
+  const problem = loading
+    ? "Loading your listing…"
+    : !sold && draft.avail === "From" && fromText && !parseAuDate(fromText)
+      ? "Enter the date as DD/MM/YYYY"
+      : itemProblem(sold ? { ...draft, avail: "Now" } : draft);
 
   const addPhotos = (picked: LocalPhoto[]) => {
     if (!picked.length) return;
-    // The first photo is the one the AI looks at
-    if (!draft.photos.length) void analysis.run(picked[0].uri);
+    // The first photo is the one the AI looks at (not when editing: the listing is already written)
+    if (!draft.photos.length && !editing) void analysis.run(picked[0].uri);
     setDraft((d) => ({ ...d, photos: [...d.photos, ...picked].slice(0, MAX_ITEM_PHOTOS) }));
   };
 
   const removePhoto = (i: number) => {
     const photos = draft.photos.filter((_, j) => j !== i);
     update({ photos });
-    if (i === 0) {
+    if (i === 0 && !editing) {
       if (photos[0]) void analysis.run(photos[0].uri);
       else analysis.reset();
     }
@@ -87,6 +110,18 @@ export default function SellScreen() {
     // An unnamed pin placed from a typed address is called by that address
     const placeName = (draft.placeName.trim() || (focus ? address.text.trim() : "")).slice(0, 64);
     void submit(async () => {
+      if (editId) {
+        // Photos already on the item keep their key; new ones are uploaded into its folder
+        const keys = await photoKeysFor(draft.photos, photoKeys, async (photo) => {
+          const upload = await uploadPhotos([photo], (type) => api.uploads.itemPhoto(type, editId), () => editId);
+          return upload.keys[0];
+        });
+        const request = itemRequest({ ...draft, placeName }, editId, keys);
+        await actions.updateItem(editId, sold ? { ...request, availability: "Sold", availableFrom: null } : request);
+        toast("Listing updated");
+        goBack();
+        return;
+      }
       const { id, keys } = await uploadPhotos(draft.photos, api.uploads.itemPhoto, (res) => res.itemId);
       if (!id) throw new Error("Add a photo first");
       const created = await api.items.create(itemRequest({ ...draft, placeName }, id, keys));
@@ -98,7 +133,7 @@ export default function SellScreen() {
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
-      <ScreenHeader title="List an item" onBack={() => router.back()} />
+      <ScreenHeader title={editing ? "Edit listing" : "List an item"} onBack={() => goBack()} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
           <PhotoDropzone
@@ -170,16 +205,20 @@ export default function SellScreen() {
 
           <View style={styles.group}>
             <FieldLabel>Availability</FieldLabel>
-            <Segmented<Availability>
-              value={draft.avail}
-              onChange={(avail) => update({ avail })}
+            {/* A sold item shows no segment picked, and stays Sold until you pick one */}
+            <Segmented<ItemAvailability>
+              value={sold ? "Sold" : draft.avail}
+              onChange={(avail) => {
+                setSold(false);
+                if (avail !== "Sold") update({ avail });
+              }}
               options={[
                 { value: "Now", label: "Now" },
                 { value: "From", label: "From date" },
                 { value: "Pending", label: "Pending" },
               ]}
             />
-            {draft.avail === "From" && (
+            {!sold && draft.avail === "From" && (
               <DateField
                 value={fromText}
                 onChange={(text) => {
@@ -196,12 +235,13 @@ export default function SellScreen() {
             {state.pickups.map((p) => {
               const active = draft.pickup === p.id;
               return (
-                <Pressable
+                <GamePressable
+                  kind="row"
                   key={p.id}
                   onPress={() => update({ pickup: p.id, pin: null })}
                   accessibilityRole="radio"
                   accessibilityState={{ selected: active }}
-                  style={[styles.option, active && styles.optionActive]}
+                  faceStyle={[styles.option, active && styles.optionActive]}
                 >
                   <View style={[styles.optionIcon, { backgroundColor: active ? colors.ink : colors.brandSoft }]}>
                     <Icon name="star" size={16} color={active ? colors.yellow : colors.brand} />
@@ -210,11 +250,10 @@ export default function SellScreen() {
                     <Text style={styles.optionName}>{p.name}</Text>
                     <Text style={styles.optionSub}>{p.sub}</Text>
                   </View>
-                </Pressable>
+                </GamePressable>
               );
             })}
-            <FieldLabel>Or type a pickup address</FieldLabel>
-            <AddressSearch search={address} placeholder="e.g. 25 Frome St" />
+            <AddressSearch search={address} placeholder="Or type a pickup address" />
             <MiniMap
               region={SELL_REGION}
               height={220}
@@ -251,7 +290,7 @@ export default function SellScreen() {
         </ScrollView>
         <View style={styles.footer}>
           <Button
-            label={busy ? "Posting…" : "Post listing"}
+            label={editing ? (busy ? "Saving…" : "Save changes") : busy ? "Posting…" : "Post listing"}
             onPress={post}
             inactive={problem !== null}
             disabled={busy}
