@@ -31,6 +31,14 @@ services:
       timeout: 3s
       retries: 20
 
+  mailpit:
+    # Catches every email the API sends. Inbox UI is on vm100 only:
+    #   ssh -L 8025:127.0.0.1:5091 book@192.168.4.106, then open http://localhost:8025
+    image: axllent/mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5091:8025"
+
   api:
     build:
       context: ./backend
@@ -46,12 +54,12 @@ services:
       R2__SecretAccessKey: ${R2_SECRET_ACCESS_KEY:-}
       R2__Bucket: ${R2_BUCKET:-}
       R2__PublicBaseUrl: ${R2_PUBLIC_BASE_URL:-}
-      # Empty SMTP_HOST = codes are only logged, so ReturnDevCode puts them in the register response.
-      Email__Host: ${SMTP_HOST:-}
-      Email__Port: ${SMTP_PORT:-587}
+      # Email goes to the mailpit service above. Set SMTP_* in .env (e.g. Resend) to send for real.
+      Email__Host: ${SMTP_HOST:-mailpit}
+      Email__Port: ${SMTP_PORT:-1025}
       Email__Username: ${SMTP_USERNAME:-}
       Email__Password: ${SMTP_PASSWORD:-}
-      Email__Security: ${SMTP_SECURITY:-auto}
+      Email__Security: ${SMTP_SECURITY:-none}
       Email__From: ${EMAIL_FROM:-UniMap <no-reply@example.com>}
       # Demo server: Swagger on, demo students/listings seeded, verification code returned by /register.
       EnableSwagger: "true"
@@ -64,6 +72,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
 volumes:
   pgdata:
