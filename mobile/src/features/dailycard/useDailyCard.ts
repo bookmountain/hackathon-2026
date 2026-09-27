@@ -101,10 +101,16 @@ export async function drawDailyCard(pool: Person[]): Promise<void> {
   }
 }
 
-/** Demo buttons (device copy only) */
+/** Demo buttons: on the server when it allows a reset (DailyCard__DemoReset), else the device copy */
 export const demo = {
-  resetToday: () => saveLocal({ ...freshCard, lastMatchId: local.lastMatchId }),
-  missDay: () => saveLocal(simulateMissed(local, new Date())),
+  resetToday: async () => {
+    if (snapshot.mode === "api") set({ view: apiView(await api.dailyCard.reset()) });
+    else saveLocal({ ...freshCard, lastMatchId: local.lastMatchId });
+  },
+  missDay: async () => {
+    if (snapshot.mode === "api") set({ view: apiView(await api.dailyCard.reset(true)) });
+    else saveLocal(simulateMissed(local, new Date()));
+  },
 };
 
 /** The clock ran out: move to the next day's state */

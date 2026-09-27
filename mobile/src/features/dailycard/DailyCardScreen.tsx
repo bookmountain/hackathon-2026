@@ -1,21 +1,18 @@
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Animated, Easing, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Circle, G, Path } from "react-native-svg";
 import { errorMessage } from "@/api/client";
 import { useToast } from "@/components/feedback/Toast";
-import { Avatar, Icon } from "@/components/ui";
+import { Avatar, Button, Icon, Logo, ScreenHeader, Sticker } from "@/components/ui";
+import type { MatchDetailsDto } from "@/api/types";
 import type { Person } from "@/data/types";
 import { startChat } from "@/features/chat/startChat";
 import { useAppStore } from "@/store";
-import { brutal, colors, font } from "@/theme";
-import { DEMO_STUDENTS, formatClock, isDemoStudent } from "./logic";
+import { colors, font } from "@/theme";
+import { DEMO_STUDENTS, formatClock, interestLabel, isDemoStudent, sharedLine, yearLabel } from "./logic";
 import { demo, drawDailyCard, loadDailyCard, refreshAfterClock, SHUFFLE_MS, useDailyCard } from "./useDailyCard";
+import { goBack } from "@/lib/goBack";
 
-const MISSED_CLOCK = "#FF8A80";
 const RULES = [
   "One card a day. A fresh deck opens every midnight.",
   "You're matched with another student who drew today.",
@@ -34,25 +31,25 @@ const COPY: Record<Phase, { title: string; sub: (info: SubInfo) => string; clock
         ? "You missed yesterday, so drawing now restarts your deck. Your next card opens at midnight."
         : `${drawnToday} students have drawn today. Flip a card to meet one of them.`,
     clockLabel: "Deck resets in",
-    clockColor: colors.surface,
+    clockColor: colors.ink,
   },
   spinning: {
     title: "Shuffling the deck…",
     sub: () => "Dealing you a fellow student from Adelaide Uni & Flinders.",
     clockLabel: "Deck resets in",
-    clockColor: colors.surface,
+    clockColor: colors.ink,
   },
   matched: {
     title: "Your card today",
     sub: () => "Say hi before midnight. Your next card opens tomorrow.",
     clockLabel: "Next draw in",
-    clockColor: colors.yellow,
+    clockColor: colors.brand,
   },
   missed: {
     title: "Deck locked",
     sub: () => "You missed a day, so this draw restarted your deck. Your next card opens at midnight.",
     clockLabel: "Unlocks in",
-    clockColor: MISSED_CLOCK,
+    clockColor: colors.danger,
   },
 };
 
@@ -68,45 +65,76 @@ function useNow() {
 
 function CardFront() {
   return (
-    // The gradient sits inside the bordered face: on its own it doesn't clip to the rounded corners
     <View style={[styles.face, styles.front]}>
-      <LinearGradient
-        colors={[colors.brand, colors.ink]}
-        start={{ x: 0.25, y: 0 }}
-        end={{ x: 0.75, y: 1 }}
-        style={styles.frontFill}
-      />
       <View style={styles.frontFrame} />
-      <Svg width={88} height={88} viewBox="0 0 40 40">
-        <Circle cx="20" cy="20" r="18" fill="none" stroke={colors.yellow} strokeWidth={1.5} />
-        <G transform="rotate(35 20 20)">
-          <Path d="M20 6l4.6 15h-9.2z" fill={colors.yellow} />
-          <Path d="M20 34l-4.6-15h9.2z" fill={colors.surface} />
-        </G>
-        <Circle cx="20" cy="20" r="2.4" fill={colors.ink} stroke={colors.surface} strokeWidth={1.4} />
-      </Svg>
-      <Text style={styles.frontMark}>UCOMPASS</Text>
+      <Logo size={120} ring />
+      <View style={styles.frontTag}>
+        <Text style={styles.frontTagText}>UCOMPASS</Text>
+      </View>
+      <Text style={[styles.corner, styles.cornerTop]}>★</Text>
+      <Text style={[styles.corner, styles.cornerBottom]}>★</Text>
     </View>
   );
 }
 
-function CardBack({ person }: { person: Person | null }) {
+/** Interests shown on the card: yours in common first, then the rest */
+const MAX_INTERESTS = 6;
+
+function CardBack({ person, details }: { person: Person | null; details: MatchDetailsDto | null }) {
+  const shared = details?.sharedInterests ?? [];
+  const interests = details
+    ? [...shared, ...details.interests.filter((t) => !shared.includes(t))].slice(0, MAX_INTERESTS)
+    : [];
+  const together = sharedLine(shared);
   return (
     <View style={[styles.face, styles.back]}>
+      {/* A strip of tape, like the login screen's polaroids */}
+      <View style={styles.tape} />
       {person && (
         <>
-          <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} look={person.avatarStyle} size={76} />
-          <Text style={styles.backNick} numberOfLines={1}>
-            {person.nick}
-          </Text>
+          <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} look={person.avatarStyle} size={84} />
+          <View style={styles.nameRow}>
+            <Text style={styles.backNick} numberOfLines={1}>
+              {person.nick}
+            </Text>
+            {!!details?.pronouns && <Text style={styles.pronouns}>{details.pronouns}</Text>}
+          </View>
           {!!person.major && (
             <Text style={styles.backMajor} numberOfLines={2}>
               {person.major}
             </Text>
           )}
-          <View style={styles.backUni}>
-            <Text style={styles.backUniText}>{person.uni}</Text>
+          <View style={styles.pills}>
+            <View style={styles.backUni}>
+              <Text style={styles.backUniText}>{person.uni}</Text>
+            </View>
+            {details?.yearOfStudy != null && (
+              <View style={styles.year}>
+                <Text style={styles.yearText}>{yearLabel(details.yearOfStudy)}</Text>
+              </View>
+            )}
           </View>
+          {!!details?.bio && (
+            <Text style={styles.bio} numberOfLines={3}>
+              “{details.bio}”
+            </Text>
+          )}
+          {interests.length > 0 && (
+            <View style={styles.interests}>
+              <View style={styles.dash} />
+              {together && <Text style={styles.together}>★ {together}</Text>}
+              <View style={styles.chips}>
+                {interests.map((tag) => {
+                  const both = shared.includes(tag);
+                  return (
+                    <View key={tag} style={[styles.chip, both && styles.chipShared]}>
+                      <Text style={[styles.chipText, both && styles.chipSharedText]}>{interestLabel(tag)}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          )}
         </>
       )}
     </View>
@@ -198,58 +226,53 @@ export default function DailyCardScreen() {
 
   const button =
     phase === "ready"
-      ? { label: "Draw a card", bg: colors.yellow, fg: colors.ink }
+      ? { label: "Draw a card", inactive: false }
       : phase === "spinning"
-        ? { label: "Dealing…", bg: "rgba(255,255,255,0.15)", fg: colors.brandLight }
+        ? { label: "Dealing…", inactive: true }
         : phase === "missed"
-          ? { label: "Locked", bg: "rgba(255,255,255,0.12)", fg: colors.faint }
+          ? { label: "Locked until midnight", inactive: true }
           : null;
+
+  const runDemo = (action: () => Promise<void>) => action().catch((e) => toast(errorMessage(e)));
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
-      <StatusBar style="light" />
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Back" style={styles.backBtn}>
-          <Icon name="back" color={colors.surface} />
-        </Pressable>
-        <Text style={styles.headerTitle}>DAILY CARD</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title="Daily card" onBack={() => goBack()} />
 
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.intro}>
           <Text style={styles.title}>{copy.title}</Text>
-          {view ? (
-            <Text style={styles.sub}>{copy.sub(view)}</Text>
-          ) : (
-            <ActivityIndicator color={colors.brandLight} />
-          )}
+          {view ? <Text style={styles.sub}>{copy.sub(view)}</Text> : <ActivityIndicator color={colors.brand} />}
         </View>
 
-        <View style={styles.card}>
-          <Animated.View style={[styles.faceWrap, { transform: [{ perspective: 1200 }, { rotateY: frontTurn }] }]}>
-            <CardFront />
-          </Animated.View>
-          <Animated.View style={[styles.faceWrap, { transform: [{ perspective: 1200 }, { rotateY: backTurn }] }]}>
-            <CardBack person={view?.match ?? null} />
-          </Animated.View>
+        <View style={styles.stage}>
+          <Sticker name="sun" size={58} rotate={-8} style={styles.sun} />
+          <Sticker name="koala" size={64} rotate={-14} style={styles.koala} />
+          <View style={styles.card}>
+            <Animated.View style={[styles.faceWrap, { transform: [{ perspective: 1200 }, { rotateY: frontTurn }] }]}>
+              <CardFront />
+            </Animated.View>
+            <Animated.View style={[styles.faceWrap, { transform: [{ perspective: 1200 }, { rotateY: backTurn }] }]}>
+              <CardBack person={view?.match ?? null} details={view?.details ?? null} />
+            </Animated.View>
+          </View>
+          <View style={styles.oneADay}>
+            <Text style={styles.oneADayText}>{phase === "matched" ? "G'day, mate!" : "1 a day!"}</Text>
+          </View>
         </View>
 
         {phase === "matched" && view?.match && (
           <View style={styles.matched}>
             <Text style={styles.matchedText}>
-              You&apos;re each other&apos;s card today. Only nickname, major, uni & avatar are shared.
+              You&apos;re each other&apos;s card today. You both see nickname, major, uni, avatar, year, pronouns, bio &
+              interests, and nothing else.
             </Text>
-            <Pressable
+            <Button
+              label="Send Message"
+              icon={<Icon name="chat" size={18} color={colors.surface} strokeWidth={2.4} />}
               onPress={() => message(view.match!, view.drawId)}
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.messageBtn, pressed && { backgroundColor: colors.brandPressed }]}
-            >
-              <Icon name="chat" size={18} color={colors.surface} strokeWidth={2.4} />
-              <Text style={styles.messageText} numberOfLines={1}>
-                Send a message to {view.match.nick}
-              </Text>
-            </Pressable>
+              style={styles.fill}
+            />
           </View>
         )}
 
@@ -261,75 +284,61 @@ export default function DailyCardScreen() {
         <View style={styles.rules}>
           {RULES.map((rule, i) => (
             <View key={rule} style={styles.rule}>
-              <Text style={styles.ruleNumber}>{i + 1}</Text>
+              <View style={styles.ruleNumber}>
+                <Text style={styles.ruleNumberText}>{i + 1}</Text>
+              </View>
               <Text style={styles.ruleText}>{rule}</Text>
             </View>
           ))}
         </View>
 
-        {card.mode === "local" && (
+        {/* The server allows it (DailyCard__DemoReset) or it's the device copy */}
+        {view?.canReset && (
           <View style={styles.demo}>
             <Text style={styles.demoLabel}>DEMO</Text>
-            <Pressable onPress={demo.resetToday} accessibilityRole="button" style={styles.demoBtn}>
-              <Text style={styles.demoText}>Reset today</Text>
-            </Pressable>
-            <Pressable onPress={demo.missDay} accessibilityRole="button" style={styles.demoBtn}>
-              <Text style={styles.demoText}>Simulate missed day</Text>
-            </Pressable>
+            <Button label="Reset today" size="sm" variant="outline" onPress={() => runDemo(demo.resetToday)} />
+            <Button label="Simulate missed day" size="sm" variant="outline" onPress={() => runDemo(demo.missDay)} />
           </View>
         )}
       </ScrollView>
 
       {button && (
         <View style={styles.footer}>
-          <Pressable
-            onPress={onButton}
+          <Button
+            label={button.label}
+            variant="yellow"
+            inactive={button.inactive}
             disabled={phase === "spinning" || !view}
-            accessibilityRole="button"
-            style={({ pressed }) => [
-              styles.drawBtn,
-              { backgroundColor: pressed && phase === "ready" ? colors.yellowPressed : button.bg },
-              phase === "ready" && styles.drawGlow,
-            ]}
-          >
-            <Text style={[styles.drawText, { color: button.fg }]}>{button.label}</Text>
-          </Pressable>
+            onPress={onButton}
+          />
         </View>
       )}
     </SafeAreaView>
   );
 }
 
-const CARD_SHADOW = "0 24px 50px -12px rgba(0,0,0,0.6)";
-
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.ink },
-  header: {
-    height: 56,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.12)",
+  screen: { flex: 1, backgroundColor: colors.canvas },
+  body: { paddingHorizontal: 22, paddingTop: 18, paddingBottom: 24, alignItems: "center", gap: 20 },
+  intro: { alignItems: "center", gap: 6 },
+  title: { color: colors.ink, textAlign: "center", ...font(800, 28, 1.15, -0.02) },
+  sub: { color: colors.muted, textAlign: "center", maxWidth: 320, ...font(500, 14.5, 1.5) },
+  // Room around the card for its stickers
+  stage: { width: "100%", alignItems: "center", paddingVertical: 8 },
+  sun: { position: "absolute", top: -8, right: 0, zIndex: 3 },
+  koala: { position: "absolute", left: -6, bottom: 40, zIndex: 3 },
+  card: { width: 290, height: 410 },
+  faceWrap: { ...StyleSheet.absoluteFill, backfaceVisibility: "hidden" },
+  face: {
+    flex: 1,
+    borderRadius: 22,
+    borderWidth: 3,
+    borderColor: colors.ink,
+    boxShadow: `0 6px 0 ${colors.ink}`,
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: { color: colors.yellow, ...font(800, 13, undefined, 0.1) },
-  headerSpacer: { width: 40 },
-  body: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 20, alignItems: "center", gap: 20 },
-  intro: { alignItems: "center", gap: 6 },
-  title: { color: colors.surface, textAlign: "center", ...font(800, 28, 1.15, -0.02) },
-  sub: { color: colors.brandLight, textAlign: "center", maxWidth: 300, ...font(500, 14.5, 1.5) },
-  card: { width: 190, height: 270, marginVertical: 6 },
-  faceWrap: { ...StyleSheet.absoluteFill, backfaceVisibility: "hidden" },
-  face: { flex: 1, borderRadius: 22, borderWidth: 3, overflow: "hidden", boxShadow: CARD_SHADOW },
-  front: { borderColor: colors.surface, alignItems: "center", justifyContent: "center" },
-  frontFill: { ...StyleSheet.absoluteFill, borderRadius: 19 },
+  front: { backgroundColor: colors.yellow, overflow: "hidden" },
   frontFrame: {
     position: "absolute",
     top: 10,
@@ -337,72 +346,118 @@ const styles = StyleSheet.create({
     right: 10,
     bottom: 10,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.25)",
-    borderRadius: 16,
+    borderStyle: "dashed",
+    borderColor: colors.ink,
+    borderRadius: 14,
   },
-  frontMark: { position: "absolute", bottom: 16, color: colors.yellow, ...font(800, 12, undefined, 0.22) },
-  back: {
+  frontTag: {
+    position: "absolute",
+    bottom: 30,
     backgroundColor: colors.surface,
-    borderColor: colors.yellow,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    padding: 16,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    transform: [{ rotate: "-4deg" }],
   },
-  backNick: { color: colors.ink, ...font(800, 19) },
-  backMajor: { color: colors.body, textAlign: "center", ...font(600, 12.5) },
+  frontTagText: { color: colors.brand, ...font(800, 12, undefined, 0.16) },
+  corner: { position: "absolute", color: colors.ink, ...font(800, 16) },
+  cornerTop: { top: 16, left: 20 },
+  cornerBottom: { top: 16, right: 20 },
+  back: { backgroundColor: colors.surface, justifyContent: "flex-start", gap: 8, paddingHorizontal: 18, paddingTop: 28, paddingBottom: 18 },
+  tape: {
+    position: "absolute",
+    top: -12,
+    width: 74,
+    height: 22,
+    borderRadius: 4,
+    backgroundColor: "rgba(244,183,64,0.75)",
+    transform: [{ rotate: "-6deg" }],
+  },
+  nameRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 6, maxWidth: "100%" },
+  backNick: { flexShrink: 1, color: colors.ink, ...font(800, 22) },
+  pronouns: { color: colors.faint, ...font(600, 12.5) },
+  backMajor: { color: colors.body, textAlign: "center", ...font(600, 13.5) },
+  pills: { flexDirection: "row", gap: 6 },
+  year: { backgroundColor: colors.yellowSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  yearText: { color: colors.yellowInk, ...font(700, 11.5) },
+  bio: { color: colors.body, textAlign: "center", ...font(500, 13, 1.45) },
+  interests: { alignSelf: "stretch", alignItems: "center", gap: 8, marginTop: 2 },
+  dash: { alignSelf: "stretch", height: 0, borderTopWidth: 2, borderStyle: "dashed", borderColor: colors.lineLight },
+  together: { color: colors.yellowInk, ...font(800, 12.5) },
+  chips: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 6 },
+  chip: {
+    borderWidth: 1.5,
+    borderColor: colors.lineLight,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  chipShared: { backgroundColor: colors.yellow, borderColor: colors.ink },
+  chipText: { color: colors.body, ...font(700, 11.5) },
+  chipSharedText: { color: colors.ink },
   backUni: { backgroundColor: colors.brandSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   backUniText: { color: colors.brand, ...font(700, 11.5) },
+  oneADay: {
+    position: "absolute",
+    right: 0,
+    bottom: 14,
+    zIndex: 3,
+    backgroundColor: colors.coral,
+    borderWidth: 3,
+    borderColor: colors.surface,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    transform: [{ rotate: "8deg" }],
+    boxShadow: "0 6px 14px rgba(20,20,43,0.25)",
+  },
+  oneADayText: { color: colors.surface, ...font(800, 14) },
   matched: {
     width: "100%",
     backgroundColor: colors.surface,
-    borderRadius: 22,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
+    borderRadius: 20,
+    borderWidth: 2.5,
+    borderColor: colors.ink,
+    boxShadow: `0 5px 0 ${colors.ink}`,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 18,
     alignItems: "center",
-    gap: 10,
+    gap: 12,
   },
   matchedText: { color: colors.muted, textAlign: "center", ...font(500, 13, 1.45) },
-  messageBtn: {
-    width: "100%",
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: colors.brand,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingHorizontal: 12,
-    ...brutal(3),
-  },
-  messageText: { flexShrink: 1, color: colors.surface, ...font(800, 16) },
+  fill: { alignSelf: "stretch" },
   clock: {
     width: "100%",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    gap: 4,
+    backgroundColor: colors.yellowSoft,
     borderRadius: 18,
+    borderWidth: 2.5,
+    borderColor: colors.ink,
+    boxShadow: `0 4px 0 ${colors.ink}`,
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 12,
   },
-  clockLabel: { color: colors.brandLight, textTransform: "uppercase", ...font(700, 12, undefined, 0.06) },
+  clockLabel: { color: colors.yellowInk, textTransform: "uppercase", ...font(700, 12, undefined, 0.06) },
   clockValue: { fontVariant: ["tabular-nums"], ...font(800, 30, undefined, 0.04) },
-  rules: { width: "100%", gap: 8 },
-  rule: { flexDirection: "row", gap: 10 },
-  ruleNumber: { color: colors.yellow, ...font(800, 13, 1.45) },
-  ruleText: { flex: 1, color: colors.brandSofter, ...font(500, 13, 1.45) },
+  rules: { width: "100%", gap: 10 },
+  rule: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  ruleNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.yellow,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ruleNumberText: { color: colors.ink, ...font(800, 12) },
+  ruleText: { flex: 1, color: colors.body, ...font(500, 13.5, 1.45) },
   demo: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: 8 },
   demoLabel: { color: colors.faint, ...font(700, 11) },
-  demoBtn: {
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.25)",
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  demoText: { color: colors.brandLight, ...font(700, 12) },
-  footer: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 12 },
-  drawBtn: { height: 58, borderRadius: 18, alignItems: "center", justifyContent: "center" },
-  drawGlow: { boxShadow: "0 10px 30px -8px rgba(255,201,64,0.55)" },
-  drawText: { ...font(800, 17) },
+  footer: { paddingHorizontal: 22, paddingTop: 10, paddingBottom: 14, backgroundColor: colors.canvas },
 });

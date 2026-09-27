@@ -1,7 +1,7 @@
 // Daily card rules, kept pure so they can be tested: one draw a day and a fresh deck at
 // local midnight. After a day without drawing, the next Draw deals nothing: it locks the
 // deck until midnight, which starts a new session. The API uses the same rules.
-import type { DailyCardDto, DailyCardStatus } from "@/api/types";
+import type { DailyCardDto, DailyCardStatus, MatchDetailsDto } from "@/api/types";
 import { toPerson } from "@/data/adapters";
 import type { Person } from "@/data/types";
 
@@ -18,6 +18,10 @@ export type CardView = {
   missedDay: boolean;
   /** The API's id for today's match, to open the chat with (null on the device copy) */
   drawId: string | null;
+  /** Show the demo buttons: the server allows a reset, or it's the device copy */
+  canReset: boolean;
+  /** More about the match for the card (the API's; the device copy has none) */
+  details: MatchDetailsDto | null;
 };
 
 /** The device's copy while the API has no daily card endpoints */
@@ -115,6 +119,8 @@ export function localView(card: LocalCard, now: Date): CardView {
     nextChangeAt: nextMidnight(now),
     missedDay: missedDay(card, now),
     drawId: null,
+    canReset: true,
+    details: null,
   };
 }
 
@@ -126,7 +132,28 @@ export function apiView(dto: DailyCardDto): CardView {
     nextChangeAt: new Date(dto.nextChangeAt),
     missedDay: dto.missedDay,
     drawId: dto.drawId,
+    canReset: dto.canReset ?? false,
+    details: dto.details ?? null,
   };
+}
+
+/** "board-games" → "Board games" */
+export function interestLabel(tag: string): string {
+  const words = tag.replace(/-/g, " ").trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/** 1 → "1st year", 2 → "2nd year"… */
+export function yearLabel(year: number): string {
+  const suffix = year % 100 >= 11 && year % 100 <= 13 ? "th" : (["th", "st", "nd", "rd"][year % 10] ?? "th");
+  return `${year}${suffix} year`;
+}
+
+/** "You both like Coffee & Hiking" (the first two you share), or null */
+export function sharedLine(shared: string[]): string | null {
+  if (!shared.length) return null;
+  const names = shared.slice(0, 2).map(interestLabel);
+  return `You both like ${names.join(" & ")}${shared.length > 2 ? ` +${shared.length - 2}` : ""}`;
 }
 
 /** Stand-ins when the app doesn't know any other students yet (they can't be messaged) */

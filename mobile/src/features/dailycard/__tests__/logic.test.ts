@@ -6,11 +6,14 @@ import {
   draw,
   formatClock,
   freshCard,
+  interestLabel,
   localView,
   missedDay,
   nextMidnight,
   rollOver,
+  sharedLine,
   simulateMissed,
+  yearLabel,
   type LocalCard,
 } from "../logic";
 
@@ -129,5 +132,30 @@ describe("views", () => {
     expect(view.drawId).toBe("d1");
     expect(view.match?.avatarStyle).toMatchObject({ icon: "Leaf", shape: "Soft" });
     expect(view.nextChangeAt.toISOString()).toBe("2026-09-27T14:30:00.000Z");
+  });
+});
+
+describe("match card labels", () => {
+  it("turns interest tags into words", () => {
+    expect(interestLabel("board-games")).toBe("Board games");
+    expect(interestLabel("coding")).toBe("Coding");
+  });
+
+  it("names the year of study", () => {
+    expect([1, 2, 3, 4, 11, 12, 21].map(yearLabel)).toEqual([
+      "1st year",
+      "2nd year",
+      "3rd year",
+      "4th year",
+      "11th year",
+      "12th year",
+      "21st year",
+    ]);
+  });
+
+  it("says what you have in common", () => {
+    expect(sharedLine([])).toBeNull();
+    expect(sharedLine(["coffee"])).toBe("You both like Coffee");
+    expect(sharedLine(["coffee", "hiking", "anime", "art"])).toBe("You both like Coffee & Hiking +2");
   });
 });
