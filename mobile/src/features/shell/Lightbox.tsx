@@ -1,12 +1,14 @@
 import { useRef, useState } from "react";
 import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "@/components/ui";
 import { colors, font } from "@/theme";
+import ZoomableImage from "./ZoomableImage";
 
 type Props = { photos: string[]; start: number; onClose: () => void };
 
-// Full-screen photo viewer: swipe between photos, close, "2/4" and a thumbnail strip
+// Full-screen photo viewer: swipe between photos, pinch or double-tap to zoom, close, "2/4" and thumbnails
 export default function Lightbox({ photos, start, onClose }: Props) {
   const { width } = useWindowDimensions();
   // A SafeAreaView inside a Modal gets zero insets on iOS, which put the close
@@ -14,16 +16,21 @@ export default function Lightbox({ photos, start, onClose }: Props) {
   const insets = useSafeAreaInsets();
   const pager = useRef<ScrollView>(null);
   const [index, setIndex] = useState(start);
+  const [stageHeight, setStageHeight] = useState(0);
+  // Swiping to the next photo is off while this one is zoomed in
+  const [zoomed, setZoomed] = useState(false);
   const multi = photos.length > 1;
 
   const show = (i: number) => {
     setIndex(i);
+    setZoomed(false);
     pager.current?.scrollTo({ x: i * width, animated: true });
   };
 
   return (
     <Modal visible animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      {/* Gestures inside a Modal need their own root */}
+      <GestureHandlerRootView style={[styles.screen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.header}>
           <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close" style={styles.close}>
             <Icon name="close" color={colors.surface} />
@@ -40,20 +47,25 @@ export default function Lightbox({ photos, start, onClose }: Props) {
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           contentOffset={{ x: start * width, y: 0 }}
+          scrollEnabled={!zoomed}
           scrollEventThrottle={32}
           onScroll={(e) => setIndex(Math.round(e.nativeEvent.contentOffset.x / width))}
+          onLayout={(e) => setStageHeight(e.nativeEvent.layout.height)}
           style={styles.stage}
         >
-          {photos.map((uri, i) => (
-            <Image
-              key={uri}
-              source={{ uri }}
-              style={{ width }}
-              resizeMode="contain"
-              accessibilityLabel={`Photo ${i + 1} of ${photos.length}`}
-              accessibilityIgnoresInvertColors
-            />
-          ))}
+          {stageHeight > 0 &&
+            photos.map((uri, i) => (
+              <ZoomableImage
+                key={uri}
+                uri={uri}
+                width={width}
+                height={stageHeight}
+                active={i === index}
+                zoomed={zoomed && i === index}
+                onZoomChange={setZoomed}
+                accessibilityLabel={`Photo ${i + 1} of ${photos.length}`}
+              />
+            ))}
         </ScrollView>
 
         {multi && (
@@ -72,7 +84,7 @@ export default function Lightbox({ photos, start, onClose }: Props) {
             ))}
           </ScrollView>
         )}
-      </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
