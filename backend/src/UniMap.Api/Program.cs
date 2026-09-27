@@ -25,6 +25,7 @@ builder.Services.Configure<UniversityOptions>(config.GetSection("Universities"))
 builder.Services.Configure<R2Options>(config.GetSection("R2"));
 builder.Services.Configure<EmailOptions>(config.GetSection("Email"));
 builder.Services.Configure<AnthropicOptions>(config.GetSection("Anthropic"));
+builder.Services.Configure<OllamaOptions>(config.GetSection("Ollama"));
 
 // --- Infrastructure ---
 builder.Services.AddDbContext<AppDbContext>(o => o
@@ -40,6 +41,12 @@ builder.Services.AddSingleton<VerificationCodeStore>();
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddSingleton<PhotoAiService>();
+builder.Services.AddHttpClient(PhotoAiService.OllamaClient, (sp, c) =>
+{
+    var o = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<OllamaOptions>>().Value;
+    if (o.IsConfigured) c.BaseAddress = new Uri(o.BaseUrl!.TrimEnd('/') + "/");
+    c.Timeout = TimeSpan.FromSeconds(o.TimeoutSeconds);
+});
 if (builder.Environment.IsDevelopment() || config.GetValue<bool>("Seed:Enabled"))
     builder.Services.AddHostedService<DemoEventsRefresher>();
 if (config.GetSection("Email").Get<EmailOptions>()?.IsConfigured == true)

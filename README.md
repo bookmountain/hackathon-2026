@@ -196,11 +196,13 @@ Draw one card a day to meet a random fellow student. All of these need a login t
 
 ### Photo analysis (Claude)
 
-The server asks Claude (`claude-opus-5`, set with `Anthropic:Model`) what a photo shows. Send the photo in
+The server asks a vision model what a photo shows: a local model on Ollama when `OLLAMA_BASE_URL` is set
+(`qwen3-vl:8b-instruct` by default, `OLLAMA_MODEL`), otherwise Claude (`claude-opus-5`, `Anthropic:Model`)
+when `ANTHROPIC_API_KEY` is. Send the photo in
 the JSON body as `image`: base64 JPEG, PNG, GIF or WebP, up to 3.75 MB (the app sends a JPEG with its longest
 side at 640 px). It's only sent to Claude, never stored, so still upload listing photos to R2 as usual.
-Without `ANTHROPIC_API_KEY` these return 503 with `code: "ai_not_configured"`; if Claude is busy or down,
-503 or 502; for a photo it won't describe, 422.
+With neither, these return 503 with `code: "ai_not_configured"`; if the model is busy, down or unreachable,
+503 or 502; for a photo Claude won't describe, 422.
 
 - `POST /api/ai/photo-analysis { kind, image }`:
   - `kind: "Item"` pre-fills Sell with `title`, `category`, `condition`, `colour`, `texture`,
@@ -269,10 +271,17 @@ ID and bucket are already filled in. The client calls `POST /api/uploads/avatar`
 URL, sends the image to that URL with `PUT`, then saves the returned `key` as `avatarKey` on the
 profile. If the bucket isn't public, avatar URLs are presigned GET links that last 24 hours.
 
-### Claude (photo analysis)
+### Photo analysis model
 
-Put an Anthropic API key in `.env` as `ANTHROPIC_API_KEY`. Without it, the photo analysis endpoints return
-503 and everything else works.
+Either a local vision model or Claude. Without either, the photo analysis endpoints return 503 and
+everything else works.
+
+- **Local (Ollama):** set `OLLAMA_BASE_URL`, e.g. `http://100.113.35.121:11434` (Book's Legion laptop over
+  Tailscale: Ollama runs in Docker in WSL with the RTX 5070). Use an instruct (non-thinking) vision model
+  that fits the GPU: `qwen3-vl:8b-instruct` takes 5.5 GB and answers in 1–5 seconds. That machine has to be
+  on and reachable from the API.
+- **Claude:** set `ANTHROPIC_API_KEY` (from platform.claude.com; a Claude subscription doesn't include API
+  access). Used only when `OLLAMA_BASE_URL` is empty.
 
 ### Layout
 

@@ -52,6 +52,24 @@ public class AnthropicOptions
     public bool IsConfigured => !string.IsNullOrWhiteSpace(ApiKey);
 }
 
+/// <summary>
+/// A local vision model on Ollama, for photo analysis. When BaseUrl is set it's used instead of Claude.
+/// </summary>
+public class OllamaOptions
+{
+    /// <summary>e.g. http://100.113.35.121:11434</summary>
+    public string? BaseUrl { get; set; }
+    /// <summary>
+    /// A vision model that's been pulled on that server. Use an instruct (non-thinking) model: thinking ones
+    /// take far longer and can run out of room before the answer.
+    /// </summary>
+    public string Model { get; set; } = "qwen3-vl:8b-instruct";
+    /// <summary>The first photo after a while also loads the model onto the GPU, which takes a while.</summary>
+    public int TimeoutSeconds { get; set; } = 120;
+
+    public bool IsConfigured => !string.IsNullOrWhiteSpace(BaseUrl);
+}
+
 public class EmailOptions
 {
     /// <summary>SMTP host. Leave empty to just log codes instead of sending.</summary>

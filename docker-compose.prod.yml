@@ -46,8 +46,10 @@ services:
       R2__SecretAccessKey: ${R2_SECRET_ACCESS_KEY:-}
       R2__Bucket: ${R2_BUCKET:-}
       R2__PublicBaseUrl: ${R2_PUBLIC_BASE_URL:-}
-      # Claude, for photo analysis. Those endpoints return 503 without a key.
+      # Photo analysis: a local model on Ollama when OLLAMA_BASE_URL is set, else Claude. 503 without either.
       Anthropic__ApiKey: ${ANTHROPIC_API_KEY:-}
+      Ollama__BaseUrl: ${OLLAMA_BASE_URL:-}
+      Ollama__Model: ${OLLAMA_MODEL:-qwen3-vl:8b-instruct}
       # Empty SMTP_HOST = codes are only logged, so ReturnDevCode puts them in the register response.
       Email__Host: ${SMTP_HOST:-}
       Email__Port: ${SMTP_PORT:-587}

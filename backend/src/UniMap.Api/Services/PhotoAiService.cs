@@ -1,4 +1,6 @@
+using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Anthropic;
 using Anthropic.Exceptions;
@@ -17,22 +19,31 @@ public class PhotoAiException(int statusCode, string message) : Exception(messag
 }
 
 /// <summary>
-/// Looks at a photo with Claude: fills in the Sell and "List a room" forms, and turns a photo into a market
-/// search. The photo is only sent to Claude, never stored.
+/// Looks at a photo with a vision model: fills in the Sell and "List a room" forms, and turns a photo into a
+/// market search. The model is a local one on Ollama when Ollama:BaseUrl is set, otherwise Claude when
+/// Anthropic:ApiKey is. The photo is only sent to the model, never stored.
 /// </summary>
-public class PhotoAiService(IOptions<AnthropicOptions> options, ILogger<PhotoAiService> log)
+public class PhotoAiService(
+    IOptions<AnthropicOptions> options,
+    IOptions<OllamaOptions> ollamaOptions,
+    IHttpClientFactory http,
+    ILogger<PhotoAiService> log)
 {
     private readonly AnthropicOptions opts = options.Value;
+    private readonly OllamaOptions ollama = ollamaOptions.Value;
     private readonly Lazy<AnthropicClient> client = new(() => new AnthropicClient { ApiKey = options.Value.ApiKey });
+
+    /// <summary>The named HttpClient for Ollama (Program.cs sets its base address and timeout).</summary>
+    public const string OllamaClient = "ollama";
 
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter(allowIntegerValues: false) },
     };
 
-    public bool IsConfigured => opts.IsConfigured;
+    public bool IsConfigured => ollama.IsConfigured || opts.IsConfigured;
 
-    /// <summary>The 503 when there's no Anthropic:ApiKey, and its ProblemDetails code.</summary>
+    /// <summary>The 503 when there's neither Ollama:BaseUrl nor Anthropic:ApiKey, and its ProblemDetails code.</summary>
     public const string NotConfigured = "AI photo analysis isn't switched on for this server.",
         NotConfiguredCode = "ai_not_configured";
 
@@ -61,9 +72,70 @@ public class PhotoAiService(IOptions<AnthropicOptions> options, ILogger<PhotoAiS
 
     private async Task<T> AskAsync<T>(Photo photo, string prompt, Dictionary<string, JsonElement> schema, CancellationToken ct)
     {
+        if (ollama.IsConfigured) return Parse<T>(await AskOllamaAsync(photo, prompt, schema, ct), "Ollama");
         if (!opts.IsConfigured)
             throw new PhotoAiException(StatusCodes.Status503ServiceUnavailable, NotConfigured);
+        return Parse<T>(await AskClaudeAsync(photo, prompt, WithoutArrayLimits(schema), ct), "Claude");
+    }
 
+    private T Parse<T>(string text, string source)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<T>(text, Json)
+                ?? throw new JsonException("Empty answer");
+        }
+        catch (JsonException e)
+        {
+            // Both models are held to the schema, so this means the answer was cut off
+            log.LogError(e, "Unreadable photo analysis from {Source}: {Text}", source, text);
+            throw new PhotoAiException(StatusCodes.Status502BadGateway, "Photo analysis is unavailable right now. Try again.");
+        }
+    }
+
+    /// <summary>Ollama's /api/chat, with the schema as its required output format.</summary>
+    private async Task<string> AskOllamaAsync(Photo photo, string prompt, Dictionary<string, JsonElement> schema, CancellationToken ct)
+    {
+        try
+        {
+            using var res = await http.CreateClient(OllamaClient).PostAsJsonAsync("api/chat", new
+            {
+                model = ollama.Model,
+                stream = false,
+                format = schema,
+                think = false,
+                // The model's own sampling: at temperature 0 small models loop ("No pets. No smoking. No pets…").
+                // A photo is about 1,000 tokens and an answer a few hundred, so 2,048 of context keeps an 8B model
+                // entirely on an 8 GB GPU, and num_predict stops a runaway answer early.
+                options = new { num_ctx = 2048, num_predict = 600 },
+                messages = new[]
+                {
+                    // Small models follow the schema better when the prompt asks for JSON too
+                    new { role = "user", content = prompt + " Answer in JSON.", images = new[] { photo.Base64 } },
+                },
+            }, ct);
+            if (!res.IsSuccessStatusCode)
+            {
+                log.LogError("Ollama answered {Status}: {Body}", (int)res.StatusCode, await res.Content.ReadAsStringAsync(ct));
+                throw new PhotoAiException(StatusCodes.Status502BadGateway, "Photo analysis is unavailable right now. Try again.");
+            }
+            var body = await res.Content.ReadFromJsonAsync<OllamaChatResponse>(ct);
+            return body?.Message?.Content ?? "";
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException && !ct.IsCancellationRequested)
+        {
+            // The PC with the model is off, asleep or unreachable, or took too long
+            log.LogWarning(e, "Couldn't reach Ollama at {BaseUrl}", ollama.BaseUrl);
+            throw new PhotoAiException(StatusCodes.Status503ServiceUnavailable, "Photo analysis is unavailable right now. Try again.");
+        }
+    }
+
+    private record OllamaChatResponse(OllamaMessage? Message);
+
+    private record OllamaMessage(string? Content);
+
+    private async Task<string> AskClaudeAsync(Photo photo, string prompt, Dictionary<string, JsonElement> schema, CancellationToken ct)
+    {
         Message response;
         try
         {
@@ -100,18 +172,7 @@ public class PhotoAiService(IOptions<AnthropicOptions> options, ILogger<PhotoAiS
         if (response.StopReason == "refusal")
             throw new PhotoAiException(StatusCodes.Status422UnprocessableEntity, "This photo can't be analysed. Try another one.");
 
-        var text = string.Concat(response.Content.Select(b => b.Value).OfType<TextBlock>().Select(t => t.Text));
-        try
-        {
-            return JsonSerializer.Deserialize<T>(text, Json)
-                ?? throw new JsonException("Empty answer");
-        }
-        catch (JsonException e)
-        {
-            // Structured outputs make this rare: it means the answer was cut off (max_tokens)
-            log.LogError(e, "Unreadable photo analysis ({StopReason}): {Text}", response.StopReason, text);
-            throw new PhotoAiException(StatusCodes.Status502BadGateway, "Photo analysis is unavailable right now. Try again.");
-        }
+        return string.Concat(response.Content.Select(b => b.Value).OfType<TextBlock>().Select(t => t.Text));
     }
 
     // Prompts from the UCompass prototype, with the app's own option values
@@ -125,8 +186,8 @@ public class PhotoAiService(IOptions<AnthropicOptions> options, ILogger<PhotoAiS
     private const string RoomPrompt =
         "You help a university student in Adelaide, Australia list a spare room for student flatmates. Look at the " +
         "room photo and fill in the listing: a title of at most 7 words, the interior style in at most 3 words, " +
-        "the main colour palette in at most 4 words, how furnished it is, the features that are visible or very " +
-        "likely, 2 friendly sentences describing the room for students, and 3 short reasons a student would like " +
+        "the main colour palette in at most 4 words, how furnished it is, the features you can see in the photo " +
+        "(leave out anything you can't see), 2 friendly sentences describing the room for students, and 3 short reasons a student would like " +
         "this room, of at most 8 words each.";
 
     private const string SearchPrompt =
@@ -143,7 +204,7 @@ public class PhotoAiService(IOptions<AnthropicOptions> options, ILogger<PhotoAiS
         texture = Str(),
         suggestedPrice = new { type = "integer" },
         description = Str(),
-        benefits = new { type = "array", items = Str() },
+        benefits = Arr(Str(), 3),
     });
 
     private static readonly Dictionary<string, JsonElement> RoomSchema = Schema(new
@@ -152,19 +213,33 @@ public class PhotoAiService(IOptions<AnthropicOptions> options, ILogger<PhotoAiS
         style = Str(),
         colours = Str(),
         furnished = EnumOf<Furnishing>(),
-        features = new { type = "array", items = new { type = "string", @enum = FlatCatalog.Features } },
+        features = Arr(new { type = "string", @enum = FlatCatalog.Features }, FlatCatalog.Features.Length),
         description = Str(),
-        benefits = new { type = "array", items = Str() },
+        benefits = Arr(Str(), 3),
     });
 
     private static readonly Dictionary<string, JsonElement> SearchSchema = Schema(new
     {
         label = Str(),
         category = new { type = "string", @enum = Enum.GetNames<ItemCategory>().Append("Other").ToArray() },
-        keywords = new { type = "array", items = Str() },
+        keywords = Arr(Str(), 4),
     });
 
     private static object Str() => new { type = "string" };
+
+    /// <summary>
+    /// A list of at most <paramref name="max"/>. The limit stops a small local model repeating an item until it
+    /// runs out of room ("Double bed", "Double bed", …). Claude's structured outputs don't accept it, so
+    /// <see cref="WithoutArrayLimits"/> takes it out for Claude.
+    /// </summary>
+    private static object Arr(object items, int max) => new { type = "array", items, maxItems = max };
+
+    private static Dictionary<string, JsonElement> WithoutArrayLimits(Dictionary<string, JsonElement> schema)
+    {
+        var props = JsonNode.Parse(schema["properties"].GetRawText())!.AsObject();
+        foreach (var (_, prop) in props) prop?.AsObject().Remove("maxItems");
+        return new(schema) { ["properties"] = JsonSerializer.SerializeToElement(props) };
+    }
 
     private static object EnumOf<TEnum>() where TEnum : struct, Enum =>
         new { type = "string", @enum = Enum.GetNames<TEnum>() };
