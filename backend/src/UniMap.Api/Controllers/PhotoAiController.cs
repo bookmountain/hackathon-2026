@@ -11,7 +11,7 @@ namespace UniMap.Api.Controllers;
 /// <summary>
 /// Photo analysis with Claude: pre-fill the Sell and "List a room" forms from a photo, and search the
 /// market by photo. The photo is base64 in the JSON body. It's only sent to Claude, never stored; upload
-/// listing photos to R2 as usual. 503 when the server has no Anthropic API key.
+/// listing photos to R2 as usual. 503 with code "ai_not_configured" when the server has no Anthropic API key.
 /// </summary>
 [ApiController]
 [Authorize]
@@ -70,8 +70,8 @@ public class PhotoAiController(PhotoAiService ai, AppDbContext db, StorageServic
     private async Task<IActionResult> Run(string image, Func<Photo, Task<IActionResult>> analyse)
     {
         if (!ai.IsConfigured)
-            return Problem("Photo analysis isn't set up on this server (Anthropic:ApiKey).",
-                statusCode: StatusCodes.Status503ServiceUnavailable);
+            return Problem(PhotoAiService.NotConfigured, statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: new Dictionary<string, object?> { ["code"] = PhotoAiService.NotConfiguredCode });
         if (Photo.FromBase64(image) is not { } photo)
             return Problem("Send image as a base64 JPEG, PNG, GIF or WebP of up to 3.75 MB.",
                 statusCode: StatusCodes.Status400BadRequest);

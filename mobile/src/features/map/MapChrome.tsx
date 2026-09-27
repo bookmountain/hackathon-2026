@@ -77,7 +77,7 @@ export default function MapChrome(props: Props) {
           onPress={() => router.push("/profile")}
           accessibilityRole="button"
           accessibilityLabel="Profile"
-          style={[styles.me, { borderRadius: 52 * AVATAR_SHAPES[me.avatarStyle?.shape ?? "circle"] }]}
+          style={[styles.me, { borderRadius: 52 * AVATAR_SHAPES[me.avatarStyle?.shape ?? "Circle"] }]}
         >
           <Avatar index={me.avatar} nick={me.nick} url={me.avatarUrl} look={me.avatarStyle} size={48} />
         </Pressable>

@@ -61,11 +61,11 @@ Differences between the UCompass prototype and this API, for the app to handle, 
    from the degree. `GET /api/meta/options` lists the suggested tags. It replaces the whole profile, so
    send back what didn't change, including `avatarKey` from `GET /api/me`: a missing key removes the
    photo. `avatarPreset` (0–7, or null) is the design's preset colour avatar; everyone sees it wherever
-   they'd see the photo, and the photo wins when there's both. `avatarDesign` holds the rest of the avatar
-   builder: `style` (`Initials` or `Icon`), `initials` (1–2 letters, or null for the nickname's first
-   letter), `icon` (`Compass`, `Book`, `Coffee`, `Music`, `Code`, `Leaf`, `Camera`, `Ball`, `Paw`, `Rocket`),
-   `shape` (`Circle`, `Squircle` = "Soft", `Square`) and `ring` (`None`, `Gold`, `Blue`, `Navy`, `Sky`). It
-   comes back everywhere `avatarPreset` does. "Anonymous" is `avatarPreset: null`.
+   they'd see the photo, and the photo wins when there's both. `avatarStyle` holds the rest of the avatar
+   builder: `mode` (`Initials` or `Icon`), `text` (1–2 letters, or "" for the nickname's first letter),
+   `icon` (`Compass`, `Book`, `Coffee`, `Music`, `Code`, `Leaf`, `Camera`, `Ball`, `Paw`, `Rocket`), `shape`
+   (`Circle`, `Soft`, `Square`) and `ring` (`None`, `Gold`, `Blue`, `Navy`, `Sky`). It comes back everywhere
+   `avatarPreset` does. "Anonymous" is `avatarPreset: null`.
 7. `DELETE /api/me` deletes the account and everything in it: profile, consents, rooms, items, hosted
    events, RSVPs, chats (for both people), Dcard cards and the account's photos in R2. It works before
    consent. Students who drew them keep their card, with `match: null`.
@@ -87,7 +87,8 @@ All of these need a login token, except `options`.
   `listingId`. Send it with the remaining photos, and as `id` when creating the listing.
 - `PUT /api/flats/{id}`, `PUT /api/flats/{id}/status` (`Active` or `Taken`), `DELETE /api/flats/{id}`,
   `GET /api/flats/mine`.
-- `POST /api/flats/analyse-photo`: fill in "List a room" from a photo (see Photo analysis below).
+- `POST /api/ai/photo-analysis` with `kind: "Room"` fills in "List a room" from a photo (see Photo analysis
+  below).
 
 Other students see each pin rounded to about 100 m; only the owner sees the exact spot.
 
@@ -117,8 +118,8 @@ All of these need a login token, except `options`.
 - Condition is `New`, `LikeNew`, `Excellent`, `Good` or `Fair`, plus an optional note. `conditionLabel`
   is ready to show, e.g. "Good — some highlighting".
 - "Message seller" is `POST /api/chats` with `{ itemId, text }` (see below).
-- `POST /api/items/analyse-photo` fills in the Sell form from a photo, and `POST /api/items/search-by-photo`
-  is the camera button in the search box (see Photo analysis below).
+- `POST /api/ai/photo-analysis` with `kind: "Item"` fills in the Sell form from a photo, and
+  `POST /api/items/image-search` is the camera button in the search box (see Photo analysis below).
 
 ### Meetups (walk-in events)
 
@@ -177,38 +178,38 @@ prototype's: TomTheTutor messaging about his Calculus textbook.
 
 Draw one card a day to meet a random fellow student. All of these need a login token.
 
-- `GET /api/draw/today`: `status` is `Ready` ("Draw a card"), `Matched` ("Your card today") or `Locked`
-  ("Deck locked"). Also `drawnToday` ("143 students have drawn today") and `resetsAt`, the next Adelaide
+- `GET /api/daily-card`: `status` is `Ready` ("Draw your card"), `Matched` ("Your card today") or `Missed`
+  ("Deck locked"). Also `drawnToday` ("143 students have drawn today") and `nextChangeAt`, the next Adelaide
   midnight, for all three clocks ("Deck resets in", "Next draw in", "Unlocks in"). With `Matched`: `match`
   (nickname, major, uni and avatar, like a chat) and `drawId`.
-- `POST /api/draw`: the Draw button. It returns the same thing, and does nothing if you've already drawn
+- `POST /api/daily-card/draw`: the Draw button. It returns the same thing, and does nothing if you've already drawn
   today. 409 if nobody is left to draw.
 - **Draws are mutual.** Drawing deals you a random student who hasn't drawn yet today, and deals you to
   them: when they press Draw they get you. Anyone with a profile and the required consents can be drawn,
   except students who missed a day. You don't get the same student two days running unless nobody else is
   left.
 - **Missing a day.** If you didn't press Draw yesterday, `GET` says `Ready` with `missedDay: true`. Pressing
-  Draw then deals nothing: it starts a new session and returns `Locked` until midnight, and from midnight you
+  Draw then deals nothing: it starts a new session and returns `Missed` until midnight, and from midnight you
   can draw again. For example, you skipped yesterday and it's 10 pm: Draw shows a 2-hour countdown. A new
   account can draw straight away.
 - "Send a message to {nick}" is `POST /api/chats { drawId, text }` (see Chats).
 
 ### Photo analysis (Claude)
 
-The server asks Claude (`claude-opus-5`, set with `Anthropic:Model`) what a photo shows. Send the photo as
-multipart/form-data field `photo`: JPEG, PNG, GIF or WebP, up to 3.75 MB (resize to about 1500 px first).
-It's only sent to Claude, never stored, so still upload listing photos to R2 as usual. Without
-`ANTHROPIC_API_KEY` these return 503; if Claude is busy or down, 503 or 502; for a photo it won't
-describe, 422.
+The server asks Claude (`claude-opus-5`, set with `Anthropic:Model`) what a photo shows. Send the photo in
+the JSON body as `image`: base64 JPEG, PNG, GIF or WebP, up to 3.75 MB (the app sends a JPEG with its longest
+side at 640 px). It's only sent to Claude, never stored, so still upload listing photos to R2 as usual.
+Without `ANTHROPIC_API_KEY` these return 503 with `code: "ai_not_configured"`; if Claude is busy or down,
+503 or 502; for a photo it won't describe, 422.
 
-- `POST /api/items/analyse-photo`: pre-fills Sell with `title`, `category`, `condition`, `colour`,
-  `texture`, `suggestedPrice` ("Use suggested price"), `description` and 3 `benefits`. The prototype
-  writes the description, then "Colour: … · Texture: … · Condition: …" and the benefits as "• " lines.
-- `POST /api/flats/analyse-photo`: pre-fills "List a room" with `title`, `style`, `colours`, `furnished`,
-  `features` (only values from `/api/flats/options`), `description` and 3 `benefits`.
-- `POST /api/items/search-by-photo?limit=5`: `label` ("Looks like: Desk lamp"), `category` (null if none
-  fits), the `keywords` it matched on, and `items`: unsold items in that category, those whose title or
-  description has the most keywords first.
+- `POST /api/ai/photo-analysis { kind, image }`:
+  - `kind: "Item"` pre-fills Sell with `title`, `category`, `condition`, `colour`, `texture`,
+    `suggestedPrice` ("Use suggested price"), `description` and 3 `benefits`.
+  - `kind: "Room"` pre-fills "List a room" with `title`, `style`, `colours`, `furnished`, `features` (only
+    values from `/api/flats/options`), `description` and 3 `benefits`.
+- `POST /api/items/image-search?limit=5 { image }`: `category` (null if none fits) and `items`, unsold items
+  in that category, those whose title or description has the most keywords first. Also `label` ("Looks like:
+  Desk lamp") and the `keywords` it matched on.
 
 ### Demo data
 

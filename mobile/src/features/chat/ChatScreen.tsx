@@ -89,7 +89,7 @@ export default function ChatScreen() {
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
       <ScreenHeader onBack={() => router.back()} height={64}>
-        <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} size={40} />
+        <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} look={person.avatarStyle} size={40} />
         <View style={styles.who}>
           <Text style={styles.nick}>{person.nick}</Text>
           <Text style={styles.meta} numberOfLines={1}>

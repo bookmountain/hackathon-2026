@@ -126,6 +126,7 @@ export default function ListRoomScreen() {
             onRemove={removePhoto}
             onDemo={() => submit(async () => addPhotos([await downloadPhoto(DEMO_PHOTO)]))}
             emptyText="Upload room photo"
+            aspectRatio={16 / 9}
           />
           <AiPhotoPanel<RoomPhotoAnalysis>
             state={analysis.state}
@@ -242,7 +243,9 @@ export default function ListRoomScreen() {
             label="Minimum stay"
             value={stayText}
             onChangeText={(t) => {
-              const text = digits(t).slice(0, 2);
+              // The API takes 1–24 months (blank = flexible)
+              const months = digits(t).slice(0, 2);
+              const text = months ? String(Math.min(24, Math.max(1, Number(months)))) : "";
               setStayText(text);
               update({ minStay: text ? Number(text) : null });
             }}

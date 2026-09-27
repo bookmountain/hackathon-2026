@@ -1,10 +1,10 @@
-// Daily card rules, kept pure so they can be tested: one draw a day, a fresh deck
-// at local midnight, and a 48-hour lock after a day without drawing.
+// Daily card rules, kept pure so they can be tested: one draw a day and a fresh deck at
+// local midnight. After a day without drawing, the next Draw deals nothing: it locks the
+// deck until midnight, which starts a new session. The API uses the same rules.
 import type { DailyCardDto, DailyCardStatus } from "@/api/types";
 import { toPerson } from "@/data/adapters";
 import type { Person } from "@/data/types";
 
-export const LOCK_HOURS = 48;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** What the screen and the tab bar badge show */
@@ -12,19 +12,23 @@ export type CardView = {
   status: DailyCardStatus;
   match: Person | null;
   drawnToday: number;
-  /** When the clock hits zero: next midnight, or the end of the lock */
+  /** When the clock hits zero: the next midnight */
   nextChangeAt: Date;
+  /** Ready, but yesterday went by without a draw: Draw will lock the deck until midnight */
+  missedDay: boolean;
+  /** The API's id for today's match, to open the chat with (null on the device copy) */
+  drawId: string | null;
 };
 
 /** The device's copy while the API has no daily card endpoints */
 export type LocalCard = {
   status: DailyCardStatus;
   match: Person | null;
-  /** Day of the last draw, "YYYY-MM-DD" in local time */
+  /** Last day Draw was pressed (a match, or a missed-day lock), "YYYY-MM-DD" in local time */
   lastDrawDay: string | null;
   /** Never deal the same person twice in a row */
   lastMatchId: string | null;
-  /** Epoch ms when a missed-day lock ends */
+  /** Epoch ms when a missed-day lock ends (the midnight after it started) */
   lockUntil: number | null;
 };
 
@@ -56,34 +60,43 @@ export function formatClock(ms: number): string {
   return `${pad(Math.floor(t / 3600))}:${pad(Math.floor((t % 3600) / 60))}:${pad(t % 60)}`;
 }
 
-/** Bring a stored card up to date: a new day reopens the deck, a skipped day locks it */
+/** True when yesterday went by without pressing Draw (a brand-new deck never has missed a day) */
+export function missedDay(card: LocalCard, now: Date): boolean {
+  return card.status === "Ready" && card.lastDrawDay !== null && daysSince(card.lastDrawDay, now) >= 2;
+}
+
+/** Bring a stored card up to date: midnight ends today's match or lock */
 export function rollOver(card: LocalCard, now: Date): LocalCard {
   if (card.status === "Missed") {
     if (card.lockUntil !== null && now.getTime() < card.lockUntil) return card;
-    // Lock over: a clean start, so the old gap doesn't lock it again
-    return { ...freshCard, lastMatchId: card.lastMatchId };
+    // Keep lastDrawDay: the lock counts as that day's draw, so today isn't a missed day
+    return { ...card, status: "Ready", match: null, lockUntil: null };
   }
-  if (!card.lastDrawDay) return card;
-  const gap = daysSince(card.lastDrawDay, now);
-  if (gap >= 2) {
-    // A whole day went by without a draw
-    return { ...card, status: "Missed", match: null, lockUntil: startOfDay(now).getTime() + LOCK_HOURS * 60 * 60 * 1000 };
+  if (card.status === "Matched" && card.lastDrawDay && daysSince(card.lastDrawDay, now) >= 1) {
+    return { ...card, status: "Ready", match: null };
   }
-  if (gap >= 1 && card.status === "Matched") return { ...card, status: "Ready", match: null };
   return card;
 }
 
-/** Deal one of `pool` (not the last match when there's a choice) */
+/**
+ * Deal one of `pool` (not the last match when there's a choice). After a missed day it deals
+ * nothing and locks the deck until midnight instead.
+ */
 export function draw(card: LocalCard, pool: Person[], now: Date, random = Math.random): LocalCard {
-  if (card.status !== "Ready" || pool.length === 0) return card;
+  if (card.status !== "Ready") return card;
+  if (missedDay(card, now)) {
+    return { ...card, status: "Missed", match: null, lastDrawDay: dayKey(now), lockUntil: nextMidnight(now).getTime() };
+  }
+  if (pool.length === 0) return card;
   const choices = pool.length > 1 ? pool.filter((p) => p.id !== card.lastMatchId) : pool;
   const match = choices[Math.floor(random() * choices.length)];
   return { status: "Matched", match, lastDrawDay: dayKey(now), lastMatchId: match.id, lockUntil: null };
 }
 
-/** Demo button: pretend yesterday was skipped */
+/** Demo button: pretend yesterday went by without a draw, so the next Draw locks the deck */
 export function simulateMissed(card: LocalCard, now: Date): LocalCard {
-  return { ...card, status: "Missed", match: null, lockUntil: startOfDay(now).getTime() + LOCK_HOURS * 60 * 60 * 1000 };
+  const twoDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2);
+  return { ...card, status: "Ready", match: null, lastDrawDay: dayKey(twoDaysAgo), lockUntil: null };
 }
 
 /** A believable "N students have drawn today" for the demo: steady through the day */
@@ -98,8 +111,10 @@ export function localView(card: LocalCard, now: Date): CardView {
   return {
     status: card.status,
     match: card.match,
-    drawnToday: demoDrawnToday(now, card.lastDrawDay === dayKey(now)),
-    nextChangeAt: card.status === "Missed" && card.lockUntil !== null ? new Date(card.lockUntil) : nextMidnight(now),
+    drawnToday: demoDrawnToday(now, card.status === "Matched" && card.lastDrawDay === dayKey(now)),
+    nextChangeAt: nextMidnight(now),
+    missedDay: missedDay(card, now),
+    drawId: null,
   };
 }
 
@@ -109,6 +124,8 @@ export function apiView(dto: DailyCardDto): CardView {
     match: dto.match ? toPerson(dto.match) : null,
     drawnToday: dto.drawnToday,
     nextChangeAt: new Date(dto.nextChangeAt),
+    missedDay: dto.missedDay,
+    drawId: dto.drawId,
   };
 }
 

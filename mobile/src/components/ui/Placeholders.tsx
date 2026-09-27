@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { colors, font } from "@/theme";
+import { brutal, colors, font } from "@/theme";
 import Icon from "./Icon";
 
 type StripedProps = {
@@ -47,60 +47,63 @@ type DropzoneProps = {
   max: number;
   onAdd: () => void;
   onRemove: (index: number) => void;
-  /** Pill text before any photo is picked, e.g. "Upload product photo" */
+  /** Box text before any photo is picked, e.g. "Upload product photo" */
   emptyText: string;
+  /** The cover's width / height, as the listing shows it: 1 for items, 4 / 3 for rooms */
+  aspectRatio: number;
   /** "Use a demo photo" under the box while it's empty */
   onDemo?: () => void;
 };
 
-// Dashed photo box: the cover photo fills it, the rest sit in a row below (tap one to remove)
-export function PhotoDropzone({ photos, max, onAdd, onRemove, emptyText, onDemo }: DropzoneProps) {
+// Dashed "Upload photo" box until a photo is picked. Then the cover shows at the listing's own
+// shape with "Add more" in its corner, and every photo sits in a row below (tap one to remove).
+export function PhotoDropzone({ photos, max, onAdd, onRemove, emptyText, aspectRatio, onDemo }: DropzoneProps) {
   const cover = photos[0];
-  const full = photos.length >= max;
-  const pill = !cover ? emptyText : full ? `${max} of ${max} photos` : "Add more photos";
+  if (!cover) {
+    return (
+      <View style={styles.picked}>
+        <Pressable onPress={onAdd} accessibilityRole="button" accessibilityLabel={emptyText} style={styles.drop}>
+          <Icon name="camera" size={20} color={colors.brand} />
+          <Text style={styles.dropText}>{emptyText}</Text>
+        </Pressable>
+        {onDemo && (
+          <Pressable onPress={onDemo} accessibilityRole="button" style={styles.demo}>
+            <Text style={styles.demoText}>Use a demo photo</Text>
+          </Pressable>
+        )}
+      </View>
+    );
+  }
   return (
     <View style={styles.picked}>
-      <Pressable
-        onPress={onAdd}
-        disabled={full}
-        accessibilityRole="button"
-        accessibilityLabel={pill}
-        style={[styles.drop, { borderColor: cover ? colors.brand : colors.brandLight }]}
-      >
-        {cover && <Image source={{ uri: cover }} style={StyleSheet.absoluteFill} accessibilityIgnoresInvertColors />}
-        <View style={styles.dropPill}>
-          <Icon name="camera" size={20} color={colors.brand} />
-          <Text style={styles.dropText}>{pill}</Text>
-        </View>
-      </Pressable>
-      {!cover && onDemo && (
-        <Pressable onPress={onDemo} accessibilityRole="button" style={styles.demo}>
-          <Text style={styles.demoText}>Use a demo photo</Text>
-        </Pressable>
-      )}
-      {cover && (
-        <>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs}>
-            {photos.map((uri, i) => (
-              <Pressable
-                key={uri}
-                onPress={() => onRemove(i)}
-                accessibilityRole="button"
-                accessibilityLabel={`Remove photo ${i + 1}`}
-                style={styles.thumb}
-              >
-                <Image source={{ uri }} style={StyleSheet.absoluteFill} accessibilityIgnoresInvertColors />
-                <View style={styles.remove}>
-                  <Text style={styles.removeText}>×</Text>
-                </View>
-              </Pressable>
-            ))}
-          </ScrollView>
-          <Text style={styles.pickedText}>
-            {photos.length} of {max} photos · the first is the cover · tap one to remove
-          </Text>
-        </>
-      )}
+      <View style={[styles.preview, brutal(3), { aspectRatio }]}>
+        <Image source={{ uri: cover }} style={StyleSheet.absoluteFill} accessibilityIgnoresInvertColors />
+        {photos.length < max && (
+          <Pressable onPress={onAdd} accessibilityRole="button" style={[styles.addMore, brutal(2)]}>
+            <Icon name="camera" size={15} color={colors.ink} />
+            <Text style={styles.addMoreText}>Add more</Text>
+          </Pressable>
+        )}
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs}>
+        {photos.map((uri, i) => (
+          <Pressable
+            key={uri}
+            onPress={() => onRemove(i)}
+            accessibilityRole="button"
+            accessibilityLabel={`Remove photo ${i + 1}`}
+            style={styles.thumb}
+          >
+            <Image source={{ uri }} style={StyleSheet.absoluteFill} accessibilityIgnoresInvertColors />
+            <View style={styles.remove}>
+              <Text style={styles.removeText}>×</Text>
+            </View>
+          </Pressable>
+        ))}
+      </ScrollView>
+      <Text style={styles.pickedText}>
+        {photos.length} of {max} photos · the first is the cover · tap one to remove
+      </Text>
     </View>
   );
 }
@@ -113,21 +116,28 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 2,
     borderStyle: "dashed",
+    borderColor: colors.brandLight,
     backgroundColor: colors.canvas,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  dropPill: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 8,
-    backgroundColor: "rgba(255,255,255,0.94)",
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
   },
   dropText: { color: colors.brand, ...font(700, 14) },
+  preview: { width: "100%", borderRadius: 18, overflow: "hidden", backgroundColor: colors.canvas },
+  addMore: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: colors.surface,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  addMoreText: { color: colors.ink, ...font(700, 13) },
   demo: {
     alignSelf: "flex-start",
     backgroundColor: colors.brandSoft,

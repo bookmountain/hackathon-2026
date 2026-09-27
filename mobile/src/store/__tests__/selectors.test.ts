@@ -36,9 +36,9 @@ describe("selectMe", () => {
   });
 
   it("uses the avatar style saved on the device until the API returns one", () => {
-    const style = { mode: "icon", text: "", icon: "paw", shape: "soft", ring: "gold" } as const;
+    const style = { mode: "Icon", text: "", icon: "Paw", shape: "Soft", ring: "Gold" } as const;
     expect(selectMe({ ...signedIn, localAvatarStyle: style }).avatarStyle).toEqual(style);
-    const fromApi = { ...style, ring: "sky" } as const;
+    const fromApi = { ...style, ring: "Sky" } as const;
     const me = { ...ME, profile: { ...ME.profile!, avatarStyle: fromApi } };
     const withApi = { ...signedIn, localAvatarStyle: style, session: { ...signedIn.session, me } };
     expect(selectMe(withApi).avatarStyle).toEqual(fromApi);

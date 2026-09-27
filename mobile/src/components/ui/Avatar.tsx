@@ -24,30 +24,30 @@ export function avatarLook(index: number | null | undefined, nick: string) {
 }
 
 export const AVATAR_ICONS: Record<AvatarIcon, IconName> = {
-  compass: "avCompass",
-  book: "avBook",
-  coffee: "avCoffee",
-  music: "avMusic",
-  code: "avCode",
-  leaf: "avLeaf",
-  camera: "avCamera",
-  ball: "avBall",
-  paw: "avPaw",
-  rocket: "avRocket",
+  Compass: "avCompass",
+  Book: "avBook",
+  Coffee: "avCoffee",
+  Music: "avMusic",
+  Code: "avCode",
+  Leaf: "avLeaf",
+  Camera: "avCamera",
+  Ball: "avBall",
+  Paw: "avPaw",
+  Rocket: "avRocket",
 };
 
 /** Corner radius as a share of the size: circle 50%, soft 32%, square 14% */
-export const AVATAR_SHAPES: Record<AvatarShape, number> = { circle: 0.5, soft: 0.32, square: 0.14 };
+export const AVATAR_SHAPES: Record<AvatarShape, number> = { Circle: 0.5, Soft: 0.32, Square: 0.14 };
 
 export const AVATAR_RINGS: Record<AvatarRing, string | null> = {
-  none: null,
-  gold: "#F4B740",
-  blue: "#2E5AA8",
-  navy: "#14142B",
-  sky: "#9AE6C4",
+  None: null,
+  Gold: "#F4B740",
+  Blue: "#2E5AA8",
+  Navy: "#14142B",
+  Sky: "#9AE6C4",
 };
 
-export const DEFAULT_AVATAR_STYLE: AvatarStyle = { mode: "initials", text: "", icon: "compass", shape: "circle", ring: "none" };
+export const DEFAULT_AVATAR_STYLE: AvatarStyle = { mode: "Initials", text: "", icon: "Compass", shape: "Circle", ring: "None" };
 
 type Props = {
   index: number | null | undefined;
@@ -55,12 +55,12 @@ type Props = {
   size?: number;
   /** Uploaded photo; wins over the preset colour */
   url?: string | null;
-  /** Shape, ring and initials/icon (your own avatar); plain initial circle without it */
+  /** Shape, ring and initials/icon; a plain initial circle without it */
   look?: AvatarStyle | null;
 };
 
 export default function Avatar({ index, nick, size = 40, url, look: style }: Props) {
-  const radius = size * AVATAR_SHAPES[style?.shape ?? "circle"];
+  const radius = size * AVATAR_SHAPES[style?.shape ?? "Circle"];
   if (url) {
     return (
       <Image
@@ -73,11 +73,11 @@ export default function Avatar({ index, nick, size = 40, url, look: style }: Pro
   const look = avatarLook(index, nick);
   const hidden = index == null || index < 0;
   const ring = style ? AVATAR_RINGS[style.ring] : null;
-  const text = !hidden && style?.mode === "initials" && style.text ? style.text.toUpperCase() : look.text;
-  const shape = AVATAR_SHAPES[style?.shape ?? "circle"];
+  const text = !hidden && style?.mode === "Initials" && style.text ? style.text.toUpperCase() : look.text;
+  const shape = AVATAR_SHAPES[style?.shape ?? "Circle"];
   const face = (dim: number) => (
     <View style={[styles.face, { width: dim, height: dim, borderRadius: dim * shape, backgroundColor: look.bg }]}>
-      {!hidden && style?.mode === "icon" ? (
+      {!hidden && style?.mode === "Icon" ? (
         <Icon name={AVATAR_ICONS[style.icon]} size={Math.round(dim * 0.58)} color={look.fg} strokeWidth={2} />
       ) : (
         <Text style={[font(800, Math.round(dim * (text.length > 1 ? 0.34 : 0.4))), { color: look.fg }]}>{text}</Text>

@@ -7,6 +7,7 @@ import {
   formatClock,
   freshCard,
   localView,
+  missedDay,
   nextMidnight,
   rollOver,
   simulateMissed,
@@ -54,25 +55,50 @@ describe("rollOver", () => {
     expect(rollOver(matched, at(2026, 9, 28, 8))).toMatchObject({ status: "Ready", match: null, lastMatchId: "a" });
   });
 
-  it("locks for 48 hours after a whole day without a draw", () => {
+  it("is Ready but flags a missed day after a whole day without a draw", () => {
     const rolled = rollOver(matched, at(2026, 9, 29, 8));
-    expect(rolled.status).toBe("Missed");
-    expect(rolled.lockUntil).toBe(new Date(2026, 8, 31).getTime());
+    expect(rolled.status).toBe("Ready");
+    expect(missedDay(rolled, at(2026, 9, 29, 8))).toBe(true);
+  });
+});
+
+describe("missed day", () => {
+  const matched = draw(freshCard, [person("a")], at(2026, 9, 27));
+
+  it("never counts for a brand-new deck", () => {
+    expect(missedDay(freshCard, at(2026, 9, 27))).toBe(false);
   });
 
-  it("reopens when the lock ends, without locking again", () => {
-    const locked = simulateMissed(matched, at(2026, 9, 28));
+  it("makes the next Draw lock the deck until midnight instead of dealing", () => {
+    const skipped = rollOver(matched, at(2026, 9, 29, 22));
+    const locked = draw(skipped, [person("b")], at(2026, 9, 29, 22));
+    expect(locked).toMatchObject({ status: "Missed", match: null, lastDrawDay: "2026-09-29" });
+    expect(locked.lockUntil).toBe(new Date(2026, 8, 30).getTime());
+    expect(localView(locked, at(2026, 9, 29, 22)).nextChangeAt).toEqual(new Date(2026, 8, 30));
+  });
+
+  it("opens a normal deck at midnight, which can deal", () => {
+    const locked = draw(rollOver(matched, at(2026, 9, 29, 22)), [], at(2026, 9, 29, 22));
     expect(rollOver(locked, at(2026, 9, 29, 23))).toBe(locked);
-    expect(rollOver(locked, at(2026, 9, 30, 0))).toEqual({ ...freshCard, lastMatchId: "a" });
+    const reopened = rollOver(locked, at(2026, 9, 30, 0));
+    expect(reopened.status).toBe("Ready");
+    expect(missedDay(reopened, at(2026, 9, 30, 0))).toBe(false);
+    expect(draw(reopened, [person("b")], at(2026, 9, 30, 9)).status).toBe("Matched");
+  });
+
+  it("can be simulated for the demo", () => {
+    const now = at(2026, 9, 27);
+    const skipped = simulateMissed(matched, now);
+    expect(skipped.status).toBe("Ready");
+    expect(missedDay(skipped, now)).toBe(true);
+    expect(draw(skipped, [person("b")], now).status).toBe("Missed");
   });
 });
 
 describe("views", () => {
-  it("counts down to midnight, or to the end of a lock", () => {
+  it("counts down to midnight", () => {
     const now = at(2026, 9, 27);
     expect(localView(freshCard, now).nextChangeAt).toEqual(new Date(2026, 8, 28));
-    const locked = simulateMissed(freshCard, now);
-    expect(localView(locked, now).nextChangeAt).toEqual(new Date(2026, 8, 29));
   });
 
   it("adds your own draw to the demo count", () => {
@@ -85,11 +111,23 @@ describe("views", () => {
   it("maps the API's card", () => {
     const view = apiView({
       status: "Matched",
-      match: { userId: "u1", displayName: "MiaReads", major: "Bachelor of Nursing", university: "Flinders", avatarUrl: null, avatarPreset: 2 },
+      match: {
+        userId: "u1",
+        displayName: "MiaReads",
+        major: "Bachelor of Nursing",
+        university: "Flinders",
+        avatarUrl: null,
+        avatarPreset: 2,
+        avatarStyle: { mode: "Icon", text: "", icon: "Leaf", shape: "Soft", ring: "Sky" },
+      },
       drawnToday: 150,
       nextChangeAt: "2026-09-28T00:00:00+09:30",
+      missedDay: false,
+      drawId: "d1",
     });
     expect(view.match).toMatchObject({ id: "u1", nick: "MiaReads", major: "Nursing", uni: "Flinders Uni" });
+    expect(view.drawId).toBe("d1");
+    expect(view.match?.avatarStyle).toMatchObject({ icon: "Leaf", shape: "Soft" });
     expect(view.nextChangeAt.toISOString()).toBe("2026-09-27T14:30:00.000Z");
   });
 });

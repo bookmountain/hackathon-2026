@@ -108,6 +108,7 @@ export default function SellScreen() {
             onRemove={removePhoto}
             onDemo={() => submit(async () => addPhotos([await downloadPhoto(DEMO_PHOTO)]))}
             emptyText="Upload product photo"
+            aspectRatio={1}
           />
           <AiPhotoPanel<ItemPhotoAnalysis>
             state={analysis.state}

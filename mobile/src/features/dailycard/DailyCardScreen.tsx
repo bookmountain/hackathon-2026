@@ -19,15 +19,20 @@ const MISSED_CLOCK = "#FF8A80";
 const RULES = [
   "One card a day. A fresh deck opens every midnight.",
   "You're matched with another student who drew today.",
-  "Miss a day and the deck locks for 48 hours.",
+  "Miss a day and your next draw only restarts the deck. It opens at midnight.",
 ];
 
 type Phase = "ready" | "spinning" | "matched" | "missed";
 
-const COPY: Record<Phase, { title: string; sub: (drawn: number) => string; clockLabel: string; clockColor: string }> = {
+type SubInfo = { drawnToday: number; missedDay: boolean };
+
+const COPY: Record<Phase, { title: string; sub: (info: SubInfo) => string; clockLabel: string; clockColor: string }> = {
   ready: {
     title: "Draw your card",
-    sub: (n) => `${n} students have drawn today. Flip a card to meet one of them.`,
+    sub: ({ drawnToday, missedDay }) =>
+      missedDay
+        ? "You missed yesterday, so drawing now restarts your deck. Your next card opens at midnight."
+        : `${drawnToday} students have drawn today. Flip a card to meet one of them.`,
     clockLabel: "Deck resets in",
     clockColor: colors.surface,
   },
@@ -45,7 +50,7 @@ const COPY: Record<Phase, { title: string; sub: (drawn: number) => string; clock
   },
   missed: {
     title: "Deck locked",
-    sub: () => "You missed a day, so your deck is paused for 48 hours. Come back when the timer ends.",
+    sub: () => "You missed a day, so this draw restarted your deck. Your next card opens at midnight.",
     clockLabel: "Unlocks in",
     clockColor: MISSED_CLOCK,
   },
@@ -90,7 +95,7 @@ function CardBack({ person }: { person: Person | null }) {
     <View style={[styles.face, styles.back]}>
       {person && (
         <>
-          <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} size={76} />
+          <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} look={person.avatarStyle} size={76} />
           <Text style={styles.backNick} numberOfLines={1}>
             {person.nick}
           </Text>
@@ -172,20 +177,22 @@ export default function DailyCardScreen() {
     return [turn(0), turn(180)];
   }, [rotation]);
 
-  const message = async (person: Person) => {
+  const message = async (person: Person, drawId: string | null) => {
     if (isDemoStudent(person)) {
       toast("This is a demo student, so there's no chat to open");
       return;
     }
     try {
-      await startChat(actions, { userId: person.id, text: "Hey! We drew each other on Dcard today" });
+      // drawId adds the "Daily card match · 27 Sep" line; the device copy only has the student
+      const to = drawId ? { drawId } : { userId: person.id };
+      await startChat(actions, { ...to, text: "Hey! We drew each other on Dcard today" });
     } catch (e) {
       toast(errorMessage(e));
     }
   };
 
   const onButton = () => {
-    if (phase === "missed") toast("Your deck unlocks when the timer ends");
+    if (phase === "missed") toast("Your deck opens again at midnight");
     else if (phase === "ready" && view) drawDailyCard(pool).catch((e) => toast(errorMessage(e)));
   };
 
@@ -213,7 +220,7 @@ export default function DailyCardScreen() {
         <View style={styles.intro}>
           <Text style={styles.title}>{copy.title}</Text>
           {view ? (
-            <Text style={styles.sub}>{copy.sub(view.drawnToday)}</Text>
+            <Text style={styles.sub}>{copy.sub(view)}</Text>
           ) : (
             <ActivityIndicator color={colors.brandLight} />
           )}
@@ -230,9 +237,11 @@ export default function DailyCardScreen() {
 
         {phase === "matched" && view?.match && (
           <View style={styles.matched}>
-            <Text style={styles.matchedText}>You both drew a card today. Only nickname, major & uni are shared.</Text>
+            <Text style={styles.matchedText}>
+              You&apos;re each other&apos;s card today. Only nickname, major, uni & avatar are shared.
+            </Text>
             <Pressable
-              onPress={() => message(view.match!)}
+              onPress={() => message(view.match!, view.drawId)}
               accessibilityRole="button"
               style={({ pressed }) => [styles.messageBtn, pressed && { backgroundColor: colors.brandPressed }]}
             >

@@ -79,6 +79,7 @@ export type PersonDto = {
   university: University;
   avatarUrl: string | null;
   avatarPreset: number | null;
+  avatarStyle: AvatarStyle | null;
 };
 
 // Flats
@@ -267,7 +268,8 @@ export type ChatSummaryDto = {
 };
 
 /** Send exactly one of userId, flatId or itemId */
-export type StartChatRequest = { userId?: string; flatId?: string; itemId?: string; text?: string };
+/** One of userId, flatId, itemId or drawId (your Dcard match, which adds a "Daily card match · 27 Sep" line) */
+export type StartChatRequest = { userId?: string; flatId?: string; itemId?: string; drawId?: string; text?: string };
 
 // Uploads
 
@@ -285,12 +287,12 @@ export type PhotoUploadResponse = {
 // Not built in the API yet (see FRONTEND-GAPS.md, "Endpoints the v4 design needs").
 // Until they exist the calls 404 and the app falls back (see isNotBuilt).
 
-export type AvatarMode = "initials" | "icon";
-export type AvatarShape = "circle" | "soft" | "square";
-export type AvatarRing = "none" | "gold" | "blue" | "navy" | "sky";
-export type AvatarIcon = "compass" | "book" | "coffee" | "music" | "code" | "leaf" | "camera" | "ball" | "paw" | "rocket";
+export type AvatarMode = "Initials" | "Icon";
+export type AvatarShape = "Circle" | "Soft" | "Square";
+export type AvatarRing = "None" | "Gold" | "Blue" | "Navy" | "Sky";
+export type AvatarIcon = "Compass" | "Book" | "Coffee" | "Music" | "Code" | "Leaf" | "Camera" | "Ball" | "Paw" | "Rocket";
 
-/** Extra look for your own avatar on top of avatarPreset (the colour) */
+/** The avatar builder's look on top of avatarPreset (the colour). `text` "" = the nickname's first letter. */
 export type AvatarStyle = { mode: AvatarMode; text: string; icon: AvatarIcon; shape: AvatarShape; ring: AvatarRing };
 
 export type PhotoAnalysisKind = "Item" | "Room";
@@ -329,6 +331,10 @@ export type DailyCardDto = {
   match: PersonDto | null;
   /** How many students have drawn today */
   drawnToday: number;
-  /** Next local midnight (Ready / Matched) or when the lock ends (Missed), with a UTC offset */
+  /** Next Adelaide midnight, with a UTC offset: the deck resets and a missed-day lock ends */
   nextChangeAt: string;
+  /** Ready after a day without drawing: pressing Draw locks the deck until midnight instead of dealing */
+  missedDay: boolean;
+  /** With Matched: send as drawId on POST /api/chats */
+  drawId: string | null;
 };

@@ -26,7 +26,7 @@ export default function ChatsScreen() {
             onPress={() => router.push({ pathname: "/chats/[id]", params: { id } })}
             style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.canvas }]}
           >
-            <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} size={50} />
+            <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} look={person.avatarStyle} size={50} />
             <View style={styles.text}>
               <View style={styles.topLine}>
                 <Text style={styles.nick}>{person.nick}</Text>

@@ -32,6 +32,10 @@ public class PhotoAiService(IOptions<AnthropicOptions> options, ILogger<PhotoAiS
 
     public bool IsConfigured => opts.IsConfigured;
 
+    /// <summary>The 503 when there's no Anthropic:ApiKey, and its ProblemDetails code.</summary>
+    public const string NotConfigured = "AI photo analysis isn't switched on for this server.",
+        NotConfiguredCode = "ai_not_configured";
+
     public async Task<ItemPhotoAnalysis> AnalyseItemAsync(Photo photo, CancellationToken ct)
     {
         var a = await AskAsync<ItemPhotoAnalysis>(photo, ItemPrompt, ItemSchema, ct);
@@ -58,8 +62,7 @@ public class PhotoAiService(IOptions<AnthropicOptions> options, ILogger<PhotoAiS
     private async Task<T> AskAsync<T>(Photo photo, string prompt, Dictionary<string, JsonElement> schema, CancellationToken ct)
     {
         if (!opts.IsConfigured)
-            throw new PhotoAiException(StatusCodes.Status503ServiceUnavailable,
-                "Photo analysis isn't set up on this server (Anthropic:ApiKey).");
+            throw new PhotoAiException(StatusCodes.Status503ServiceUnavailable, NotConfigured);
 
         Message response;
         try

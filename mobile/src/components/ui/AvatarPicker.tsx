@@ -5,11 +5,11 @@ import { AVATAR_COLORS, AVATAR_ICONS, AVATAR_RINGS } from "./Avatar";
 import Icon from "./Icon";
 import Segmented from "./Segmented";
 
-type Show = AvatarMode | "anonymous";
+type Show = AvatarMode | "Anonymous";
 
 const ICON_KEYS = Object.keys(AVATAR_ICONS) as AvatarIcon[];
 const RING_KEYS = Object.keys(AVATAR_RINGS) as AvatarRing[];
-const SHAPE_KEYS: AvatarShape[] = ["circle", "soft", "square"];
+const SHAPE_KEYS: AvatarShape[] = ["Circle", "Soft", "Square"];
 const SELECTED_RING = `0 0 0 3px ${colors.canvas}, 0 0 0 5px ${colors.brand}`;
 
 const pick = <T,>(list: readonly T[]): T => list[Math.floor(Math.random() * list.length)];
@@ -20,7 +20,7 @@ export function surpriseAvatar(current: AvatarStyle): { preset: number; style: A
     preset: Math.floor(Math.random() * AVATAR_COLORS.length),
     style: {
       ...current,
-      mode: pick<AvatarMode>(["initials", "icon", "icon"]),
+      mode: pick<AvatarMode>(["Initials", "Icon", "Icon"]),
       icon: pick(ICON_KEYS),
       shape: pick(SHAPE_KEYS),
       ring: pick(RING_KEYS),
@@ -48,7 +48,7 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 // "Customise avatar" panel: initials or icon, colour, shape and ring
 export default function AvatarPicker({ preset, style, nick, onChange }: Props) {
   const anonymous = preset < 0;
-  const show: Show = anonymous ? "anonymous" : style.mode;
+  const show: Show = anonymous ? "Anonymous" : style.mode;
   const [bg, fg] = AVATAR_COLORS[Math.max(0, preset) % AVATAR_COLORS.length];
   const initial = (nick.replace(/[^A-Za-z]/g, "").charAt(0) || "U").toUpperCase();
   const setStyle = (change: Partial<AvatarStyle>) => onChange(preset, { ...style, ...change });
@@ -58,16 +58,16 @@ export default function AvatarPicker({ preset, style, nick, onChange }: Props) {
       <Section label="Show">
         <Segmented<Show>
           value={show}
-          onChange={(v) => (v === "anonymous" ? onChange(-1, style) : onChange(Math.max(0, preset), { ...style, mode: v }))}
+          onChange={(v) => (v === "Anonymous" ? onChange(-1, style) : onChange(Math.max(0, preset), { ...style, mode: v }))}
           options={[
-            { value: "initials", label: "Initials" },
-            { value: "icon", label: "Icon" },
-            { value: "anonymous", label: "Anonymous" },
+            { value: "Initials", label: "Initials" },
+            { value: "Icon", label: "Icon" },
+            { value: "Anonymous", label: "Anonymous" },
           ]}
         />
       </Section>
 
-      {show === "initials" && (
+      {show === "Initials" && (
         <Section label="Initials (1–2 letters)">
           <TextInput
             value={style.text}
@@ -82,7 +82,7 @@ export default function AvatarPicker({ preset, style, nick, onChange }: Props) {
         </Section>
       )}
 
-      {show === "icon" && (
+      {show === "Icon" && (
         <Section label="Icon">
           <View style={styles.iconGrid}>
             {ICON_KEYS.map((key) => {
@@ -92,7 +92,7 @@ export default function AvatarPicker({ preset, style, nick, onChange }: Props) {
                   <Pressable
                     onPress={() => setStyle({ icon: key })}
                     accessibilityRole="button"
-                    accessibilityLabel={`${key} icon`}
+                    accessibilityLabel={`${key.toLowerCase()} icon`}
                     accessibilityState={{ selected }}
                     style={[
                       styles.iconTile,
@@ -133,9 +133,9 @@ export default function AvatarPicker({ preset, style, nick, onChange }: Props) {
               value={style.shape}
               onChange={(shape) => setStyle({ shape })}
               options={[
-                { value: "circle", label: "Circle" },
-                { value: "soft", label: "Soft" },
-                { value: "square", label: "Square" },
+                { value: "Circle", label: "Circle" },
+                { value: "Soft", label: "Soft" },
+                { value: "Square", label: "Square" },
               ]}
             />
           </Section>
@@ -149,7 +149,7 @@ export default function AvatarPicker({ preset, style, nick, onChange }: Props) {
                     key={key}
                     onPress={() => setStyle({ ring: key })}
                     accessibilityRole="button"
-                    accessibilityLabel={key === "none" ? "No ring" : `${key} ring`}
+                    accessibilityLabel={key === "None" ? "No ring" : `${key.toLowerCase()} ring`}
                     accessibilityState={{ selected }}
                     style={[
                       styles.ring,
@@ -157,7 +157,7 @@ export default function AvatarPicker({ preset, style, nick, onChange }: Props) {
                       selected && { boxShadow: `0 0 0 2px ${colors.canvas}, 0 0 0 4px ${colors.brand}` },
                     ]}
                   >
-                    {key === "none" && <Text style={styles.ringOff}>off</Text>}
+                    {key === "None" && <Text style={styles.ringOff}>off</Text>}
                   </Pressable>
                 );
               })}
