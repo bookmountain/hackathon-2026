@@ -1,22 +1,31 @@
-import { useState } from "react";
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useRef, useState } from "react";
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "@/components/ui";
 import { colors, font } from "@/theme";
 
 type Props = { photos: string[]; start: number; onClose: () => void };
 
-// Full-screen photo viewer: close, "2/4", prev/next and a thumbnail strip
+// Full-screen photo viewer: swipe between photos, close, "2/4" and a thumbnail strip
 export default function Lightbox({ photos, start, onClose }: Props) {
+  const { width } = useWindowDimensions();
+  // A SafeAreaView inside a Modal gets zero insets on iOS, which put the close
+  // button under the status bar where it can't be tapped; pad with the app's insets
+  const insets = useSafeAreaInsets();
+  const pager = useRef<ScrollView>(null);
   const [index, setIndex] = useState(start);
   const multi = photos.length > 1;
-  const step = (by: number) => setIndex((i) => (i + by + photos.length) % photos.length);
+
+  const show = (i: number) => {
+    setIndex(i);
+    pager.current?.scrollTo({ x: i * width, animated: true });
+  };
 
   return (
     <Modal visible animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <SafeAreaView style={styles.screen}>
+      <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.header}>
-          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" style={styles.close}>
+          <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close" style={styles.close}>
             <Icon name="close" color={colors.surface} />
           </Pressable>
           <Text style={styles.count}>
@@ -25,26 +34,34 @@ export default function Lightbox({ photos, start, onClose }: Props) {
           <View style={styles.spacer} />
         </View>
 
-        <View style={styles.stage}>
-          <Image source={{ uri: photos[index] }} style={StyleSheet.absoluteFill} resizeMode="contain" accessibilityIgnoresInvertColors />
-          {multi && (
-            <>
-              <Pressable onPress={() => step(-1)} accessibilityRole="button" accessibilityLabel="Previous photo" style={[styles.nav, { left: 12 }]}>
-                <Icon name="back" color={colors.surface} />
-              </Pressable>
-              <Pressable onPress={() => step(1)} accessibilityRole="button" accessibilityLabel="Next photo" style={[styles.nav, { right: 12 }]}>
-                <Icon name="chevronRight" color={colors.surface} />
-              </Pressable>
-            </>
-          )}
-        </View>
+        <ScrollView
+          ref={pager}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          contentOffset={{ x: start * width, y: 0 }}
+          scrollEventThrottle={32}
+          onScroll={(e) => setIndex(Math.round(e.nativeEvent.contentOffset.x / width))}
+          style={styles.stage}
+        >
+          {photos.map((uri, i) => (
+            <Image
+              key={uri}
+              source={{ uri }}
+              style={{ width }}
+              resizeMode="contain"
+              accessibilityLabel={`Photo ${i + 1} of ${photos.length}`}
+              accessibilityIgnoresInvertColors
+            />
+          ))}
+        </ScrollView>
 
         {multi && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs} style={styles.strip}>
             {photos.map((uri, i) => (
               <Pressable
                 key={uri}
-                onPress={() => setIndex(i)}
+                onPress={() => show(i)}
                 accessibilityRole="button"
                 accessibilityLabel={`Photo ${i + 1}`}
                 accessibilityState={{ selected: i === index }}
@@ -55,7 +72,7 @@ export default function Lightbox({ photos, start, onClose }: Props) {
             ))}
           </ScrollView>
         )}
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 }
@@ -73,18 +90,7 @@ const styles = StyleSheet.create({
   },
   count: { color: colors.surface, ...font(700, 13) },
   spacer: { width: 40 },
-  stage: { flex: 1, justifyContent: "center" },
-  nav: {
-    position: "absolute",
-    top: "50%",
-    marginTop: -22,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.16)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  stage: { flex: 1 },
   strip: { flexGrow: 0 },
   thumbs: { height: 78, gap: 8, paddingTop: 10, paddingHorizontal: 16, paddingBottom: 20 },
   thumb: {
