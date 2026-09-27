@@ -77,7 +77,7 @@ jobs:
           fi
 
           curl --fail --silent http://127.0.0.1:5090/swagger/v1/swagger.json >/dev/null
-          curl --fail --silent http://127.0.0.1:5091/api/v1/info >/dev/null
+          curl --fail --silent http://127.0.0.1:8025/api/v1/info >/dev/null
           curl --fail --silent http://127.0.0.1:5090/api/flats/options >/dev/null
           curl --fail --silent -H 'Content-Type: application/json' \
             -d '{"email":"a1900000@adelaide.edu.au","password":"password123"}' \

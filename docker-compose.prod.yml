@@ -32,12 +32,11 @@ services:
       retries: 20
 
   mailpit:
-    # Catches every email the API sends. Inbox UI is on vm100 only:
-    #   ssh -L 8025:127.0.0.1:5091 book@192.168.4.106, then open http://localhost:8025
+    # Catches every email the API sends. Inbox UI on the LAN: http://192.168.4.106:8025
     image: axllent/mailpit
     restart: unless-stopped
     ports:
-      - "127.0.0.1:5091:8025"
+      - "8025:8025"
 
   api:
     build:
