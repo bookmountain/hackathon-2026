@@ -135,8 +135,16 @@ public class DailyCardController(
         }
         if (mine.SessionRestart)
             return new(DrawStatus.Missed, null, drawnToday, nextChangeAt, false, null, canReset);
+        var matchProfile = mine.MatchedUser?.Profile;
+        MatchDetails? details = null;
+        if (matchProfile is not null)
+        {
+            var myInterests = await db.Profiles.Where(p => p.UserId == me).Select(p => p.Interests).FirstOrDefaultAsync() ?? [];
+            details = new(matchProfile.Pronouns, matchProfile.YearOfStudy, matchProfile.Bio, matchProfile.Interests,
+                matchProfile.Interests.Where(myInterests.Contains).ToList());
+        }
         return new(DrawStatus.Matched, mine.MatchedUser is { } u ? chats.ToPerson(u) : null,
-            drawnToday, nextChangeAt, false, mine.Id, canReset);
+            drawnToday, nextChangeAt, false, mine.Id, canReset, details);
     }
 
     /// <summary>The last day before today on which the student pressed Draw, or null if they never have.</summary>

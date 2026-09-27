@@ -181,7 +181,9 @@ Draw one card a day to meet a random fellow student. All of these need a login t
 - `GET /api/daily-card`: `status` is `Ready` ("Draw your card"), `Matched` ("Your card today") or `Missed`
   ("Deck locked"). Also `drawnToday` ("143 students have drawn today") and `nextChangeAt`, the next Adelaide
   midnight, for all three clocks ("Deck resets in", "Next draw in", "Unlocks in"). With `Matched`: `match`
-  (nickname, major, uni and avatar, like a chat) and `drawId`.
+  (nickname, major, uni and avatar, like a chat), `drawId`, and `details` for the rest of the card:
+  `pronouns`, `yearOfStudy`, `bio`, `interests` and `sharedInterests` (the ones you have too). Only your
+  daily match sees these.
 - `POST /api/daily-card/draw`: the Draw button. It returns the same thing, and does nothing if you've already drawn
   today. 409 if nobody is left to draw.
 - `POST /api/daily-card/reset` (demo servers only): starts your card over so you can draw again, for running
