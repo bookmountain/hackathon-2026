@@ -1,7 +1,7 @@
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { useState } from "react";
-import { Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { maskAuDate } from "@/lib/auDate";
+import { Modal, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { formatAuDate, parseAuDate } from "@/lib/auDate";
 import { colors, font } from "@/theme";
 import Button from "./Button";
 import FieldLabel from "./FieldLabel";
@@ -9,40 +9,95 @@ import Icon from "./Icon";
 
 type DateProps = {
   label?: string;
-  /** "DD/MM/YYYY" as typed (maybe unfinished) */
+  /** "DD/MM/YYYY", or "" for none */
   value: string;
   onChange: (text: string) => void;
   placeholder?: string;
-  /** Shown under the field, e.g. when the date doesn't exist */
+  /** Shown under the field */
   error?: string | null;
+  /** Earliest pickable day; defaults to today (every date the app asks for is today or later) */
+  minimumDate?: Date;
 };
 
-// Typed DD/MM/YYYY date: digits only, the slashes go in by themselves
-export default function DateField({ label, value, onChange, placeholder = "DD/MM/YYYY", error }: DateProps) {
-  const [focused, setFocused] = useState(false);
-  const field = (
-    <View>
-      <TextInput
-        value={value}
-        onChangeText={(t) => onChange(maskAuDate(t))}
-        placeholder={placeholder}
-        placeholderTextColor={colors.faint}
-        keyboardType="number-pad"
-        maxLength={10}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        style={[styles.field, styles.input, focused && styles.focused, !!error && { borderColor: colors.danger }]}
-      />
-      <View pointerEvents="none" style={styles.icon}>
-        <Icon name="calendar" size={18} color={colors.brand} />
-      </View>
-    </View>
-  );
+const startOfToday = () => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+// A date from the system picker: a calendar sheet on iOS, the date dialog on Android
+export default function DateField({ label, value, onChange, placeholder = "Pick a date", error, minimumDate }: DateProps) {
+  const [iosOpen, setIosOpen] = useState(false);
+  const min = minimumDate ?? startOfToday();
+  const current = parseAuDate(value);
+  const [draft, setDraft] = useState<Date>(current ?? min);
+
+  const open = () => {
+    const start = current && current >= min ? current : min;
+    if (Platform.OS === "android") {
+      DateTimePickerAndroid.open({
+        value: start,
+        mode: "date",
+        minimumDate: min,
+        onValueChange: (_e, d) => onChange(formatAuDate(d)),
+      });
+      return;
+    }
+    setDraft(start);
+    setIosOpen(true);
+  };
+
   return (
     <View style={styles.group}>
       {label ? <FieldLabel>{label}</FieldLabel> : null}
-      {field}
+      <Pressable
+        onPress={open}
+        accessibilityRole="button"
+        accessibilityLabel={label ?? "Date"}
+        accessibilityValue={{ text: value || placeholder }}
+        style={[styles.field, styles.pressable, !!error && { borderColor: colors.danger }]}
+      >
+        <Text style={[styles.value, !value && { color: colors.faint }]}>{value || placeholder}</Text>
+        <View pointerEvents="none" style={styles.icon}>
+          <Icon name="calendar" size={18} color={colors.brand} />
+        </View>
+      </Pressable>
       {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      {Platform.OS === "ios" && (
+        <Modal visible={iosOpen} transparent animationType="slide" onRequestClose={() => setIosOpen(false)}>
+          <Pressable style={styles.backdrop} onPress={() => setIosOpen(false)} />
+          <View style={styles.sheet}>
+            <DateTimePicker
+              value={draft}
+              mode="date"
+              display="inline"
+              minimumDate={min}
+              accentColor={colors.brand}
+              themeVariant="light"
+              onValueChange={(_e, d) => setDraft(d)}
+            />
+            <Button
+              label="Done"
+              onPress={() => {
+                onChange(formatAuDate(draft));
+                setIosOpen(false);
+              }}
+            />
+            {!!value && (
+              <Button
+                label="Clear date"
+                variant="outline"
+                size="md"
+                onPress={() => {
+                  onChange("");
+                  setIosOpen(false);
+                }}
+              />
+            )}
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -128,8 +183,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: colors.surface,
   },
-  input: { paddingLeft: 16, paddingRight: 44, color: colors.ink, ...font(600, 15) },
-  focused: { borderColor: colors.brand },
   icon: { position: "absolute", right: 14, top: 0, bottom: 0, justifyContent: "center" },
   pressable: { paddingHorizontal: 16, justifyContent: "center" },
   value: { color: colors.ink, ...font(600, 15) },
