@@ -5,7 +5,7 @@ import { colors, font } from "@/theme";
 // "$245/wk" price pill on the map; coral while its sheet is open
 export default function FlatPin({ flat, selected }: { flat: Flat; selected: boolean }) {
   return (
-    <View style={[styles.pin, { backgroundColor: selected ? colors.coral : colors.brand }]}>
+    <View style={[styles.pin, { backgroundColor: selected ? colors.pinCoral : colors.pinBlue }]}>
       <Text style={styles.text}>${flat.price}/wk</Text>
     </View>
   );
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 2,
     borderColor: colors.surface,
-    boxShadow: "0 4px 12px rgba(20,20,43,0.4)",
+    boxShadow: "0 4px 12px rgba(15,18,38,0.4)",
   },
   text: { color: colors.surface, ...font(800, 12.5) },
 });

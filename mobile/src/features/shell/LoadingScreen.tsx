@@ -1,14 +1,14 @@
-import { router } from "expo-router";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, ScreenHeader } from "@/components/ui";
 import { colors, font } from "@/theme";
+import { goBack } from "@/lib/goBack";
 
 // Detail screen placeholder while its data loads, or when loading failed
 export function LoadingScreen({ error, onRetry }: { error?: string; onRetry: () => void }) {
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
-      <ScreenHeader onBack={() => router.back()} bordered={false} />
+      <ScreenHeader onBack={() => goBack()} bordered={false} />
       <View style={styles.body}>
         {error ? (
           <>

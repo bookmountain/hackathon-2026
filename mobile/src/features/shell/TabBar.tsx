@@ -1,8 +1,11 @@
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { router } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Animated, Easing, Pressable, StyleSheet, Text, useAnimatedValue, View } from "react-native";
 import { Icon, type IconName } from "@/components/ui";
 import { useDailyCardReady } from "@/features/dailycard/useDailyCard";
+import { TAB_POPS } from "@/features/stickers/pops";
+import { useStickerPop } from "@/features/stickers/StickerPop";
 import { colors, font } from "@/theme";
 import { emitTabSwitch } from "./tabSwitch";
 
@@ -37,6 +40,7 @@ function Slot({ label, icon, color, onPress, selected }: {
 // "Draw card" button, Market and More. Active tab in ink.
 export default function TabBar({ state, navigation, insets }: BottomTabBarProps) {
   const drawReady = useDailyCardReady();
+  const pop = useStickerPop();
   const tabs = state.routes.flatMap((route, index) => {
     const tab = TABS[route.name];
     if (!tab) return [];
@@ -52,6 +56,7 @@ export default function TabBar({ state, navigation, insets }: BottomTabBarProps)
           if (!focused && !event.defaultPrevented) {
             emitTabSwitch();
             navigation.navigate(route.name);
+            if (TAB_POPS[route.name]) pop(TAB_POPS[route.name]);
           }
         }}
       />,
@@ -66,17 +71,47 @@ export default function TabBar({ state, navigation, insets }: BottomTabBarProps)
       <Slot label="More" icon="more" color={colors.faint} onPress={() => router.push("/about")} />
 
       <View pointerEvents="box-none" style={styles.drawRow}>
-        <Pressable
-          onPress={() => router.push("/daily-card")}
-          accessibilityRole="button"
-          accessibilityLabel={drawReady ? "Draw card, today's card is ready" : "Draw card"}
-          style={({ pressed }) => [styles.draw, pressed && { backgroundColor: colors.yellowPressed }]}
-        >
-          <Icon name="cards" size={26} color={colors.ink} strokeWidth={2.1} />
-          {drawReady && <View style={styles.badge} />}
-        </Pressable>
+        <DrawButton ready={drawReady} />
       </View>
     </View>
+  );
+}
+
+// Every 3s: still for most of it, then a quick shake (the design's ucWiggle)
+const WIGGLE = { input: [0, 0.76, 0.8, 0.84, 0.88, 0.92, 0.96, 1], rotate: [0, 0, -14, 11, -8, 5, -2, 0] };
+
+// Yellow "Draw card" button: ink-bordered, in a white ring, on an ink ledge it sinks into
+function DrawButton({ ready }: { ready: boolean }) {
+  const [pressed, setPressed] = useState(false);
+  const wiggle = useAnimatedValue(0);
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(wiggle, { toValue: 1, duration: 3000, easing: Easing.linear, useNativeDriver: true }),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [wiggle]);
+
+  const rotate = wiggle.interpolate({ inputRange: WIGGLE.input, outputRange: WIGGLE.rotate.map((d) => `${d}deg`) });
+  const scale = wiggle.interpolate({ inputRange: [0, 0.76, 0.8, 0.84, 0.88, 1], outputRange: [1, 1, 1.06, 1.06, 1, 1] });
+  return (
+    <Animated.View style={{ transform: [{ rotate }, { scale }] }}>
+      <View style={[styles.drawLedge, { top: pressed ? 4 : 6 }]} />
+      <Pressable
+        onPress={() => router.push("/daily-card")}
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
+        accessibilityRole="button"
+        accessibilityLabel={ready ? "Draw card, today's card is ready" : "Draw card"}
+        style={[styles.drawRing, pressed && { transform: [{ translateY: 4 }] }]}
+      >
+        <View style={[styles.draw, pressed && { backgroundColor: colors.yellowPressed }]}>
+          <Icon name="cards" size={26} color={colors.ink} strokeWidth={2.1} />
+          {ready && <View style={styles.badge} />}
+        </View>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -92,17 +127,17 @@ const styles = StyleSheet.create({
   },
   tab: { flex: 1, alignItems: "center", gap: 5 },
   label: { ...font(600, 11) },
-  drawRow: { position: "absolute", top: -20, left: 0, right: 0, alignItems: "center" },
+  drawRow: { position: "absolute", top: -24, left: 0, right: 0, alignItems: "center" },
+  drawLedge: { position: "absolute", left: 0, width: 64, height: 64, borderRadius: 32, backgroundColor: colors.ink },
+  drawRing: { width: 64, height: 64, borderRadius: 32, padding: 4, backgroundColor: colors.surface },
   draw: {
-    width: 56,
-    height: 56,
+    flex: 1,
     borderRadius: 28,
-    borderWidth: 4,
-    borderColor: colors.surface,
+    borderWidth: 3,
+    borderColor: colors.ink,
     backgroundColor: colors.yellow,
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0 6px 16px -3px rgba(244,183,64,0.7)",
   },
   badge: {
     position: "absolute",

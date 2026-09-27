@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Keyboard } from "react-native";
 import type MapView from "react-native-maps";
 import { onTabSwitch } from "@/features/shell/tabSwitch";
-import { CBD_REGION } from "./geometry";
+import { MAIN_REGION } from "./geometry";
 
 /** What the bottom sheet shows: search results, or the card of a tapped pin */
 export type MapSelection<K extends string> = { kind: "results" } | { kind: K; id: string } | null;
@@ -32,7 +32,7 @@ export function useMapSearch<K extends string>() {
     /** Back to the opening view, sheet closed */
     recenter: () => {
       setSheet(null);
-      mapRef.current?.animateToRegion(CBD_REGION, 400);
+      mapRef.current?.animateToRegion(MAIN_REGION, 400);
     },
     query,
     sheet,

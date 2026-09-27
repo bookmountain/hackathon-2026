@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Icon, Segmented } from "@/components/ui";
-import { brutal, colors, divider, font } from "@/theme";
+import { StyleSheet, Text, View } from "react-native";
+import { GamePressable, Icon, Segmented } from "@/components/ui";
+import { colors, divider, font } from "@/theme";
 
 export type TabView = "map" | "list";
 
@@ -26,14 +26,15 @@ export default function ViewToolbar({ view, onViewChange, action }: Props) {
           ]}
         />
       </View>
-      <Pressable
+      <GamePressable
+        kind="sm"
         onPress={action.onPress}
         accessibilityRole="button"
-        style={({ pressed }) => [styles.action, pressed && { backgroundColor: colors.brandPressed }]}
+        faceStyle={(pressed) => [styles.action, pressed && { backgroundColor: colors.brandPressed }]}
       >
         <Icon name="plus" size={14} color={colors.surface} />
         <Text style={styles.actionText}>{action.label}</Text>
-      </Pressable>
+      </GamePressable>
     </View>
   );
 }
@@ -55,7 +56,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 11,
     backgroundColor: colors.brand,
-    ...brutal(3),
     flexDirection: "row",
     alignItems: "center",
     gap: 6,

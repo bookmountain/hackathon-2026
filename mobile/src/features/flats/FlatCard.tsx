@@ -1,12 +1,12 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Photo, Pill } from "@/components/ui";
+import { StyleSheet, Text, View } from "react-native";
+import { GamePressable, Photo, Pill } from "@/components/ui";
 import type { Flat } from "@/data/types";
-import { colors, font, shadows } from "@/theme";
+import { colors, font } from "@/theme";
 
 // Room card in the list view
 export default function FlatCard({ flat, onPress }: { flat: Flat; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={styles.card}>
+    <GamePressable kind="card" onPress={onPress} accessibilityRole="button" faceStyle={styles.card}>
       <Photo uri={flat.photo} tone={colors.brandSoft} label="room photo" style={styles.photo}>
         <View style={styles.price}>
           <Text style={styles.priceText}>
@@ -28,12 +28,12 @@ export default function FlatCard({ flat, onPress }: { flat: Flat; onPress: () =>
           <Pill label={`${flat.walkF} min to Flinders City`} />
         </View>
       </View>
-    </Pressable>
+    </GamePressable>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: colors.surface, borderRadius: 22, overflow: "hidden", ...shadows.card },
+  card: { backgroundColor: colors.surface, borderRadius: 22, overflow: "hidden" },
   photo: { aspectRatio: 16 / 9 },
   price: {
     position: "absolute",

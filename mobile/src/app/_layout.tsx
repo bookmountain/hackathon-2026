@@ -8,7 +8,7 @@ import {
 } from "@expo-google-fonts/dm-sans";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ToastProvider } from "@/components/feedback/Toast";
+import { StickerPopProvider } from "@/features/stickers/StickerPop";
 import { AppStoreProvider } from "@/store";
 import { colors } from "@/theme";
 
@@ -26,10 +26,10 @@ export default function RootLayout() {
 
   return (
     <AppStoreProvider>
-      <ToastProvider>
+      <StickerPopProvider>
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.surface } }} />
         <StatusBar style="dark" />
-      </ToastProvider>
+      </StickerPopProvider>
     </AppStoreProvider>
   );
 }

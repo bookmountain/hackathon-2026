@@ -51,6 +51,8 @@ export default function MiniMap({ region, children, onPressPoint, label, footer,
           rotateEnabled={false}
           pitchEnabled={false}
           toolbarEnabled={false}
+          // The design greys out read-only previews; maps you pin on stay in colour
+          mapType={picker ? "standard" : "mutedStandard"}
           // Lite mode renders a cheap static image on Android for previews
           liteMode={!picker && Platform.OS === "android"}
           onPress={picker ? (e) => onPressPoint(e.nativeEvent.coordinate) : undefined}

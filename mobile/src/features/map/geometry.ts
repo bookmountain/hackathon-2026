@@ -9,6 +9,17 @@ export const CBD_REGION: Region = {
   longitudeDelta: 0.018,
 };
 
+/**
+ * Opening view of the full-screen tab maps: the design's centre (-34.9310, 138.5950)
+ * as it renders there: North Adelaide at the top down to Unley, the CBD in the middle
+ */
+export const MAIN_REGION: Region = {
+  latitude: -34.931,
+  longitude: 138.595,
+  latitudeDelta: 0.05,
+  longitudeDelta: 0.038,
+};
+
 /** Where "You" sits for the demo (Rundle Mall). Swap for device location later. */
 export const YOU: MapPoint = { latitude: -34.92284, longitude: 138.6026 };
 

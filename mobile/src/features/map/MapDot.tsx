@@ -8,10 +8,18 @@ export type MapDotKind = "pin" | "evpin" | "dot";
 
 type Look = { color: string; halo: number; haloColor: string; haloOpacity: number; size: number; stroke: string; strokeWidth: number };
 
+/** Soft drop shadow under the dot; the event pin has none */
+const SHADOW: Record<MapDotKind, string | undefined> = {
+  pin: "0 2px 6px rgba(10,26,63,0.35)",
+  evpin: undefined,
+  dot: "0 2px 6px rgba(10,26,63,0.3)",
+};
+
+// The design's map script colours: its own blue halo and a warm yellow ring round events
 const KINDS: Record<MapDotKind, Look> = {
-  pin: { color: colors.brand, halo: 34, haloColor: colors.brand, haloOpacity: 0.22, size: 16, stroke: colors.surface, strokeWidth: 3 },
-  evpin: { color: colors.coral, halo: 34, haloColor: colors.yellow, haloOpacity: 0.4, size: 14, stroke: colors.ink, strokeWidth: 2.5 },
-  dot: { color: colors.brandLight, halo: 0, haloColor: colors.brandLight, haloOpacity: 0, size: 12, stroke: colors.surface, strokeWidth: 2 },
+  pin: { color: colors.pinBlue, halo: 34, haloColor: "#1F5BFF", haloOpacity: 0.22, size: 16, stroke: colors.surface, strokeWidth: 3 },
+  evpin: { color: colors.pinCoral, halo: 34, haloColor: "#FFC940", haloOpacity: 0.4, size: 14, stroke: colors.pinInk, strokeWidth: 2.5 },
+  dot: { color: colors.brandLight, halo: 0, haloColor: colors.brandLight, haloOpacity: 0, size: 12, stroke: colors.surface, strokeWidth: 2.5 },
 };
 
 type Props = MapPoint & {
@@ -36,7 +44,7 @@ export default function MapDot({ latitude, longitude, kind = "pin", selected, on
   const base = KINDS[kind];
   const look: Look = {
     ...base,
-    ...(kind === "dot" && selected ? { color: colors.ink, size: 18 } : null),
+    ...(kind === "dot" && selected ? { color: colors.pinInk, size: 18 } : null),
     ...Object.fromEntries(Object.entries(override).filter(([, v]) => v !== undefined)),
   };
   const haloColor = override.color && kind !== "evpin" ? override.color : look.haloColor;
@@ -64,6 +72,7 @@ export default function MapDot({ latitude, longitude, kind = "pin", selected, on
             backgroundColor: look.color,
             borderColor: look.stroke,
             borderWidth: look.strokeWidth,
+            boxShadow: SHADOW[kind],
           }}
         />
       </View>

@@ -1,14 +1,20 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Icon, Photo } from "@/components/ui";
+import { StyleSheet, Text, View } from "react-native";
+import { GamePressable, Icon, Photo } from "@/components/ui";
 import type { Item } from "@/data/types";
-import { colors, font, shadows } from "@/theme";
+import { colors, font } from "@/theme";
 import { availabilityColors, availabilityShort, isSold } from "./logic";
 
 // Square card in the Market grid; sold items are faded
 export default function ItemCard({ item, onPress }: { item: Item; onPress: () => void }) {
   const badge = availabilityColors(item.avail);
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.card, isSold(item) && styles.sold]}>
+    <GamePressable
+      kind="card"
+      onPress={onPress}
+      accessibilityRole="button"
+      style={[styles.cell, isSold(item) && styles.sold]}
+      faceStyle={styles.card}
+    >
       <Photo uri={item.photo} tone={colors.brandSoft} label={item.cat} style={styles.photo}>
         {item.avail !== "Available now" && (
           <View style={[styles.badge, { backgroundColor: badge.bg }]}>
@@ -28,12 +34,13 @@ export default function ItemCard({ item, onPress }: { item: Item; onPress: () =>
           </Text>
         </View>
       </View>
-    </Pressable>
+    </GamePressable>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { flex: 1, minWidth: 0, backgroundColor: colors.surface, borderRadius: 18, overflow: "hidden", ...shadows.card },
+  cell: { flex: 1, minWidth: 0 },
+  card: { backgroundColor: colors.surface, borderRadius: 18, overflow: "hidden" },
   sold: { opacity: 0.55 },
   photo: { aspectRatio: 1 },
   badge: { position: "absolute", left: 8, top: 8, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4 },

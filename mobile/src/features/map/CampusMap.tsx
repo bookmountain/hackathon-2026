@@ -2,7 +2,7 @@ import type { ReactNode, Ref } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CBD_REGION } from "./geometry";
+import { MAIN_REGION } from "./geometry";
 import YouMarker from "./YouMarker";
 
 type Props = {
@@ -29,7 +29,7 @@ export default function CampusMap({ children, onBackgroundPress, overlay, ref }:
       <MapView
         ref={ref}
         style={StyleSheet.absoluteFill}
-        initialRegion={CBD_REGION}
+        initialRegion={MAIN_REGION}
         rotateEnabled={false}
         pitchEnabled={false}
         toolbarEnabled={false}

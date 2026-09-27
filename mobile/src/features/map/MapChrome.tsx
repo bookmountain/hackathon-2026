@@ -1,11 +1,11 @@
 import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Avatar, AVATAR_SHAPES, ChipRow, Icon } from "@/components/ui";
+import { Avatar, AVATAR_SHAPES, ChipRow, GamePressable, Icon } from "@/components/ui";
 import { selectMe, useAppStore } from "@/store";
-import { brutal, colors, font } from "@/theme";
+import { colors, font } from "@/theme";
 
-type ChipOption = { label: string; active: boolean; onPress: () => void };
+type ChipOption = { label: string; active: boolean; removable?: boolean; onPress: () => void };
 
 type Props = {
   placeholder: string;
@@ -26,6 +26,9 @@ type Props = {
   action: { label: string; onPress: () => void };
 };
 
+/** Your avatar button, top right */
+const ME = 52;
+
 // Floating controls over the full-bleed map: search, your avatar, filter chips,
 // recenter, the list switch and the tab's main action
 export default function MapChrome(props: Props) {
@@ -33,6 +36,7 @@ export default function MapChrome(props: Props) {
   const insets = useSafeAreaInsets();
   const { state } = useAppStore();
   const me = selectMe(state);
+  const shape = me.avatarStyle?.shape ?? "Circle";
 
   return (
     <>
@@ -73,14 +77,16 @@ export default function MapChrome(props: Props) {
             </Pressable>
           )}
         </View>
-        <Pressable
+        <GamePressable
+          // The design's game look: round button when the avatar is a circle, a big button otherwise
+          kind={shape === "Circle" ? "round" : "cta"}
           onPress={() => router.push("/profile")}
           accessibilityRole="button"
           accessibilityLabel="Profile"
-          style={[styles.me, { borderRadius: 52 * AVATAR_SHAPES[me.avatarStyle?.shape ?? "Circle"] }]}
+          faceStyle={[styles.me, { borderRadius: ME * AVATAR_SHAPES[shape] }]}
         >
-          <Avatar index={me.avatar} nick={me.nick} url={me.avatarUrl} look={me.avatarStyle} size={48} />
-        </Pressable>
+          <Avatar index={me.avatar} nick={me.nick} url={me.avatarUrl} look={me.avatarStyle} size={ME - 5} />
+        </GamePressable>
       </View>
 
       <View style={[styles.chips, { top: insets.top + 68 }]}>
@@ -89,27 +95,30 @@ export default function MapChrome(props: Props) {
 
       {!sheetOpen && (
         <>
-          <Pressable
+          <GamePressable
+            kind="round"
             onPress={props.onRecenter}
             accessibilityRole="button"
             accessibilityLabel="Recenter map"
-            style={styles.recenter}
+            style={styles.recenterSpot}
+            faceStyle={styles.recenter}
           >
             <Icon name="crosshair" size={24} color={colors.brand} strokeWidth={2.2} />
-          </Pressable>
+          </GamePressable>
           <View style={styles.bottom}>
-            <Pressable onPress={props.onList} accessibilityRole="button" style={styles.listButton}>
+            <GamePressable kind="cta" onPress={props.onList} accessibilityRole="button" faceStyle={styles.listButton}>
               <Icon name="list" size={18} color={colors.brand} />
               <Text style={styles.listText}>{props.listLabel}</Text>
-            </Pressable>
-            <Pressable
+            </GamePressable>
+            <GamePressable
+              kind="cta"
               onPress={props.action.onPress}
               accessibilityRole="button"
-              style={({ pressed }) => [styles.action, pressed && { backgroundColor: colors.brandPressed }]}
+              faceStyle={(pressed) => [styles.action, pressed && { backgroundColor: colors.brandPressed }]}
             >
               <Icon name="plus" size={18} color={colors.surface} />
               <Text style={styles.actionText}>{props.action.label}</Text>
-            </Pressable>
+            </GamePressable>
           </View>
         </>
       )}
@@ -124,30 +133,32 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 26,
     backgroundColor: colors.surface,
-    ...brutal(4),
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    paddingLeft: 4,
-    paddingRight: 6,
+    paddingLeft: 6,
+    paddingRight: 8,
   },
   round: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
   input: { flex: 1, minWidth: 0, height: 44, color: colors.ink, ...font(500, 15) },
   clear: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
   imageButton: { borderLeftWidth: 2, borderLeftColor: colors.brandSoft, borderRadius: 0 },
-  // The avatar's own shape sits inside the brutal frame
-  me: { width: 52, height: 52, overflow: "hidden", ...brutal(4), alignItems: "center", justifyContent: "center" },
+  // The avatar fills the bordered face
+  me: {
+    width: ME,
+    height: ME,
+    overflow: "hidden",
+    backgroundColor: colors.anon,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   chips: { position: "absolute", left: 0, right: 0, zIndex: 6 },
+  recenterSpot: { position: "absolute", right: 14, bottom: 86, zIndex: 6 },
   recenter: {
-    position: "absolute",
-    right: 14,
-    bottom: 86,
-    zIndex: 6,
     width: 52,
     height: 52,
     borderRadius: 26,
     backgroundColor: colors.surface,
-    ...brutal(4),
     alignItems: "center",
     justifyContent: "center",
   },
@@ -167,21 +178,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 24,
     backgroundColor: colors.surface,
-    ...brutal(4),
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
-  listText: { color: colors.brand, ...font(700, 14) },
+  // The design's game buttons set their label in 17px Bricolage
+  listText: { color: colors.brand, ...font(800, 17) },
   action: {
     height: 52,
     paddingHorizontal: 20,
     borderRadius: 16,
     backgroundColor: colors.brand,
-    ...brutal(4),
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
-  actionText: { color: colors.surface, ...font(800, 14.5) },
+  actionText: { color: colors.surface, ...font(800, 17) },
 });
