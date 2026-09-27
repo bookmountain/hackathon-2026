@@ -82,6 +82,8 @@ export type ItemDraft = {
   pickup: string;
   pin: MapPoint | null;
   placeName: string;
+  /** Editing: the saved condition note (the form has no input for it), sent back unchanged */
+  conditionNote?: string | null;
 };
 
 export const EMPTY_ITEM: ItemDraft = {
@@ -118,7 +120,7 @@ export function itemRequest(draft: ItemDraft, id: string, photoKeys: string[]): 
     description: draft.desc.trim() || null,
     category: draft.category ?? "StudyGear",
     condition: draft.condition ?? "Good",
-    conditionNote: null,
+    conditionNote: draft.conditionNote ?? null,
     availability: draft.avail,
     availableFrom: draft.avail === "From" && draft.from ? toDateOnly(draft.from) : null,
     pickupPointId: ownPin ? null : draft.pickup,

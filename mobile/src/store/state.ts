@@ -13,6 +13,16 @@ export type Session = {
   devCode: string | null;
 };
 
+/** Your own posts, for Profile's "My activity" */
+export type MyActivity = {
+  /** Upcoming events you host or joined, soonest first */
+  events: MeetupEvent[];
+  /** Rooms you listed, Taken ones too */
+  flats: Flat[];
+  /** Items you're selling, sold ones too */
+  items: Item[];
+};
+
 export type AppState = {
   session: Session;
   flats: Flat[];
@@ -26,6 +36,8 @@ export type AppState = {
   typingIn: string | null;
   /** Your avatar style saved on this device, until the API stores it */
   localAvatarStyle: AvatarStyle | null;
+  /** Null until Profile loads it */
+  mine: MyActivity | null;
 };
 
 export const signedOutSession: Session = { booted: true, token: null, me: null, email: "", devCode: null };
@@ -40,4 +52,5 @@ export const initialState: AppState = {
   messages: {},
   typingIn: null,
   localAvatarStyle: null,
+  mine: null,
 };

@@ -85,6 +85,7 @@ export function toFlat(f: FlatSummaryDto, now = new Date()): Flat {
     from: fromLabel(f.availableFrom, now),
     photo: f.coverPhotoUrl,
     mine: f.isMine,
+    taken: f.status === "Taken",
     latitude: f.lat,
     longitude: f.lng,
     tone: TONE,
@@ -192,6 +193,19 @@ export function toEvent(e: EventSummaryDto): MeetupEvent {
     joined: e.isGoing,
     host: e.isHost,
   };
+}
+
+/**
+ * "My activity" meetups: events you host that aren't over (GET /api/events/mine includes
+ * past ones) plus upcoming ones you joined (GET /api/events/going, which also lists the
+ * ones you host), each once, soonest first
+ */
+export function toMyEvents(hosted: EventSummaryDto[], going: EventSummaryDto[]): MeetupEvent[] {
+  const seen = new Set<string>();
+  return [...hosted.filter((e) => !e.isOver), ...going]
+    .filter((e) => !seen.has(e.id) && !!seen.add(e.id))
+    .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
+    .map(toEvent);
 }
 
 export function toEventDetail(d: EventDetailDto): EventDetail {

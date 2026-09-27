@@ -124,6 +124,8 @@ export type FlatDetailDto = {
   preferredFlatmate: string | null;
   housemates: string[];
   photoUrls: string[];
+  /** Same order as photoUrls; only for the owner (empty otherwise), to send back unchanged on PUT */
+  photoKeys: string[];
   campuses: CampusWalk[];
   owner: PersonDto;
 };
@@ -151,6 +153,8 @@ export type FlatRequest = {
   housemates: string[];
   photoKeys: string[];
 };
+
+export type FlatStatus = FlatSummaryDto["status"];
 
 // Market
 
@@ -182,6 +186,8 @@ export type ItemDetailDto = {
   summary: ItemSummaryDto;
   description: string | null;
   photoUrls: string[];
+  /** Same order as photoUrls; only for the seller (empty otherwise), to send back unchanged on PUT */
+  photoKeys: string[];
   seller: PersonDto;
 };
 
@@ -337,4 +343,19 @@ export type DailyCardDto = {
   missedDay: boolean;
   /** With Matched: send as drawId on POST /api/chats */
   drawId: string | null;
+  /** Demo server: POST /api/daily-card/reset works (older servers leave it out) */
+  canReset?: boolean;
+  /** With Matched: the rest of the card, which only your daily match sees */
+  details?: MatchDetailsDto | null;
+};
+
+export type MatchDetailsDto = {
+  pronouns: string | null;
+  /** 1 = first year */
+  yearOfStudy: number | null;
+  bio: string | null;
+  /** Tags, e.g. "board-games" */
+  interests: string[];
+  /** The ones you have too */
+  sharedInterests: string[];
 };

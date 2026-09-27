@@ -9,6 +9,8 @@ export type CalendarEvent = {
   /** Timed events default to an hour; all-day events cover the start date */
   end?: Date;
   allDay?: boolean;
+  /** Alerts before the start, as ISO 8601 durations ("P2D" = two days before); .ics only */
+  alarms?: string[];
 };
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -38,6 +40,11 @@ export function googleCalendarUrl(e: CalendarEvent): string {
 
 const escapeIcs = (s: string) => s.replace(/\\/g, "\\\\").replace(/([,;])/g, "\\$1").replace(/\r?\n/g, "\\n");
 
+/** A display alert `duration` before the start (Google links can't carry alarms) */
+export function valarm(duration: string, title: string): string[] {
+  return ["BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${escapeIcs(title)}`, `TRIGGER:-${duration}`, "END:VALARM"];
+}
+
 export function icsFile(e: CalendarEvent, now = new Date()): string {
   const [a, b] = range(e);
   const when = (v: string) => (e.allDay ? `;VALUE=DATE:${v}` : `;TZID=Australia/Adelaide:${v}`);
@@ -54,6 +61,7 @@ export function icsFile(e: CalendarEvent, now = new Date()): string {
     `SUMMARY:${escapeIcs(e.title)}`,
     `LOCATION:${escapeIcs(e.location)}`,
     `DESCRIPTION:${escapeIcs(e.details)}`,
+    ...(e.alarms ?? []).flatMap((d) => valarm(d, e.title)),
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");

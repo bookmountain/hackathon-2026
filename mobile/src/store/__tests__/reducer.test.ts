@@ -1,5 +1,5 @@
 import type { ChatThread } from "@/data/types";
-import { EVENT, ME } from "@/test/fixtures";
+import { EVENT, FLATS, ITEMS, ME } from "@/test/fixtures";
 import { reducer } from "../reducer";
 import { initialState, type AppState } from "../state";
 
@@ -41,6 +41,67 @@ describe("events", () => {
     const state = reducer(withEvent, { type: "setGoing", eventId: "e1", going: 30 });
     expect(state.events[0]).toMatchObject({ going: 30, full: true });
     expect(reducer(withEvent, { type: "removeEvent", eventId: "e1" }).events).toEqual([]);
+  });
+});
+
+describe("study levels (kept on the phone)", () => {
+  it("survives the same event coming back from the API without them", () => {
+    let state = reducer(initialState, { type: "putEvent", event: { ...EVENT, levels: ["PhD"] } });
+    state = reducer(state, { type: "setEvents", events: [EVENT] });
+    expect(state.events[0].levels).toEqual(["PhD"]);
+    state = reducer(state, { type: "putEvent", event: { ...EVENT, going: 16 } });
+    expect(state.events[0]).toMatchObject({ going: 16, levels: ["PhD"] });
+  });
+});
+
+describe("my activity", () => {
+  const hosted = { ...EVENT, id: "e-host", host: true, joined: true, startsAt: "2026-10-02T09:00:00Z" };
+  const going = { ...EVENT, joined: true };
+  let state: AppState;
+  beforeEach(() => {
+    state = reducer(initialState, { type: "setFlats", flats: FLATS });
+    state = reducer(state, { type: "setItems", items: ITEMS });
+    state = reducer(state, {
+      type: "setMine",
+      mine: { events: [going, hosted], flats: [FLATS[0]], items: [ITEMS[0]] },
+    });
+  });
+
+  it("drops an event you leave and adds one you join, soonest first", () => {
+    const left = reducer(state, { type: "putEvent", event: { ...going, joined: false } });
+    expect(left.mine?.events.map((e) => e.id)).toEqual(["e-host"]);
+    const joined = reducer(left, { type: "putEvent", event: going });
+    expect(joined.mine?.events.map((e) => e.id)).toEqual(["e1", "e-host"]);
+  });
+
+  it("removes a deleted event everywhere", () => {
+    const next = reducer(state, { type: "removeEvent", eventId: "e-host" });
+    expect(next.mine?.events.map((e) => e.id)).toEqual(["e1"]);
+  });
+
+  it("updates and removes rooms in both lists; Taken rooms leave search", () => {
+    const edited = reducer(state, { type: "putFlat", flat: { ...FLATS[0], title: "New title" } });
+    expect(edited.flats[0].title).toBe("New title");
+    expect(edited.mine?.flats[0].title).toBe("New title");
+    const taken = reducer(state, { type: "putFlat", flat: { ...FLATS[0], taken: true } });
+    expect(taken.flats.some((f) => f.id === FLATS[0].id)).toBe(false);
+    expect(taken.mine?.flats[0].taken).toBe(true);
+    const removed = reducer(state, { type: "removeFlat", flatId: FLATS[0].id });
+    expect(removed.flats).toHaveLength(FLATS.length - 1);
+    expect(removed.mine?.flats).toEqual([]);
+  });
+
+  it("updates and removes items in both lists", () => {
+    const edited = reducer(state, { type: "putItem", item: { ...ITEMS[0], price: 30 } });
+    expect(edited.items[0].price).toBe(30);
+    expect(edited.mine?.items[0].price).toBe(30);
+    const removed = reducer(state, { type: "removeItem", itemId: ITEMS[0].id });
+    expect(removed.items).toHaveLength(ITEMS.length - 1);
+    expect(removed.mine?.items).toEqual([]);
+  });
+
+  it("is forgotten on sign-out", () => {
+    expect(reducer(state, { type: "signOut" }).mine).toBeNull();
   });
 });
 

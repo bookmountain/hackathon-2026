@@ -1,4 +1,4 @@
-import { googleCalendarUrl, icsFile, icsFileName } from "../calendar";
+import { googleCalendarUrl, icsFile, icsFileName, valarm } from "../calendar";
 
 const timed = {
   id: "e1",
@@ -53,6 +53,32 @@ describe("icsFile", () => {
     const ics = icsFile({ ...timed, allDay: true }, now);
     expect(ics).toContain("DTSTART;VALUE=DATE:20261002");
     expect(ics).toContain("DTEND;VALUE=DATE:20261003");
+  });
+
+  it("has no alarms unless asked", () => {
+    expect(icsFile(timed, now)).not.toContain("VALARM");
+  });
+
+  it("adds a display alarm per reminder, inside the event", () => {
+    const lines = icsFile({ ...timed, alarms: ["P2D", "P1D"] }, now).split("\r\n");
+    expect(lines.filter((l) => l === "BEGIN:VALARM")).toHaveLength(2);
+    expect(lines).toContain("TRIGGER:-P2D");
+    expect(lines).toContain("TRIGGER:-P1D");
+    expect(lines).toContain("ACTION:DISPLAY");
+    expect(lines).toContain("DESCRIPTION:Pizza night · UCompass");
+    expect(lines.lastIndexOf("END:VALARM")).toBeLessThan(lines.indexOf("END:VEVENT"));
+  });
+});
+
+describe("valarm", () => {
+  it("fires the duration before the start and escapes the text", () => {
+    expect(valarm("P1D", "Pizza, drinks")).toEqual([
+      "BEGIN:VALARM",
+      "ACTION:DISPLAY",
+      "DESCRIPTION:Pizza\\, drinks",
+      "TRIGGER:-P1D",
+      "END:VALARM",
+    ]);
   });
 });
 

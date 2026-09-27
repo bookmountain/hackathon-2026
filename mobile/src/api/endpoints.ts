@@ -16,6 +16,7 @@ import type {
   EventSummaryDto,
   FlatDetailDto,
   FlatRequest,
+  FlatStatus,
   FlatSummaryDto,
   ItemAvailability,
   ItemDetailDto,
@@ -58,6 +59,13 @@ export const flats = {
   list: () => api<FlatSummaryDto[]>("/api/flats", { query: { sort: "newest" } }),
   get: (id: string) => api<FlatDetailDto>(`/api/flats/${id}`),
   create: (flat: FlatRequest) => api<FlatDetailDto>("/api/flats", { method: "POST", body: flat }),
+  /** Your own rooms, including ones marked Taken, newest first */
+  mine: () => api<FlatSummaryDto[]>("/api/flats/mine"),
+  /** Send the photo keys to keep (from the detail's photoKeys) plus any new ones uploaded for this id */
+  update: (id: string, flat: FlatRequest) => api<FlatDetailDto>(`/api/flats/${id}`, { method: "PUT", body: flat }),
+  /** Taken hides the room from search; Active lists it again */
+  setStatus: (id: string, status: FlatStatus) => api<void>(`/api/flats/${id}/status`, { method: "PUT", body: { status } }),
+  remove: (id: string) => api<void>(`/api/flats/${id}`, { method: "DELETE" }),
 };
 
 export const items = {
@@ -66,6 +74,11 @@ export const items = {
   pickupPoints: () => api<PickupPointDto[]>("/api/items/pickup-points"),
   get: (id: string) => api<ItemDetailDto>(`/api/items/${id}`),
   create: (item: ItemRequest) => api<ItemDetailDto>("/api/items", { method: "POST", body: item }),
+  /** Your own items, including sold ones, newest first */
+  mine: () => api<ItemSummaryDto[]>("/api/items/mine"),
+  /** Send the photo keys to keep (from the detail's photoKeys) plus any new ones uploaded for this id */
+  update: (id: string, item: ItemRequest) => api<ItemDetailDto>(`/api/items/${id}`, { method: "PUT", body: item }),
+  remove: (id: string) => api<void>(`/api/items/${id}`, { method: "DELETE" }),
   setAvailability: (id: string, availability: ItemAvailability, availableFrom: string | null = null) =>
     api<void>(`/api/items/${id}/availability`, { method: "PUT", body: { availability, availableFrom } }),
 };
@@ -74,6 +87,14 @@ export const events = {
   list: () => api<EventSummaryDto[]>("/api/events"),
   get: (id: string) => api<EventDetailDto>(`/api/events/${id}`),
   create: (event: EventRequest) => api<EventDetailDto>("/api/events", { method: "POST", body: event }),
+  /** Events you host, past ones too, newest start first */
+  mine: () => api<EventSummaryDto[]>("/api/events/mine"),
+  /** Upcoming events you've joined (hosted ones included), soonest first */
+  going: () => api<EventSummaryDto[]>("/api/events/going"),
+  /** Hosts only; everyone going hears "eventUpdated" */
+  update: (id: string, event: EventRequest) => api<EventDetailDto>(`/api/events/${id}`, { method: "PUT", body: event }),
+  /** Cancels your event; everyone going hears "eventCancelled" */
+  remove: (id: string) => api<void>(`/api/events/${id}`, { method: "DELETE" }),
   join: (id: string) => api<EventSummaryDto>(`/api/events/${id}/join`, { method: "POST" }),
   leave: (id: string) => api<EventSummaryDto>(`/api/events/${id}/join`, { method: "DELETE" }),
 };
@@ -109,4 +130,7 @@ export const imageSearch = {
 export const dailyCard = {
   get: () => api<DailyCardDto>("/api/daily-card"),
   draw: () => api<DailyCardDto>("/api/daily-card/draw", { method: "POST" }),
+  /** Demo servers only: start today over, or (missedDay) pretend yesterday was skipped */
+  reset: (missedDay = false) =>
+    api<DailyCardDto>(`/api/daily-card/reset${missedDay ? "?missedDay=true" : ""}`, { method: "POST" }),
 };

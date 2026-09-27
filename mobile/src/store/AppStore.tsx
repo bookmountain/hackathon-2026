@@ -3,9 +3,18 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type
 import { setToken, setUnauthorizedHandler } from "@/api/client";
 import * as api from "@/api/endpoints";
 import { connectRealtime, type Realtime } from "@/api/realtime";
-import type { AuthResponse, AvatarStyle, ChatMessageDto, Me, StartChatRequest } from "@/api/types";
-import { previewOf, toEvent, toFlat, toItem, toMessage, toPickup, toThread } from "@/data/adapters";
-import type { MeetupEvent } from "@/data/types";
+import type {
+  AuthResponse,
+  AvatarStyle,
+  ChatMessageDto,
+  EventRequest,
+  FlatRequest,
+  ItemRequest,
+  Me,
+  StartChatRequest,
+} from "@/api/types";
+import { previewOf, toEvent, toFlat, toItem, toMessage, toMyEvents, toPickup, toThread } from "@/data/adapters";
+import type { Flat, Item, MeetupEvent, Pickup } from "@/data/types";
 import { reducer } from "./reducer";
 import { selectSignedIn } from "./selectors";
 import { initialState, type AppState } from "./state";
@@ -80,6 +89,14 @@ function useStoreValue() {
       dispatch({ type: "setChats", chats: chats.map(toThread) });
     };
 
+    /** The safe pickup points (they name items' pickups), loaded once */
+    const ensurePickups = async (): Promise<Pickup[]> => {
+      if (stateRef.current.pickups.length) return stateRef.current.pickups;
+      const pickups = (await api.items.pickupPoints()).map(toPickup);
+      dispatch({ type: "setPickups", pickups });
+      return pickups;
+    };
+
     const receiveMessage = (dto: ChatMessageDto) => {
       if (!stateRef.current.chats.some((c) => c.id === dto.conversationId)) {
         // Someone started a new chat with you
@@ -151,6 +168,70 @@ function useStoreValue() {
       },
 
       putEvent: (event: MeetupEvent) => dispatch({ type: "putEvent", event }),
+
+      /** Save your event; `levels` (Study events) are kept on this phone, the API has no field for them */
+      updateEvent: async (id: string, req: EventRequest, levels?: string[]): Promise<MeetupEvent> => {
+        const event = toEvent((await api.events.update(id, req)).summary);
+        const updated = levels ? { ...event, levels } : event;
+        dispatch({ type: "putEvent", event: updated });
+        return updated;
+      },
+
+      /** Cancel your event; everyone going is told */
+      deleteEvent: async (id: string) => {
+        await api.events.remove(id);
+        dispatch({ type: "removeEvent", eventId: id });
+      },
+
+      /** Leave an event you joined; resolves to the updated event */
+      leaveEvent: async (id: string): Promise<MeetupEvent> => {
+        const updated = toEvent(await api.events.leave(id));
+        dispatch({ type: "putEvent", event: updated });
+        return updated;
+      },
+
+      /** Profile's "My activity": meetups you host or joined, your rooms and your listings */
+      loadMine: async () => {
+        const [hosted, going, flats, items, pickups] = await Promise.all([
+          api.events.mine(),
+          api.events.going(),
+          api.flats.mine(),
+          api.items.mine(),
+          ensurePickups(),
+        ]);
+        const now = new Date();
+        dispatch({
+          type: "setMine",
+          mine: {
+            events: toMyEvents(hosted, going),
+            flats: flats.map((f) => toFlat(f, now)),
+            items: items.map((i) => toItem(i, pickups, now)),
+          },
+        });
+      },
+
+      updateFlat: async (id: string, req: FlatRequest): Promise<Flat> => {
+        const flat = toFlat((await api.flats.update(id, req)).summary);
+        dispatch({ type: "putFlat", flat });
+        return flat;
+      },
+
+      deleteFlat: async (id: string) => {
+        await api.flats.remove(id);
+        dispatch({ type: "removeFlat", flatId: id });
+      },
+
+      updateItem: async (id: string, req: ItemRequest): Promise<Item> => {
+        const [detail, pickups] = await Promise.all([api.items.update(id, req), ensurePickups()]);
+        const item = toItem(detail.summary, pickups);
+        dispatch({ type: "putItem", item });
+        return item;
+      },
+
+      deleteItem: async (id: string) => {
+        await api.items.remove(id);
+        dispatch({ type: "removeItem", itemId: id });
+      },
 
       /** Join / "Going ✓"; resolves to the updated event */
       toggleJoin: async (event: MeetupEvent): Promise<MeetupEvent> => {

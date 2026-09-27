@@ -54,7 +54,8 @@ export function useLoad<T>(load: () => Promise<T>, key: string) {
 
   // Ignore a result left over from the previous key
   const current = state.key === key ? state : { key };
-  return { data: current.data, error: current.error, reload: () => setAttempt((a) => a + 1) };
+  const reload = useCallback(() => setAttempt((a) => a + 1), []);
+  return { data: current.data, error: current.error, reload };
 }
 
 /** Runs a form action once at a time; failures show the API's message in a toast */

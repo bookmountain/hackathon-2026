@@ -94,4 +94,8 @@ describe("selling", () => {
       availableFrom: "2026-10-01",
     });
   });
+
+  it("sends an edited item's condition note back", () => {
+    expect(itemRequest({ ...ready, conditionNote: "Some highlighting" }, "item-1", []).conditionNote).toBe("Some highlighting");
+  });
 });

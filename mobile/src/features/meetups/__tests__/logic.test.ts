@@ -9,6 +9,7 @@ import {
   fillPercent,
   filterEvents,
   joinLabel,
+  levelTags,
 } from "../logic";
 
 const now = new Date(2026, 8, 26, 16, 0); // Sat 26 Sep 2026, 4pm
@@ -67,6 +68,18 @@ describe("eventRequest", () => {
     });
     expect(body).toMatchObject({ placeId: null, placeName: "Rymill Park", lat: -34.9235, lng: 138.6155, walkInsWelcome: false });
   });
+
+  it("keeps an edited event's length and its preset place's name", () => {
+    const start = new Date("2026-10-01T09:30:00Z");
+    const kept = { startsAt: start.toISOString(), endsAt: "2026-10-01T12:00:00Z", placeId: "barr-smith-library", placeName: "Barr Smith, Level 2" };
+    const moved = new Date("2026-10-02T09:30:00Z");
+    expect(eventRequest({ ...EMPTY_EVENT, title: "Revision", when: moved, kept })).toMatchObject({
+      endsAt: "2026-10-02T12:00:00.000Z",
+      placeName: "Barr Smith, Level 2",
+    });
+    // Moved to another place: that place's own name
+    expect(eventRequest({ ...EMPTY_EVENT, title: "Revision", when: moved, where: "hub-central", kept }).placeName).toBeNull();
+  });
 });
 
 describe("calendarEntry", () => {
@@ -83,6 +96,23 @@ describe("calendarEntry", () => {
     const entry = calendarEntry({ ...EVENT, startsAt: "2026-09-29T09:30:00Z", endsAt: "2026-09-29T10:00:00Z" });
     expect(entry.end!.toISOString()).toBe("2026-09-29T10:00:00.000Z");
     expect(entry.details).toBe("Walk-in welcome. Host & guests stay anonymous on UCompass.");
+    expect(entry.alarms).toBeUndefined();
+  });
+
+  it("carries the reminders as .ics alarms", () => {
+    expect(calendarEntry(EVENT, "", ["P2D", "P1D"]).alarms).toEqual(["P2D", "P1D"]);
+  });
+});
+
+describe("levelTags", () => {
+  it("says all study levels when the event has none or includes Everyone", () => {
+    expect(levelTags(EVENT)).toEqual(["All study levels"]);
+    expect(levelTags({ ...EVENT, levels: [] })).toEqual(["All study levels"]);
+    expect(levelTags({ ...EVENT, levels: ["Everyone"] })).toEqual(["All study levels"]);
+  });
+
+  it("lists the chosen levels", () => {
+    expect(levelTags({ ...EVENT, levels: ["Postgrad", "PhD"] })).toEqual(["Postgrad", "PhD"]);
   });
 });
 

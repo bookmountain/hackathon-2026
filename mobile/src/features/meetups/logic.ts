@@ -2,7 +2,7 @@ import type { EventRequest } from "@/api/types";
 import type { EventCategory, MapPoint, MeetupEvent } from "@/data/types";
 import type { CalendarEvent } from "@/lib/calendar";
 
-export const EVENT_CATEGORIES: EventCategory[] = ["Study", "Casual", "Social", "Food"];
+export const EVENT_CATEGORIES: EventCategory[] = ["Study", "Social", "Casual", "Food"];
 
 /** Chips over the meetups map */
 export type MeetupWhen = "any" | "today" | "weekend" | "week";
@@ -67,8 +67,11 @@ export function fillPercent(event: MeetupEvent): number {
 /** Events without an end time go in the calendar as two hours long */
 const DEFAULT_LENGTH_MS = 2 * 60 * 60 * 1000;
 
-/** "Add to calendar" entry for an event; the list has no description, the detail page does */
-export function calendarEntry(event: MeetupEvent, desc = ""): CalendarEvent {
+/**
+ * "Add to calendar" entry for an event; the list has no description, the detail
+ * page does. `alarms` are .ics triggers for the chosen reminders ("P1D").
+ */
+export function calendarEntry(event: MeetupEvent, desc = "", alarms: string[] = []): CalendarEvent {
   const start = new Date(event.startsAt);
   return {
     id: `event-${event.id}`,
@@ -77,10 +80,17 @@ export function calendarEntry(event: MeetupEvent, desc = ""): CalendarEvent {
     details: `${desc ? `${desc}\n\n` : ""}Walk-in welcome. Host & guests stay anonymous on UCompass.`,
     start,
     end: event.endsAt ? new Date(event.endsAt) : new Date(start.getTime() + DEFAULT_LENGTH_MS),
+    ...(alarms.length ? { alarms } : null),
   };
 }
 
-export const JOIN_TOAST = "You're in. Just walk in — no one sees your name.";
+export const JOIN_TOAST = "You're in! Set a reminder if you'd like one.";
+
+/** "For …" pills on a Study event; no levels (the API has none yet) or "Everyone" = all */
+export function levelTags(event: MeetupEvent): string[] {
+  const levels = event.levels?.length ? event.levels : ["Everyone"];
+  return levels.includes("Everyone") ? ["All study levels"] : levels;
+}
 
 /** Label of the Join toggle on cards and sheets */
 export function joinLabel(event: MeetupEvent): string {
@@ -100,6 +110,8 @@ export type EventDraft = {
   desc: string;
   cap: number;
   walkIn: boolean;
+  /** Editing: what the form can't show, sent back so the PUT doesn't clear it */
+  kept?: { startsAt: string; endsAt: string | null; placeId: string | null; placeName: string | null };
 };
 
 export const EMPTY_EVENT: EventDraft = {
@@ -125,6 +137,13 @@ export function eventProblem(draft: EventDraft, now: Date = new Date()): string 
   return null;
 }
 
+/** An edited event keeps its length: the end moves with the start */
+function keptEnd(kept: EventDraft["kept"], start: Date): string | null {
+  if (!kept?.endsAt) return null;
+  const shift = start.getTime() - new Date(kept.startsAt).getTime();
+  return new Date(new Date(kept.endsAt).getTime() + shift).toISOString();
+}
+
 /**
  * POST /api/events body. The picked time is an instant, so ISO (UTC) keeps it
  * exact; the API returns Adelaide-time labels for display.
@@ -135,10 +154,10 @@ export function eventRequest(draft: EventDraft & { when: Date }): EventRequest {
     title: draft.title.trim(),
     type: draft.cat,
     startsAt: draft.when.toISOString(),
-    endsAt: null,
+    endsAt: keptEnd(draft.kept, draft.when),
     description: draft.desc.trim() || null,
     placeId: pin ? null : draft.where,
-    placeName: pin ? draft.place.trim() || null : null,
+    placeName: pin ? draft.place.trim() || null : draft.kept?.placeId === draft.where ? draft.kept.placeName : null,
     lat: pin?.latitude ?? null,
     lng: pin?.longitude ?? null,
     capacity: draft.cap,

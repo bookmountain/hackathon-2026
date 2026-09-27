@@ -55,6 +55,8 @@ export type Flat = MapPoint & {
   /** Cover photo URL (expires after 24 h) */
   photo: string | null;
   mine: boolean;
+  /** Your own room marked Taken (hidden from search); only seen in your own lists */
+  taken?: boolean;
   tone: string;
 };
 
@@ -116,6 +118,8 @@ export type MeetupEvent = {
   /** You tapped Join (hosts count as going) */
   joined: boolean;
   host: boolean;
+  /** Study events: who it's for ("Everyone", "Undergrad", …). Not in the API yet, so usually absent. */
+  levels?: string[];
 };
 
 export type EventDetail = MeetupEvent & { desc: string };

@@ -1,5 +1,5 @@
 import { ITEMS, NOW, PICKUPS, eventDto, flatDto, itemDto, messageDto } from "@/test/fixtures";
-import { majorLabel, previewOf, toEvent, toFlat, toItem, toMessage, toThread } from "../adapters";
+import { majorLabel, previewOf, toEvent, toFlat, toItem, toMessage, toMyEvents, toThread } from "../adapters";
 
 describe("majorLabel", () => {
   it("shows the subject, like the design's majors", () => {
@@ -105,5 +105,19 @@ describe("chat", () => {
         lastMessageAt: "2026-09-26T12:19:58Z",
       }),
     ).toMatchObject({ person: { nick: "TomTheTutor", major: "Mathematics (Honours)", uni: "Adelaide Uni", avatar: 4 }, unread: 2 });
+  });
+});
+
+describe("toMyEvents", () => {
+  it("merges hosted and joined events once each, soonest first, without past hosted ones", () => {
+    const hosted = [
+      eventDto({ id: "h-past", isHost: true, isOver: true, startsAt: "2026-09-01T09:00:00+00:00" }),
+      eventDto({ id: "h1", isHost: true, isGoing: true, startsAt: "2026-10-05T09:00:00+00:00" }),
+    ];
+    const going = [
+      eventDto({ id: "g1", isGoing: true, startsAt: "2026-09-29T09:30:00+00:00" }),
+      eventDto({ id: "h1", isHost: true, isGoing: true, startsAt: "2026-10-05T09:00:00+00:00" }),
+    ];
+    expect(toMyEvents(hosted, going).map((e) => e.id)).toEqual(["g1", "h1"]);
   });
 });
