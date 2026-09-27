@@ -5,12 +5,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
 import type { ConsentsResponse, ConsentType } from "@/api/types";
-import { Button, Checkbox, Icon } from "@/components/ui";
+import { Button, Checkbox, GamePressable, Icon } from "@/components/ui";
 import { useToast } from "@/components/feedback/Toast";
 import { selectMe, selectSignedIn, useAppStore } from "@/store";
 import { colors, divider, font } from "@/theme";
 import { PRIVACY_LINKS } from "./constants";
 import { goToApp } from "./navigation";
+import { goBack } from "@/lib/goBack";
 
 type Consents = { terms: boolean; location: boolean; age: boolean };
 
@@ -26,7 +27,10 @@ function fromApi(res: ConsentsResponse): Consents {
 }
 
 const SUMMARY = [
-  ["Others only ever see", "Your nickname, major and uni. An avatar only if you choose one."],
+  [
+    "Others only ever see",
+    "Your nickname, major and uni. An avatar only if you choose one. Your daily card match also sees your year, pronouns, bio and interests.",
+  ],
   ["Location is approximate", "Snapped to a campus zone, never your exact spot or home address."],
   ["We never share or sell", "Your email, real name or student ID. Delete your account and data anytime."],
 ] as const;
@@ -81,14 +85,14 @@ export default function ConsentScreen() {
         usageStats: false,
       });
       const me = await actions.refreshMe();
-      if (reviewing) router.back();
+      if (reviewing) goBack("/login");
       else if (me.profile) goToApp();
       else router.push("/setup");
     });
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.badge}>
           <Icon name="shield" size={14} color={colors.brand} />
@@ -115,6 +119,19 @@ export default function ConsentScreen() {
             </Text>
           </View>
         </View>
+
+        <GamePressable
+          kind="row"
+          onPress={() => setConsents(ready ? NO_CONSENTS : { terms: true, location: true, age: true })}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: ready }}
+          faceStyle={[styles.all, ready ? styles.allOn : styles.allOff]}
+        >
+          <View style={[styles.allBox, ready ? styles.allBoxOn : styles.allOff]}>
+            {ready && <Icon name="check" size={14} color={colors.surface} />}
+          </View>
+          <Text style={styles.allLabel}>Agree to all</Text>
+        </GamePressable>
 
         {CHECKS.map((c) => (
           <Checkbox
@@ -161,10 +178,31 @@ const styles = StyleSheet.create({
   summaryRow: { backgroundColor: colors.canvas, paddingHorizontal: 16, paddingVertical: 14, gap: 3 },
   summaryTitle: { color: colors.ink, ...font(700, 14) },
   summaryText: { color: colors.body, ...font(500, 13.5, 1.45) },
+  all: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 2,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  allOn: { borderColor: colors.brand, backgroundColor: colors.brandSoft },
+  allOff: { borderColor: colors.checkbox, backgroundColor: colors.surface },
+  allBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 7,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  allBoxOn: { borderColor: colors.brand, backgroundColor: colors.brand },
+  allLabel: { color: colors.ink, ...font(800, 14.5) },
   footer: {
     paddingHorizontal: 24,
     paddingTop: 12,
-    paddingBottom: 12,
+    paddingBottom: 34,
     ...divider.top,
   },
 });

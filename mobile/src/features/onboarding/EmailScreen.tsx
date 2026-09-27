@@ -5,11 +5,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ApiError } from "@/api/client";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
-import { BackButton, Button, FieldLabel, Icon, TextField } from "@/components/ui";
+import { BackButton, Button, FieldLabel, GamePressable, Icon, TextField } from "@/components/ui";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { continueOnboarding } from "./navigation";
 import { DEMO_EMAIL, DEMO_PASSWORD, isUniEmail, PASSWORD_MIN, UNI_EMAIL_ERROR } from "./uniEmail";
+import { goBack } from "@/lib/goBack";
 
 type Mode = "signIn" | "signUp";
 
@@ -69,10 +70,10 @@ export default function EmailScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-          <BackButton onPress={() => router.back()} />
+          <BackButton onPress={() => goBack("/login")} />
           <View style={styles.intro}>
             <Text style={styles.title}>{mode === "signIn" ? "Welcome back" : "Create your account"}</Text>
             <Text style={styles.text}>
@@ -109,18 +110,20 @@ export default function EmailScreen() {
             </View>
             <View style={styles.hintRow}>
               <Text style={styles.hint}>@adelaide.edu.au · @flinders.edu.au</Text>
-              <Pressable
+              <GamePressable
+                kind="sm"
                 hitSlop={6}
+                accessibilityRole="button"
                 onPress={() => {
                   setMode("signIn");
                   setEmail(DEMO_EMAIL);
                   setPassword(DEMO_PASSWORD);
                   setError("");
                 }}
-                style={styles.demo}
+                faceStyle={(pressed) => [styles.demo, pressed && { backgroundColor: colors.brandSofter }]}
               >
                 <Text style={styles.demoText}>Use demo account</Text>
-              </Pressable>
+              </GamePressable>
             </View>
           </View>
 
@@ -161,7 +164,6 @@ export default function EmailScreen() {
             onPress={go}
             inactive={!filled}
             disabled={busy}
-            style={styles.cta}
           />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -172,7 +174,7 @@ export default function EmailScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
-  body: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 20, gap: 22 },
+  body: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 36, gap: 22 },
   intro: { gap: 8 },
   title: { color: colors.ink, ...font(800, 28, 1.15, -0.02) },
   text: { color: colors.muted, ...font(500, 15, 1.5) },
@@ -206,5 +208,4 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   noteText: { flex: 1, color: colors.body, ...font(500, 12.5, 1.45) },
-  cta: { height: 56 },
 });

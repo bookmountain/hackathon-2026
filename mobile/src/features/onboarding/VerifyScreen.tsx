@@ -1,13 +1,13 @@
-import { router } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as api from "@/api/endpoints";
 import { useSubmit } from "@/api/hooks";
-import { BackButton, Button } from "@/components/ui";
+import { BackButton, Button, GamePressable } from "@/components/ui";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { continueOnboarding } from "./navigation";
+import { goBack } from "@/lib/goBack";
 
 const CODE_LENGTH = 6;
 
@@ -26,9 +26,9 @@ export default function VerifyScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <KeyboardAvoidingView style={styles.body} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <BackButton onPress={() => router.back()} />
+        <BackButton onPress={() => goBack("/login")} />
         <View style={styles.intro}>
           <Text style={styles.title}>Check your uni inbox</Text>
           <Text style={styles.text}>
@@ -50,9 +50,15 @@ export default function VerifyScreen() {
           style={[styles.code, focused && { borderColor: colors.brand }]}
         />
         {devCode && (
-          <Pressable onPress={() => setCode(devCode)} style={styles.autofill}>
+          <GamePressable
+            kind="sm"
+            accessibilityRole="button"
+            onPress={() => setCode(devCode)}
+            style={styles.autofillWrap}
+            faceStyle={(pressed) => [styles.autofill, pressed && { backgroundColor: colors.brandSofter }]}
+          >
             <Text style={styles.autofillText}>Autofill demo code</Text>
-          </Pressable>
+          </GamePressable>
         )}
         <View style={styles.flex} />
         <Button
@@ -60,7 +66,6 @@ export default function VerifyScreen() {
           onPress={verify}
           inactive={!complete}
           disabled={busy}
-          weight={700}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -69,7 +74,7 @@ export default function VerifyScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  body: { flex: 1, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 20, gap: 20 },
+  body: { flex: 1, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 36, gap: 20 },
   flex: { flex: 1 },
   intro: { gap: 8 },
   title: { color: colors.ink, ...font(800, 28, 1.15, -0.02) },
@@ -85,8 +90,8 @@ const styles = StyleSheet.create({
     color: colors.ink,
     ...font(800, 28, undefined, 0.5),
   },
+  autofillWrap: { alignSelf: "flex-start" },
   autofill: {
-    alignSelf: "flex-start",
     backgroundColor: colors.brandSoft,
     borderRadius: 999,
     paddingHorizontal: 14,

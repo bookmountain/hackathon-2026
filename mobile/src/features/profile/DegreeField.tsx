@@ -47,8 +47,8 @@ export default function DegreeField({ university, value, onChange }: Props) {
     <View style={styles.group}>
       <FieldLabel>Major</FieldLabel>
       <Pressable onPress={() => setOpen(true)} accessibilityRole="button" style={styles.field}>
-        <Text style={[styles.value, !value && { color: colors.faint }]} numberOfLines={1}>
-          {value?.name ?? "Search for your degree"}
+        <Text style={styles.value} numberOfLines={1}>
+          {value?.name ?? "Select your major"}
         </Text>
         <Icon name="chevronDown" size={18} color={colors.muted} />
       </Pressable>
