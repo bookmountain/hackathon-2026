@@ -10,7 +10,16 @@ export function goToApp() {
   router.replace("/meetups");
 }
 
-/** After signing in: consent first, then the profile, then the app */
+/**
+ * After Setup saves the profile: "Make it yours", then the app. It replaces onboarding
+ * (like goToApp) so back from the app can't reach Setup again.
+ */
+export function goToPersona() {
+  if (router.canDismiss()) router.dismissAll();
+  router.replace({ pathname: "/persona", params: { from: "setup" } });
+}
+
+/** After signing in (returning users with a profile skip "Make it yours"): consent first, then the profile, then the app */
 export function continueOnboarding(me: Me) {
   if (!me.consentComplete) router.push("/consent");
   else if (!me.profile) router.push("/setup");

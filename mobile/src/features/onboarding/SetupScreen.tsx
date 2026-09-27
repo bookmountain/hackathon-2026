@@ -10,7 +10,7 @@ import { profileRequest } from "@/features/profile/profileRequest";
 import { selectMe, useAppStore } from "@/store";
 import { colors, font } from "@/theme";
 import { NICKNAME_MAX } from "./constants";
-import { goToApp } from "./navigation";
+import { goToPersona } from "./navigation";
 
 export default function SetupScreen() {
   const { state, actions } = useAppStore();
@@ -31,13 +31,12 @@ export default function SetupScreen() {
         profileRequest(profile, { displayName: nick.trim(), degreeId: degree.id }),
       );
       await actions.refreshMe();
-      toast(`Welcome to UCompass, ${nick.trim()}`);
-      goToApp();
+      goToPersona();
     });
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>{"How you'll appear"}</Text>
@@ -66,7 +65,7 @@ export default function SetupScreen() {
         </ScrollView>
         <View style={styles.footer}>
           <Button
-            label={busy ? "Saving…" : "Enter UCompass"}
+            label={busy ? "Saving…" : "Continue"}
             onPress={finish}
             inactive={!ready}
             disabled={busy}
@@ -84,7 +83,7 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: 24, paddingVertical: 20, gap: 18 },
   title: { color: colors.ink, ...font(800, 28, 1.15, -0.02) },
   intro: { color: colors.muted, ...font(500, 14.5, 1.5) },
-  group: { gap: 10 },
+  group: { gap: 8 },
   uni: {
     height: 52,
     borderRadius: 14,
@@ -96,5 +95,5 @@ const styles = StyleSheet.create({
   },
   uniName: { color: colors.ink, ...font(600, 15) },
   verified: { color: colors.brand, ...font(700, 12) },
-  footer: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 12 },
+  footer: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 34 },
 });
