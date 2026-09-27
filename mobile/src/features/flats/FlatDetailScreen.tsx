@@ -71,13 +71,13 @@ function FlatDetailView({ flat, availableFrom }: { flat: FlatDetail; availableFr
   ];
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView edges={["top"]} style={styles.screen}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled">
           <PhotoPager photos={flat.photos} tone={flat.tone} label="room photos" height={250}>
-            <SafeAreaView edges={["top"]} style={styles.back}>
+            <View style={styles.back}>
               <BackButton variant="white" onPress={() => router.back()} />
-            </SafeAreaView>
+            </View>
           </PhotoPager>
 
           <View style={styles.body}>
@@ -205,7 +205,7 @@ function FlatDetailView({ flat, availableFrom }: { flat: FlatDetail; availableFr
           />
         </SafeAreaView>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 }
 

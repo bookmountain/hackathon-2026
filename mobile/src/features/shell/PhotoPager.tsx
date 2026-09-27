@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Striped } from "@/components/ui";
 import { colors, font } from "@/theme";
 import Lightbox from "./Lightbox";
@@ -10,7 +9,6 @@ type Props = {
   tone: string;
   /** Placeholder label when there are no photos */
   label: string;
-  /** Visible height below the status bar; the photos also run up under it */
   height: number;
   /** Drawn over the photos, e.g. the back button */
   children?: ReactNode;
@@ -18,9 +16,7 @@ type Props = {
 
 // Swipeable photos at the top of a detail screen, with a "2/4" counter and dots.
 // Tapping a photo opens it full screen.
-export default function PhotoPager({ photos, tone, label, height: visibleHeight, children }: Props) {
-  const insets = useSafeAreaInsets();
-  const height = visibleHeight + insets.top;
+export default function PhotoPager({ photos, tone, label, height, children }: Props) {
   const [width, setWidth] = useState(0);
   const [page, setPage] = useState(0);
   const [open, setOpen] = useState<number | null>(null);
@@ -58,8 +54,7 @@ export default function PhotoPager({ photos, tone, label, height: visibleHeight,
       )}
       {multi && (
         <>
-          {/* Level with the back button, below the status bar */}
-          <View style={[styles.counter, { top: insets.top + 21 }]} pointerEvents="none">
+          <View style={styles.counter} pointerEvents="none">
             <Text style={styles.counterText}>
               {page + 1}/{photos.length}
             </Text>
@@ -81,6 +76,7 @@ const styles = StyleSheet.create({
   counter: {
     position: "absolute",
     right: 14,
+    top: 21, // level with the back button
     backgroundColor: "rgba(20,20,43,0.72)",
     borderRadius: 999,
     paddingHorizontal: 11,

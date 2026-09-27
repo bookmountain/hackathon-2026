@@ -38,12 +38,12 @@ function ItemDetailView({ item }: { item: ItemDetail }) {
   };
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView edges={["top"]} style={styles.screen}>
       <ScrollView>
         <PhotoPager photos={item.photos} tone={item.tone} label="product photo" height={290}>
-          <SafeAreaView edges={["top"]} style={styles.back}>
+          <View style={styles.back}>
             <BackButton variant="white" onPress={() => router.back()} />
-          </SafeAreaView>
+          </View>
         </PhotoPager>
 
         <View style={styles.body}>
@@ -97,7 +97,7 @@ function ItemDetailView({ item }: { item: ItemDetail }) {
       <SafeAreaView edges={["bottom"]} style={styles.footer}>
         <Button label={cta} onPress={message} inactive={mine || isSold(item)} disabled={busy} />
       </SafeAreaView>
-    </View>
+    </SafeAreaView>
   );
 }
 
