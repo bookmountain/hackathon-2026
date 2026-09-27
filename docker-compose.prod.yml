@@ -53,6 +53,10 @@ services:
       R2__SecretAccessKey: ${R2_SECRET_ACCESS_KEY:-}
       R2__Bucket: ${R2_BUCKET:-}
       R2__PublicBaseUrl: ${R2_PUBLIC_BASE_URL:-}
+      # Photo analysis: a local model on Ollama when OLLAMA_BASE_URL is set, else Claude. 503 without either.
+      Anthropic__ApiKey: ${ANTHROPIC_API_KEY:-}
+      Ollama__BaseUrl: ${OLLAMA_BASE_URL:-}
+      Ollama__Model: ${OLLAMA_MODEL:-qwen3-vl:8b-instruct}
       # Email goes to the mailpit service above. Set SMTP_* in .env (e.g. Resend) to send for real.
       Email__Host: ${SMTP_HOST:-mailpit}
       Email__Port: ${SMTP_PORT:-1025}

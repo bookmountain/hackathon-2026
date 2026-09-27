@@ -13,7 +13,7 @@ export type Person = {
   avatar: number;
   /** Uploaded photo avatar; shown instead of the preset when set */
   avatarUrl?: string | null;
-  /** Your own avatar's shape, ring and initials/icon */
+  /** The avatar's shape, ring and initials/icon */
   avatarStyle?: AvatarStyle | null;
 };
 

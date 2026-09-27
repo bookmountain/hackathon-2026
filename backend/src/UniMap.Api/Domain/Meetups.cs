@@ -112,6 +112,9 @@ public static class AdelaideTime
     /// <summary>"Tue 29 Sep".</summary>
     public static string Date(DateTime local) => $"{Weekday(local)} {local.Day} {Months[local.Month - 1]}";
 
+    /// <summary>"27 Sep".</summary>
+    public static string DayMonth(DateOnly date) => $"{date.Day} {Months[date.Month - 1]}";
+
     /// <summary>"7:00 pm", "9:30 am".</summary>
     public static string Time(DateTime local) => $"{Clock(local)} {(local.Hour < 12 ? "am" : "pm")}";
 

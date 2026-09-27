@@ -53,6 +53,7 @@ export function toPerson(p: PersonDto): Person {
     uni: UNI_LABEL[p.university],
     avatar: p.avatarPreset ?? -1,
     avatarUrl: p.avatarUrl,
+    avatarStyle: p.avatarStyle,
   };
 }
 

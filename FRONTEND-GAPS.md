@@ -152,41 +152,47 @@ the API requires.
 - [x] **Real time:** connect SignalR to `/hubs/chat?access_token={jwt}` for `message`, `read` and
       `typing`. Call `Typing(conversationId)` for the "•••" indicator.
 
+## UCompass v4 (2026-09-27)
+
+The design moved to `UCompass Demo v4.dc.html` (in `~/Downloads/UCompass hackathon demo (2).zip`). The app
+was rebuilt for it on `main`, calling four endpoints the API didn't have yet; the `dcard` branch adds them
+with the paths and fields the app already used. Shapes are in `mobile/src/api/types.ts` and README.
+
+- [x] **Dcard.** `GET /api/daily-card` and `POST /api/daily-card/draw` → `{ status: Ready | Matched |
+      Missed, match, drawnToday, nextChangeAt, missedDay, drawId }`. One draw per Adelaide day, and draws are
+      mutual. **A missed day doesn't lock for 48 hours** (the design's wording): the next Draw deals nothing
+      and locks the deck until midnight, which starts a new session.
+      *App:* Uses the API when it answers, else a demo on the device with the same rules. The wording says
+      "opens at midnight", Ready warns when `missedDay` is set, and "Send a message" sends `drawId`, which
+      adds the "Daily card match · 27 Sep" line.
+- [x] **AI photo analysis.** `POST /api/ai/photo-analysis { kind: Item | Room, image }`, image = base64 JPEG
+      (the app sends 640 px). Without a server key it's 503 with `code: "ai_not_configured"`.
+      *App:* The panel says why it failed: "isn't switched on yet" (no endpoint or key, no Retry), the
+      server's reason for a photo it won't describe (no Retry), or "Couldn't analyse" with Retry.
+- [x] **Photo box.** The design drew the picked photo inside the dashed upload box, cropped to 150 px high.
+      *App:* Dashed only while empty; then the cover shows at the listing's own shape (square for items,
+      16:9 for rooms, like their cards) with "Add more" in the corner.
+- [x] **Search by image.** `POST /api/items/image-search { image }` → `{ category, items, label, keywords }`.
+      *App:* Uses `category` and `items`; falls back to guessing from the file name while the endpoint 404s.
+- [x] **Avatar style.** `avatarStyle { mode, text, icon, shape, ring }` on `PUT /api/me/profile`, `/api/me`
+      and every person (chats, flat owners, item sellers, the Dcard match). Values are the API's enum names
+      like everywhere else: `Initials`, `Soft`, `Gold`, `Compass`.
+      *App:* Draws everyone's avatar with it. Styles saved on the device before (lowercase) are upgraded
+      when read.
+- [x] **Search box on every tab.** The API takes `search` on `GET /api/flats`, `/api/items` and `/api/events`.
+      *App:* Filters the lists it has already loaded (every pin is loaded), so it doesn't need the param yet.
+- [x] **Sell category and condition.** The API requires both; the AI only suggests them.
+      *App:* Chip pickers, filled in by the analysis.
+- [x] **Room address** is one box geocoded with Nominatim; the API needs `suburb`.
+      *App:* Fills suburb and street from Nominatim's address details, and the fields stay editable.
+- [x] **Minimum stay** is a number box; the API takes 1–24 months or null for flexible.
+      *App:* Clamped to 1–24 as you type; blank = flexible.
+- [x] **Consent** has 3 checkboxes in v4. *App:* Sends `usageStats: false`.
+- [x] **Calendar links** ("Add to Google Calendar", .ics) need no API. *App:* `lib/calendar.ts`.
+- [x] **Sign-in is still passwordless in v4.** *App:* Keeps email + password (see Sign in above).
+
 ## People on the map (not built yet)
 
 - [ ] **Connect and Wave** on person pins have no API yet. Connect can already use
       `POST /api/chats { userId, text }`; the prototype's "Connected from the map" line and Wave need the
       people-on-map feature (HANDOFF section 5.3).
-
-## Endpoints the v4 design needs (not built yet)
-
-The v4 prototype (`UCompass Demo v4.dc.html`, 2026-09-27) adds four features the API can't serve yet.
-The app already calls the endpoints below. Until they exist it gets a 404 and falls back, as noted.
-The shapes are in `mobile/src/api/types.ts`; `image` is always a base64 JPEG, longest side 640px, quality 0.82.
-
-- [ ] **AI photo analysis** on "Sell" and "List a room". `POST /api/ai/photo-analysis { kind, image }`, where
-      `kind` is `Item` or `Room`. The prototype asks a vision model for JSON; its prompts are in the HTML
-      (search for "You help a university student"). Responses:
-      - Item: `{ title, category, condition, colour, texture, suggestedPrice, description, benefits[] }`.
-        `category` and `condition` use the API's enum names (`StudyGear`, `LikeNew`).
-      - Room: `{ title, style, colours, furnished, features[], description, benefits[] }`.
-        `furnished` is `Fully` / `Partly` / `Unfurnished`; `features` are drawn from the flat options.
-      *App until then:* the panel shows "Couldn't analyse this photo. Fill in the details yourself."
-- [ ] **Search by image** in Market. `POST /api/items/image-search { image }` →
-      `{ category: ItemCategory | null, items: ItemSummary[] }`: the guessed category and the closest unsold
-      items (the prototype shows 4 with a category, 5 without).
-      *App until then:* guesses the category from the photo's file name and ranks items locally, like the prototype.
-- [ ] **Daily card** ("Dcard"). `GET /api/daily-card` and `POST /api/daily-card/draw` →
-      `{ status: Ready | Matched | Missed, match: Person | null, drawnToday, nextChangeAt }`. One draw per
-      Adelaide day. You're matched with another student who drew today. A missed day locks the deck for 48
-      hours. `nextChangeAt` is the next midnight, or when the lock ends.
-      *App until then:* a demo on the device that picks from students you already know, with
-      "Reset today" / "Simulate missed day" buttons.
-- [ ] **Avatar style.** Profiles can pick a shape (`circle` / `soft` / `square`), a ring (`none` / `gold` /
-      `blue` / `navy` / `sky`), and initials (1–2 letters) or one of 10 icons, on top of the preset colour. The
-      app sends `avatarStyle: { mode, text, icon, shape, ring }` on `PUT /api/me/profile` and reads it back
-      from `profile.avatarStyle`. Other people's avatars should use it too, so it also belongs on `Person`.
-      *App until then:* saved on the device per account, so only you see it.
-
-Also new in v4, but handled in the app alone: the address search on the forms uses OpenStreetMap
-Nominatim directly, and "Add to calendar" builds Google Calendar links and `.ics` files.

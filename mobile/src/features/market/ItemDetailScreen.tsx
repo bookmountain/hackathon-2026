@@ -80,7 +80,7 @@ function ItemDetailView({ item }: { item: ItemDetail }) {
           </View>
 
           <View style={styles.seller}>
-            <Avatar index={seller.avatar} nick={seller.nick} url={seller.avatarUrl} size={42} />
+            <Avatar index={seller.avatar} nick={seller.nick} url={seller.avatarUrl} look={seller.avatarStyle} size={42} />
             <View style={styles.sellerText}>
               <Text style={styles.sellerNick}>
                 {seller.nick}

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -13,9 +14,11 @@ using UniMap.Api.Data;
 namespace UniMap.Api.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260926232453_AddDailyCards")]
+    partial class AddDailyCards
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -632,42 +635,13 @@ namespace UniMap.Api.Data.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("age_range");
 
-                    b.Property<string>("AvatarIcon")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("avatar_icon");
-
                     b.Property<string>("AvatarKey")
                         .HasColumnType("text")
                         .HasColumnName("avatar_key");
 
-                    b.Property<string>("AvatarMode")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("avatar_mode");
-
                     b.Property<int?>("AvatarPreset")
                         .HasColumnType("integer")
                         .HasColumnName("avatar_preset");
-
-                    b.Property<string>("AvatarRing")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("avatar_ring");
-
-                    b.Property<string>("AvatarShape")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("avatar_shape");
-
-                    b.Property<string>("AvatarText")
-                        .HasMaxLength(2)
-                        .HasColumnType("character varying(2)")
-                        .HasColumnName("avatar_text");
 
                     b.Property<string>("Bio")
                         .HasMaxLength(500)

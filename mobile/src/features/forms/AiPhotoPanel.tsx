@@ -38,10 +38,12 @@ export default function AiPhotoPanel<T>({ state, facts, benefits, price, onUsePr
 
       {state.status === "error" && (
         <View style={styles.row}>
-          <Text style={styles.error}>Couldn&apos;t analyse this photo. Fill in the details yourself.</Text>
-          <Pressable onPress={onRetry} accessibilityRole="button" style={styles.retry}>
-            <Text style={styles.retryText}>Retry</Text>
-          </Pressable>
+          <Text style={styles.error}>{state.message}</Text>
+          {state.canRetry && (
+            <Pressable onPress={onRetry} accessibilityRole="button" style={styles.retry}>
+              <Text style={styles.retryText}>Retry</Text>
+            </Pressable>
+          )}
         </View>
       )}
 

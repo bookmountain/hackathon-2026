@@ -54,19 +54,20 @@ public class ChatsController(AppDbContext db, ChatService chats) : ControllerBas
     }
 
     /// <summary>
-    /// Open the chat with a student (userId), a listing's owner (flatId, the "Message tenant" button) or
-    /// an item's seller (itemId, the "Message seller" button), optionally with a first message. Reuses the
-    /// existing chat if there is one.
+    /// Open the chat with a student (userId), a listing's owner (flatId, the "Message tenant" button), an
+    /// item's seller (itemId, the "Message seller" button) or your Dcard match (drawId), optionally with a
+    /// first message. Reuses the existing chat if there is one.
     /// </summary>
     [HttpPost]
     public async Task<ActionResult<ChatSummary>> Start(StartChatRequest req)
     {
         var me = User.UserId();
-        if (new object?[] { req.UserId, req.FlatId, req.ItemId }.Count(x => x is not null) != 1)
-            return Problem("Send exactly one of userId, flatId or itemId.", statusCode: StatusCodes.Status400BadRequest);
+        if (new object?[] { req.UserId, req.FlatId, req.ItemId, req.DrawId }.Count(x => x is not null) != 1)
+            return Problem("Send exactly one of userId, flatId, itemId or drawId.", statusCode: StatusCodes.Status400BadRequest);
 
         FlatListing? flat = null;
         MarketItem? item = null;
+        DailyDraw? draw = null;
         Guid otherId;
         if (req.FlatId is { } flatId)
         {
@@ -83,6 +84,13 @@ public class ChatsController(AppDbContext db, ChatService chats) : ControllerBas
                 return Problem("This item has been sold.", statusCode: StatusCodes.Status409Conflict);
             otherId = item.SellerId;
         }
+        else if (req.DrawId is { } drawId)
+        {
+            draw = await db.DailyDraws.AsNoTracking()
+                .FirstOrDefaultAsync(d => d.Id == drawId && d.UserId == me && d.DrawnAt != null && d.MatchedUserId != null);
+            if (draw is null) return NotFound();
+            otherId = draw.MatchedUserId!.Value;
+        }
         else
         {
             otherId = req.UserId!.Value;
@@ -96,6 +104,16 @@ public class ChatsController(AppDbContext db, ChatService chats) : ControllerBas
         var added = new List<ChatMessage>();
         if (flat is not null && await chats.AddAboutFlatAsync(conv, flat) is { } aboutFlat) added.Add(aboutFlat);
         if (item is not null && await chats.AddAboutItemAsync(conv, item) is { } aboutItem) added.Add(aboutItem);
+        if (draw is not null)
+        {
+            // Both students' cards for the day; the About line points at the first student's (by id), so
+            // it's the same whichever of them opens the chat
+            var first = await db.DailyDraws.AsNoTracking()
+                .Where(d => d.Day == draw.Day && d.UserId == conv.UserAId && d.MatchedUserId == conv.UserBId)
+                .Select(d => (Guid?)d.Id)
+                .FirstOrDefaultAsync() ?? draw.Id;
+            if (await chats.AddAboutDailyCardAsync(conv, first, draw.Day) is { } aboutCard) added.Add(aboutCard);
+        }
         if (!string.IsNullOrWhiteSpace(req.Text)) added.Add(chats.AddText(conv, me, req.Text));
         await db.SaveChangesAsync();
         await chats.NotifyAsync(conv, added);

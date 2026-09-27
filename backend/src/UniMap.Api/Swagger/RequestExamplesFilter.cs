@@ -52,7 +52,8 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
             Habits: ["night-owl", "gym", "coffee", "studies-in-library"],
             Interests: ["coding", "hackathons", "hiking", "board-games"],
             AvatarKey: null,
-            AvatarPreset: 2),
+            AvatarPreset: 2,
+            AvatarStyle: new AvatarStyle(AvatarMode.Icon, "", AvatarIcon.Coffee, AvatarShape.Soft, AvatarRing.Gold)),
         _ when type == typeof(UploadUrlRequest) => new UploadUrlRequest("image/jpeg"),
         _ when type == typeof(UpsertFlatRequest) => new UpsertFlatRequest(
             Id: null,
@@ -115,8 +116,10 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
             WalkInsWelcome: true),
         // Koala_Kai (the login example) messaging TomTheTutor about his seeded Calculus textbook.
         _ when type == typeof(StartChatRequest) => new StartChatRequest(
-            UserId: null, FlatId: null, ItemId: SeedCalculusTextbookId,
+            UserId: null, FlatId: null, ItemId: SeedCalculusTextbookId, DrawId: null,
             Text: "Hi! Is the calculus textbook still available?"),
+        _ when type == typeof(PhotoAnalysisRequest) => new PhotoAnalysisRequest(PhotoAnalysisKind.Item, ExamplePhoto),
+        _ when type == typeof(ImageSearchRequest) => new ImageSearchRequest(ExamplePhoto),
         _ when type == typeof(SendMessageRequest) => new SendMessageRequest("Great — see you at Barr Smith after 4pm!"),
         _ => null,
     };
@@ -131,6 +134,10 @@ public class RequestExamplesFilter(IServiceScopeFactory scopes) : ISchemaFilter
     /// <summary>With Adelaide's UTC offset, e.g. 2026-10-02T08:30:00+09:30, so the example reads naturally.</summary>
     private static DateTimeOffset InAdelaide(DateOnly date, TimeOnly time) =>
         TimeZoneInfo.ConvertTime(AdelaideTime.ToUtc(date, time), AdelaideTime.Zone);
+
+    /// <summary>A 1×1 PNG. Replace it with a real photo to get a real answer.</summary>
+    private const string ExamplePhoto =
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
     private static readonly Guid ExampleItemId = Guid.Parse("5b0c3e2a-8f41-4d7e-9a26-1c7f0e9d4b83");
 

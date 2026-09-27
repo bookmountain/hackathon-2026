@@ -36,10 +36,12 @@ public class EventsController(AppDbContext db, IHubContext<ChatHub> hub) : Contr
     /// (without an end time, 2 hours after they start). Events happening now are included.
     /// </summary>
     /// <param name="type">Only this type (Study, Casual, Social or Food).</param>
+    /// <param name="search">The search box ("Search meetups &amp; events"): matches the title or the place's name.</param>
     /// <param name="minLat">Map viewport (all four bounds, or none).</param>
     [HttpGet]
     public async Task<ActionResult<List<EventSummary>>> Search(
         [FromQuery] EventType? type,
+        [FromQuery] string? search,
         [FromQuery] double? minLat, [FromQuery] double? minLng, [FromQuery] double? maxLat, [FromQuery] double? maxLng,
         [FromQuery] int limit = 100)
     {
@@ -55,6 +57,17 @@ public class EventsController(AppDbContext db, IHubContext<ChatHub> hub) : Contr
             q = q.Where(e => box.Covers(e.Location));
         }
         if (type is not null) q = q.Where(e => e.Type == type);
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            // A preset place shows its own name unless the host gave it one (EventMapper.Place)
+            var pattern = SqlLike.Contains(search);
+            var presets = PickupPoints.All
+                .Where(p => p.Name.Contains(search.Trim(), StringComparison.OrdinalIgnoreCase))
+                .Select(p => p.Id).ToList();
+            q = q.Where(e => EF.Functions.ILike(e.Title, pattern, SqlLike.Escape)
+                || (e.PlaceName != null && EF.Functions.ILike(e.PlaceName, pattern, SqlLike.Escape))
+                || (e.PlaceName == null && e.PlaceId != null && presets.Contains(e.PlaceId)));
+        }
 
         var me = User.UserId();
         var rows = await q.OrderBy(e => e.StartsAt).ThenBy(e => e.Id)

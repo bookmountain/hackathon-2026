@@ -29,6 +29,13 @@ public class ChatService(AppDbContext db, StorageService storage, IHubContext<Ch
 
     public static string AboutItem(string title, int price) => $"About: {title} · ${price}";
 
+    /// <summary>
+    /// Adds the "Daily card match · 27 Sep" line. <paramref name="drawId"/> is the same for both students
+    /// (see ChatsController), so it's added once however many times either of them opens the chat.
+    /// </summary>
+    public Task<ChatMessage?> AddAboutDailyCardAsync(Conversation conv, Guid drawId, DateOnly day) =>
+        AddAboutAsync(conv, ChatAboutType.DailyCard, drawId, $"Daily card match · {AdelaideTime.DayMonth(day)}");
+
     private async Task<ChatMessage?> AddAboutAsync(Conversation conv, ChatAboutType type, Guid id, string body)
     {
         var lastAbout = await db.ChatMessages.AsNoTracking()
@@ -80,5 +87,6 @@ public class ChatService(AppDbContext db, StorageService storage, IHubContext<Ch
     /// <summary>Needs Profile and Profile.Degree loaded.</summary>
     public ChatPerson ToPerson(User u) => new(
         u.Id, u.Profile?.DisplayName ?? "Student", u.Profile?.Degree?.Name ?? u.Profile?.Department,
-        u.University, storage.ReadUrl(u.Profile?.AvatarKey), u.Profile?.AvatarPreset);
+        u.University, storage.ReadUrl(u.Profile?.AvatarKey), u.Profile?.AvatarPreset,
+        ProfileMapper.StyleOrNull(u.Profile));
 }

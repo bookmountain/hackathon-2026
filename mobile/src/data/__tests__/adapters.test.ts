@@ -91,7 +91,15 @@ describe("chat", () => {
     expect(
       toThread({
         id: "c1",
-        other: { userId: "tom", displayName: "TomTheTutor", major: "Bachelor of Mathematics (Honours)", university: "Adelaide", avatarUrl: null, avatarPreset: 4 },
+        other: {
+          userId: "tom",
+          displayName: "TomTheTutor",
+          major: "Bachelor of Mathematics (Honours)",
+          university: "Adelaide",
+          avatarUrl: null,
+          avatarPreset: 4,
+          avatarStyle: null,
+        },
         lastMessage: messageDto(),
         unreadCount: 2,
         lastMessageAt: "2026-09-26T12:19:58Z",

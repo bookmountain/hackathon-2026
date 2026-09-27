@@ -21,7 +21,10 @@ async function readAvatarStyle(userId: string): Promise<AvatarStyle | null> {
   const raw = await readStored(avatarStyleKey(userId));
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as AvatarStyle;
+    const style = JSON.parse(raw) as AvatarStyle;
+    // Saved before the API existed, in lowercase ("circle"); the API uses its enum names ("Circle")
+    const name = <T extends string>(v: T) => (v.charAt(0).toUpperCase() + v.slice(1)) as T;
+    return { ...style, mode: name(style.mode), icon: name(style.icon), shape: name(style.shape), ring: name(style.ring) };
   } catch {
     return null;
   }

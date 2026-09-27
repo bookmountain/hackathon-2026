@@ -56,6 +56,29 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
       Adelaide. The same goes for the check that a new date is in the future.
 - [ ] **No report or block** for scam listings. The consent screen promises "Report & block in one tap".
 
+## Dcard
+
+- [ ] **`drawnToday` counts real draws only.** Seeded students are dealt to people, but never press Draw
+      themselves, so the demo shows small numbers where the design shows "143". A job that draws for some
+      seeded students each day would fix it.
+- [ ] **Dormant accounts can be drawn.** Anyone who has never pressed Draw counts as new and can be
+      dealt, so an active student can draw someone who never opens the app. Consider only dealing students
+      who were active in the last week (once the app records activity).
+- [x] **Tested end to end** on 2026-09-27 against a fresh database: the draw, the mutual reveal, one chat line
+      from both cards, the missed-day lock until midnight, and a new match the next day.
+
+## Photo analysis
+
+- [ ] **No rate limit.** Every call costs money on the Anthropic account. Add a per-student limit
+      (e.g. a Redis counter, 30 a day).
+- [ ] **The Claude path is untested**: there was no Anthropic key. The Ollama path is tested end to end.
+- [ ] **The local model over-claims room features** (Parking, Laundry from a bedroom photo) even when told to
+      list only what it can see. The form lets you untick them; a bigger model would do better.
+- [ ] **The local model depends on one laptop** being on, awake, with WSL running, and reachable over
+      Tailscale. Fall back to Claude (unset `OLLAMA_BASE_URL`) if that's a risk for the demo.
+- [ ] **Search by photo ranks by keywords only.** It looks at the newest 200 unsold items in the photo's
+      category. Image embeddings would find lookalikes better.
+
 ## Meetups
 
 - [ ] **No report or block** for events, like the market. An anonymous host makes this matter more: the

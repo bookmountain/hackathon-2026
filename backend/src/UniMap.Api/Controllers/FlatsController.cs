@@ -32,6 +32,7 @@ public class FlatsController(AppDbContext db, StorageService storage) : Controll
     /// The prototype's chips map to: "Under $250" = maxRent=249, "Furnished" = furnished=Fully,
     /// "Ensuite" = toilet=PrivateEnsuite, "Bills &lt; $30" = maxBills=29.
     /// </summary>
+    /// <param name="search">The search box ("Search rooms near campus"): matches the title, suburb or street.</param>
     /// <param name="minLat">Map viewport (all four bounds, or none).</param>
     /// <param name="campus">Campus id from /api/flats/options. With maxWalkMinutes, limits to rooms within walking distance.</param>
     /// <param name="features">Every listed feature must be present.</param>
@@ -39,6 +40,7 @@ public class FlatsController(AppDbContext db, StorageService storage) : Controll
     /// <param name="sort">newest (default), cheapest (rent + bills), or nearest (needs campus).</param>
     [HttpGet]
     public async Task<ActionResult<List<FlatSummary>>> Search(
+        [FromQuery] string? search,
         [FromQuery] double? minLat, [FromQuery] double? minLng, [FromQuery] double? maxLat, [FromQuery] double? maxLng,
         [FromQuery] int? maxRent, [FromQuery] int? maxBills, [FromQuery] Furnishing? furnished,
         [FromQuery] ToiletType? toilet, [FromQuery] BathroomType? bathroom, [FromQuery] List<string>? features,
@@ -56,6 +58,13 @@ public class FlatsController(AppDbContext db, StorageService storage) : Controll
             q = q.Where(f => box.Covers(f.Location));
         }
 
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var pattern = SqlLike.Contains(search);
+            q = q.Where(f => EF.Functions.ILike(f.Title, pattern, SqlLike.Escape)
+                || EF.Functions.ILike(f.Suburb, pattern, SqlLike.Escape)
+                || (f.Street != null && EF.Functions.ILike(f.Street, pattern, SqlLike.Escape)));
+        }
         if (maxRent is not null) q = q.Where(f => f.RentPerWeek <= maxRent);
         if (maxBills is not null) q = q.Where(f => f.BillsPerWeek <= maxBills);
         if (furnished is not null) q = q.Where(f => f.Furnished == furnished);
