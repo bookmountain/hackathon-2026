@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { colors, divider, font, shadows } from "@/theme";
+import { StyleSheet, Text, View } from "react-native";
+import { colors, divider, font } from "@/theme";
+import GamePressable from "./GamePressable";
 import Icon from "./Icon";
 
 type BackButtonProps = { onPress: () => void; variant?: "soft" | "white" };
@@ -8,15 +9,16 @@ type BackButtonProps = { onPress: () => void; variant?: "soft" | "white" };
 // Round back button: soft blue on white pages, white on top of photos
 export function BackButton({ onPress, variant = "soft" }: BackButtonProps) {
   return (
-    <Pressable
+    <GamePressable
+      kind="round"
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel="Back"
       hitSlop={6}
-      style={[styles.back, { backgroundColor: variant === "soft" ? colors.brandSoft : colors.surface }, variant === "white" && shadows.photoButton]}
+      faceStyle={[styles.back, { backgroundColor: variant === "soft" ? colors.brandSoft : colors.surface }]}
     >
       <Icon name="back" color={colors.ink} />
-    </Pressable>
+    </GamePressable>
   );
 }
 

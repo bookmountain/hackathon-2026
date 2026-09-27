@@ -256,6 +256,34 @@ const ICONS = {
       </>
     ),
   },
+  bell: {
+    body: (
+      <>
+        <Path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8" />
+        <Path d="M10.5 20a1.8 1.8 0 0 0 3 0" />
+      </>
+    ),
+    strokeWidth: 2.4,
+  },
+  clock: {
+    body: (
+      <>
+        <Circle cx="12" cy="12" r="9" />
+        <Path d="M12 7v5l3 2" />
+      </>
+    ),
+    strokeWidth: 2.2,
+  },
+  pencil: {
+    body: (
+      <>
+        <Path d="M4 20h4L19 9l-4-4L4 16z" />
+        <Path d="M13.5 6.5l4 4" />
+      </>
+    ),
+    strokeWidth: 2.2,
+  },
+  trash: { body: <Path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />, strokeWidth: 2.2 },
   avRocket: {
     body: (
       <>

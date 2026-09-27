@@ -88,6 +88,9 @@ export function TimeField({ label, value, onChange, placeholder = "18:00" }: Tim
       {label ? <FieldLabel>{label}</FieldLabel> : null}
       <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={label ?? "Time"} style={[styles.field, styles.pressable]}>
         <Text style={[styles.value, !value && { color: colors.faint }]}>{value ? display(value) : placeholder}</Text>
+        <View pointerEvents="none" style={styles.icon}>
+          <Icon name="clock" size={18} color={colors.brand} />
+        </View>
       </Pressable>
 
       {Platform.OS === "ios" && (

@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { brutal, colors, font } from "@/theme";
+import GamePressable from "./GamePressable";
 import Icon from "./Icon";
 
 type StripedProps = {
@@ -67,9 +68,9 @@ export function PhotoDropzone({ photos, max, onAdd, onRemove, emptyText, aspectR
           <Text style={styles.dropText}>{emptyText}</Text>
         </Pressable>
         {onDemo && (
-          <Pressable onPress={onDemo} accessibilityRole="button" style={styles.demo}>
+          <GamePressable kind="sm" onPress={onDemo} accessibilityRole="button" style={styles.demoSpot} faceStyle={styles.demo}>
             <Text style={styles.demoText}>Use a demo photo</Text>
-          </Pressable>
+          </GamePressable>
         )}
       </View>
     );
@@ -138,8 +139,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   addMoreText: { color: colors.ink, ...font(700, 13) },
+  demoSpot: { alignSelf: "flex-start" },
   demo: {
-    alignSelf: "flex-start",
     backgroundColor: colors.brandSoft,
     borderRadius: 999,
     paddingHorizontal: 13,

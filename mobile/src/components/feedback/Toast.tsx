@@ -12,7 +12,8 @@ export function useToast() {
   return useContext(ToastContext);
 }
 
-export function ToastProvider({ children }: { children: ReactNode }) {
+/** `onToast` hears every message, e.g. to celebrate good news */
+export function ToastProvider({ children, onToast }: { children: ReactNode; onToast?: (message: string) => void }) {
   // id restarts the entrance animation when a new toast replaces a visible one
   const [toast, setToast] = useState<{ id: number; text: string } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -21,7 +22,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToast((prev) => ({ id: (prev?.id ?? 0) + 1, text }));
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setToast(null), DURATION_MS);
-  }, []);
+    onToast?.(text);
+  }, [onToast]);
 
   useEffect(() => () => clearTimeout(timer.current), []);
 

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from "react-native";
-import { brutal, colors, font, type FontWeight } from "@/theme";
+import { StyleSheet, Text, type StyleProp, type ViewStyle } from "react-native";
+import { colors, font, type FontWeight } from "@/theme";
+import GamePressable from "./GamePressable";
 
 type Variant = "primary" | "outline" | "soft" | "yellow" | "flat";
 type Size = "lg" | "md" | "sm";
@@ -10,31 +11,31 @@ type Props = {
   onPress: () => void;
   variant?: Variant;
   size?: Size;
-  /** Hard offset shadow under the ink border (px); 0 for none. Defaults per variant. */
-  shadow?: 0 | 2 | 3 | 4;
   /** Looks disabled (grey-blue) but stays tappable, like the design: a tap explains what's missing */
   inactive?: boolean;
   disabled?: boolean;
   icon?: ReactNode;
   weight?: FontWeight;
+  /** Layout only (flex, margins, alignSelf); the face is styled by variant and size */
   style?: StyleProp<ViewStyle>;
 };
 
 const SIZES: Record<Size, { height: number; radius: number; fontSize: number; padding: number }> = {
-  lg: { height: 54, radius: 16, fontSize: 16, padding: 20 },
-  md: { height: 48, radius: 14, fontSize: 15, padding: 16 },
+  lg: { height: 54, radius: 16, fontSize: 17, padding: 20 },
+  md: { height: 48, radius: 14, fontSize: 17, padding: 16 },
   sm: { height: 38, radius: 11, fontSize: 13.5, padding: 16 },
 };
 
-// primary / yellow / outline get the design's 2px ink border; "flat" is primary without it
-const VARIANTS: Record<Variant, { bg: string; pressed: string; fg: string; shadow: 0 | 2 | 3 | 4 | null }> = {
-  primary: { bg: colors.brand, pressed: colors.brandPressed, fg: colors.surface, shadow: 3 },
-  outline: { bg: colors.surface, pressed: colors.brandSoft, fg: colors.ink, shadow: 0 },
-  soft: { bg: colors.brandSoft, pressed: colors.brandSofter, fg: colors.brand, shadow: null },
-  yellow: { bg: colors.yellow, pressed: colors.yellowPressed, fg: colors.ink, shadow: 3 },
-  flat: { bg: colors.brand, pressed: colors.brandPressed, fg: colors.surface, shadow: null },
+const VARIANTS: Record<Variant, { bg: string; pressed: string; fg: string }> = {
+  primary: { bg: colors.brand, pressed: colors.brandPressed, fg: colors.surface },
+  outline: { bg: colors.surface, pressed: colors.brandSoft, fg: colors.ink },
+  soft: { bg: colors.brandSoft, pressed: colors.brandSofter, fg: colors.brand },
+  yellow: { bg: colors.yellow, pressed: colors.yellowPressed, fg: colors.ink },
+  flat: { bg: colors.brand, pressed: colors.brandPressed, fg: colors.surface },
 };
 
+// Game-style button: ink border on an ink ledge it sinks into when pressed.
+// lg and md are the design's big CTAs, set in 17px Bricolage.
 export default function Button({
   label,
   onPress,
@@ -44,19 +45,21 @@ export default function Button({
   disabled = false,
   icon,
   weight = 800,
-  shadow,
   style,
 }: Props) {
   const s = SIZES[size];
   const v = VARIANTS[variant];
   const greyed = inactive || disabled;
+  const cta = size !== "sm";
   return (
-    <Pressable
+    <GamePressable
+      kind={cta ? "cta" : "sm"}
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityState={{ disabled: greyed }}
-      style={({ pressed }) => [
+      style={style}
+      faceStyle={(pressed) => [
         styles.base,
         {
           height: s.height,
@@ -64,15 +67,11 @@ export default function Button({
           paddingHorizontal: s.padding,
           backgroundColor: greyed ? colors.disabled : pressed ? v.pressed : v.bg,
         },
-        v.shadow !== null ? brutal(shadow ?? v.shadow) : null,
-        style,
       ]}
     >
       {icon}
-      <Text style={[font(weight, s.fontSize), { color: greyed ? colors.surface : v.fg }]}>
-        {label}
-      </Text>
-    </Pressable>
+      <Text style={[font(cta ? 800 : weight, s.fontSize), { color: greyed ? colors.surface : v.fg }]}>{label}</Text>
+    </GamePressable>
   );
 }
 
