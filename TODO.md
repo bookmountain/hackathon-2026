@@ -56,7 +56,7 @@ The course lists were researched from each uni's website on 2026-09-26. Details 
       Adelaide. The same goes for the check that a new date is in the future.
 - [ ] **No report or block** for scam listings. The consent screen promises "Report & block in one tap".
 
-## Dcard
+## Daily card draw
 
 - [ ] **`drawnToday` counts real draws only.** Seeded students are dealt to people, but never press Draw
       themselves, so the demo shows small numbers where the design shows "143". A job that draws for some
