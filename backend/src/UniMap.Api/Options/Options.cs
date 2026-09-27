@@ -70,6 +70,16 @@ public class OllamaOptions
     public bool IsConfigured => !string.IsNullOrWhiteSpace(BaseUrl);
 }
 
+/// <summary>Dcard settings.</summary>
+public class DailyCardOptions
+{
+    /// <summary>
+    /// Demo servers only: POST /api/daily-card/reset clears your card so you can draw again, and GET reports
+    /// canReset. Off in production, where the endpoint is a 404.
+    /// </summary>
+    public bool DemoReset { get; set; }
+}
+
 public class EmailOptions
 {
     /// <summary>SMTP host. Leave empty to just log codes instead of sending.</summary>

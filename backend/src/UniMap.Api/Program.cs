@@ -26,6 +26,7 @@ builder.Services.Configure<R2Options>(config.GetSection("R2"));
 builder.Services.Configure<EmailOptions>(config.GetSection("Email"));
 builder.Services.Configure<AnthropicOptions>(config.GetSection("Anthropic"));
 builder.Services.Configure<OllamaOptions>(config.GetSection("Ollama"));
+builder.Services.Configure<DailyCardOptions>(config.GetSection("DailyCard"));
 
 // --- Infrastructure ---
 builder.Services.AddDbContext<AppDbContext>(o => o

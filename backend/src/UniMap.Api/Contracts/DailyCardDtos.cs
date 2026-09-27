@@ -12,10 +12,12 @@ namespace UniMap.Api.Contracts;
 /// <param name="MissedDay">With Ready: you didn't draw yesterday, so pressing Draw locks the deck until
 /// nextChangeAt (status Missed) instead of dealing a card. You can draw again from then.</param>
 /// <param name="DrawId">With Matched: send it as drawId on POST /api/chats ("Send a message to {nick}").</param>
+/// <param name="CanReset">Demo server: POST /api/daily-card/reset works, so the app can show its demo buttons.</param>
 public record DailyCardResponse(
     DrawStatus Status,
     ChatPerson? Match,
     int DrawnToday,
     DateTimeOffset NextChangeAt,
     bool MissedDay,
-    Guid? DrawId);
+    Guid? DrawId,
+    bool CanReset);

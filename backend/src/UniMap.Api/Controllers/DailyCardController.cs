@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using UniMap.Api.Contracts;
 using UniMap.Api.Data;
 using UniMap.Api.Domain;
+using UniMap.Api.Options;
 using UniMap.Api.Services;
 
 namespace UniMap.Api.Controllers;
@@ -21,6 +23,7 @@ public class DailyCardController(
     AppDbContext db,
     ChatService chats,
     ConsentService consents,
+    IOptions<DailyCardOptions> options,
     ILogger<DailyCardController> log) : ControllerBase
 {
     /// <summary>Today's card: Ready, Matched (with the student you drew) or Missed, plus the clock.</summary>
@@ -85,6 +88,37 @@ public class DailyCardController(
         return Problem("Lots of students are drawing right now. Try again.", statusCode: StatusCodes.Status409Conflict);
     }
 
+    /// <summary>
+    /// Demo servers only (DailyCard__DemoReset=true), for running the demo again: forgets all your draws so
+    /// the deck is Ready, and hides you from anyone you'd been dealt to who hasn't drawn yet. With
+    /// missedDay=true it also pretends your last draw was two days ago, so Draw shows the missed-day lock.
+    /// 404 when the setting is off.
+    /// </summary>
+    [HttpPost("reset")]
+    public async Task<ActionResult<DailyCardResponse>> Reset([FromQuery] bool missedDay = false)
+    {
+        if (!options.Value.DemoReset) return NotFound();
+        var me = User.UserId();
+        var today = AdelaideTime.Today();
+
+        // Students who drew you keep their card; unrevealed ones dealt to you go, so they get a fresh pick
+        await db.DailyDraws.Where(d => d.UserId == me).ExecuteDeleteAsync();
+        await db.DailyDraws.Where(d => d.MatchedUserId == me && d.DrawnAt == null).ExecuteDeleteAsync();
+        if (missedDay)
+        {
+            db.DailyDraws.Add(new DailyDraw
+            {
+                UserId = me,
+                Day = today.AddDays(-2),
+                DrawnAt = DateTimeOffset.UtcNow.AddDays(-2),
+                SessionRestart = true,
+            });
+            await db.SaveChangesAsync();
+        }
+        log.LogInformation("Dcard demo reset for {UserId} (missedDay: {MissedDay})", me, missedDay);
+        return await StateAsync(me, today);
+    }
+
     private async Task<DailyCardResponse> StateAsync(Guid me, DateOnly today)
     {
         var mine = await db.DailyDraws.AsNoTracking()
@@ -92,16 +126,17 @@ public class DailyCardController(
             .FirstOrDefaultAsync(d => d.UserId == me && d.Day == today && d.DrawnAt != null);
         var drawnToday = await db.DailyDraws.CountAsync(d => d.Day == today && d.DrawnAt != null && !d.SessionRestart);
         var nextChangeAt = DailyCardRules.NextChangeAt(today);
+        var canReset = options.Value.DemoReset;
 
         if (mine is null)
         {
             var missed = !DailyCardRules.CanDraw(await LastPressedAsync(me, today), today);
-            return new(DrawStatus.Ready, null, drawnToday, nextChangeAt, missed, null);
+            return new(DrawStatus.Ready, null, drawnToday, nextChangeAt, missed, null, canReset);
         }
         if (mine.SessionRestart)
-            return new(DrawStatus.Missed, null, drawnToday, nextChangeAt, false, null);
+            return new(DrawStatus.Missed, null, drawnToday, nextChangeAt, false, null, canReset);
         return new(DrawStatus.Matched, mine.MatchedUser is { } u ? chats.ToPerson(u) : null,
-            drawnToday, nextChangeAt, false, mine.Id);
+            drawnToday, nextChangeAt, false, mine.Id, canReset);
     }
 
     /// <summary>The last day before today on which the student pressed Draw, or null if they never have.</summary>

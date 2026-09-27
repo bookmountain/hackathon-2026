@@ -56,6 +56,7 @@ services:
       Anthropic__ApiKey: ${ANTHROPIC_API_KEY:-}
       Ollama__BaseUrl: ${OLLAMA_BASE_URL:-}
       Ollama__Model: ${OLLAMA_MODEL:-qwen3-vl:8b-instruct}
+      DailyCard__DemoReset: ${DAILY_CARD_DEMO_RESET:-true}
       # Email: defaults to Mailpit. Point SMTP_* at Resend/Brevo/Gmail in .env to send for real.
       Email__Host: ${SMTP_HOST:-mailpit}
       Email__Port: ${SMTP_PORT:-1025}

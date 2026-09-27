@@ -184,6 +184,10 @@ Draw one card a day to meet a random fellow student. All of these need a login t
   (nickname, major, uni and avatar, like a chat) and `drawId`.
 - `POST /api/daily-card/draw`: the Draw button. It returns the same thing, and does nothing if you've already drawn
   today. 409 if nobody is left to draw.
+- `POST /api/daily-card/reset` (demo servers only): starts your card over so you can draw again, for running
+  the demo twice. `?missedDay=true` also pretends you skipped yesterday. Turned on by `DAILY_CARD_DEMO_RESET`
+  (`DailyCard__DemoReset`), which the hosted demo sets; otherwise it's a 404. `GET` says `canReset: true` when
+  it's on, and the app then shows its "Reset today" and "Simulate missed day" buttons.
 - **Draws are mutual.** Drawing deals you a random student who hasn't drawn yet today, and deals you to
   them: when they press Draw they get you. Anyone with a profile and the required consents can be drawn,
   except students who missed a day. You don't get the same student two days running unless nobody else is
