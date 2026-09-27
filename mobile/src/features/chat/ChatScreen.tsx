@@ -4,10 +4,11 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { SafeAreaView } from "react-native-safe-area-context";
 import { errorMessage } from "@/api/client";
 import { useToast } from "@/components/feedback/Toast";
-import { Avatar, Icon, ScreenHeader } from "@/components/ui";
+import { Avatar, GamePressable, Icon, ScreenHeader } from "@/components/ui";
 import type { ChatMessage } from "@/data/types";
 import { useAppStore } from "@/store";
 import { colors, divider, font } from "@/theme";
+import { goBack } from "@/lib/goBack";
 
 /** Send a typing ping at most this often while the user types */
 const TYPING_PING_MS = 2000;
@@ -88,7 +89,7 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.screen}>
-      <ScreenHeader onBack={() => router.back()} height={64}>
+      <ScreenHeader onBack={() => goBack()} height={64}>
         <Avatar index={person.avatar} nick={person.nick} url={person.avatarUrl} look={person.avatarStyle} size={40} />
         <View style={styles.who}>
           <Text style={styles.nick}>{person.nick}</Text>
@@ -133,15 +134,17 @@ export default function ChatScreen() {
             onBlur={() => setFocused(false)}
             style={[styles.input, focused && { borderColor: colors.brand }]}
           />
-          <Pressable
+          <GamePressable
+            kind="round"
             onPress={send}
             disabled={sending}
             accessibilityRole="button"
             accessibilityLabel="Send"
-            style={[styles.send, sending && { opacity: 0.6 }]}
+            style={sending && styles.sending}
+            faceStyle={styles.send}
           >
             <Icon name="arrowRight" color={colors.surface} />
-          </Pressable>
+          </GamePressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -228,4 +231,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  sending: { opacity: 0.6 },
 });

@@ -2,9 +2,11 @@ import { router } from "expo-router";
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRefreshOnFocus } from "@/api/hooks";
+import EmptyState from "@/components/feedback/EmptyState";
 import { Avatar, ScreenHeader } from "@/components/ui";
 import { useAppStore } from "@/store";
 import { colors, font } from "@/theme";
+import { goBack } from "@/lib/goBack";
 
 export default function ChatsScreen() {
   const { state, actions } = useAppStore();
@@ -12,14 +14,14 @@ export default function ChatsScreen() {
 
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
-      <ScreenHeader title="Messages" onBack={() => router.back()} />
+      <ScreenHeader title="Messages" onBack={() => goBack()} />
       <FlatList
         data={state.chats}
         keyExtractor={(c) => c.id}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} />}
         ListEmptyComponent={
-          <Text style={styles.empty}>No chats yet. Tap a listing on the map and send a message.</Text>
+          <EmptyState sticker="koala" title="No chats yet, mate!" text="Tap a listing on the map and send a message." />
         }
         renderItem={({ item: { id, person, preview, unread } }) => (
           <Pressable
@@ -34,7 +36,8 @@ export default function ChatsScreen() {
               </View>
               <Text
                 numberOfLines={1}
-                style={[font(unread ? 800 : 500, 13.5), { color: unread ? colors.ink : colors.muted }]}
+                // Unread is the design's DM Sans 800; 700 is the heaviest DM Sans we load (800 would be Bricolage)
+                style={[font(unread ? 700 : 500, 13.5), { color: unread ? colors.ink : colors.muted }]}
               >
                 {preview}
               </Text>
@@ -54,5 +57,4 @@ const styles = StyleSheet.create({
   topLine: { flexDirection: "row", justifyContent: "space-between" },
   nick: { color: colors.ink, ...font(800, 15) },
   uni: { color: colors.faint, ...font(600, 11.5) },
-  empty: { paddingHorizontal: 20, paddingVertical: 40, textAlign: "center", color: colors.muted, ...font(600, 14, 1.5) },
 });
