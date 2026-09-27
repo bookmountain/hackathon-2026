@@ -1,6 +1,139 @@
-# hackathon-2026 — UniMap
+# UCompass
 
-Uni buddy-finder for University of Adelaide and Flinders students.
+UCompass is a student-only campus companion for finding a room, buying and selling useful items,
+joining low-pressure meetups, and meeting another student through a daily card. The experience is
+built around maps of Adelaide, so every feature begins with what is nearby.
+
+The hackathon demo supports verified University of Adelaide and Flinders University students. It
+combines a React Native mobile app, a .NET API, geospatial search, real-time messaging, object storage,
+and local vision AI running on a private Tailscale network.
+
+## What UCompass does
+
+- **Flats:** browse student rooms on a map, filter by rent and facilities, inspect house details, and
+  message the tenant.
+- **Market:** sell or find second-hand textbooks, furniture, technology and study gear, with campus
+  pickup points and photo search.
+- **Meetups:** discover and host walk-in study, food, social and casual events without exposing the
+  host or attendee list.
+- **Chat:** message tenants, sellers, daily-card matches and other students, with live messages, typing
+  indicators and read state.
+- **Dcard:** draw one mutual student match each day and start a conversation from the card.
+- **AI-assisted posting:** turn an item or room photo into a structured draft instead of filling every
+  form field manually.
+- **Student trust:** university-domain verification, explicit consent, approximate private pins and
+  anonymous meetup identities.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Mobile["Expo + React Native app"]
+    API["ASP.NET Core API<br/>Docker on VPS"]
+    Postgres["PostgreSQL + PostGIS"]
+    Redis["Redis"]
+    R2["Cloudflare R2"]
+    Tailnet["Private Tailscale network"]
+    Ollama["Ollama + Qwen3-VL<br/>local RTX GPU"]
+    Claude["Anthropic Claude<br/>optional alternative"]
+    Actions["GitHub Actions"]
+
+    Mobile -->|"HTTPS + JWT via Cloudflare"| API
+    Mobile <-->|"SignalR WebSocket"| API
+    API --> Postgres
+    API --> Redis
+    API -->|"presigned uploads and reads"| R2
+    API --> Tailnet --> Ollama
+    API -. when local AI is not configured .-> Claude
+    Actions -->|"build and Docker Compose deploy"| API
+```
+
+The production API runs on a VPS behind Cloudflare. PostgreSQL and Redis use persistent Docker
+volumes. Listing and avatar images go directly between the mobile client and R2 through presigned
+URLs, keeping large uploads away from the API process.
+
+## Technology stack
+
+| Layer | Technology | Role |
+|---|---|---|
+| Mobile | Expo 57, React Native 0.86, React 19, TypeScript | Cross-platform application |
+| Navigation and UI | Expo Router, React Native Maps, Reanimated, Gesture Handler | Typed routes, maps, sheets and interactions |
+| Mobile security | Expo SecureStore | Stores the JWT session on device |
+| API | ASP.NET Core 10, C# | REST API, authentication, validation and business rules |
+| Data | PostgreSQL 17, PostGIS, EF Core 10 | Relational and geospatial data |
+| Realtime and cache | SignalR, Redis 7 | Chat, typing, read state, meetup updates and verification codes |
+| Object storage | Cloudflare R2 through its S3-compatible API | Avatars and listing photos |
+| Local AI | Ollama, `qwen3-vl:8b-instruct` | Vision analysis and structured listing suggestions |
+| Private AI networking | Tailscale | Connects the VPS API to the local inference machine without exposing Ollama publicly |
+| Optional hosted AI | Anthropic Claude | Alternative vision provider when local Ollama is not configured |
+| Local development | Docker Compose, Mailpit, Swagger/OpenAPI | Reproducible services, captured email and API exploration |
+| Delivery | GitHub Actions, self-hosted runner, Docker Compose | Builds, deploys and checks the production API |
+
+## Local AI over Tailscale
+
+UCompass uses a local-first vision pipeline. The current demo runs `qwen3-vl:8b-instruct` with Ollama
+on an RTX-equipped development machine. The production API reaches that machine through its private
+Tailscale address, so port `11434` does not need to be exposed to the public internet.
+
+The AI features are:
+
+| Feature | Model output | How UCompass uses it |
+|---|---|---|
+| Sell from a photo | Title, category, condition, colours, texture, suggested price, description and benefits | Pre-fills an editable marketplace draft |
+| List a room from a photo | Title, style, colours, furnishing, visible features, description and benefits | Pre-fills an editable flat listing draft |
+| Search the market by photo | Category, a short label and keywords | Filters unsold items and ranks matching listing text |
+
+The mobile app resizes the photo to a 640 px JPEG and sends it as base64 to the API. The API calls
+Ollama's `/api/chat` endpoint with a JSON schema, disables thinking output, validates the response and
+returns typed fields to the app. The analysis image is not stored. A user still reviews every suggested
+field before publishing.
+
+Set these values in `.env` to use the local model:
+
+```dotenv
+OLLAMA_BASE_URL=http://<tailscale-ip>:11434
+OLLAMA_MODEL=qwen3-vl:8b-instruct
+```
+
+Both the VPS and inference machine must be connected to the same Tailscale network, and Ollama must
+listen on an interface reachable through that network. If `OLLAMA_BASE_URL` is empty, the API uses
+Claude when `ANTHROPIC_API_KEY` is configured. This selection happens from configuration; an unreachable
+local model returns an unavailable response instead of silently sending the photo to Claude.
+
+## Repository layout
+
+```text
+backend/src/UniMap.Api/
+  Controllers/   HTTP endpoints for auth, profiles, flats, market, meetups, chat, Dcard and AI
+  Contracts/     Request and response models
+  Data/          EF Core context, migrations and demo seed data
+  Domain/        Entities and shared catalogs
+  Hubs/          SignalR realtime hub
+  Services/      JWT, Redis, R2, email, chat mapping and vision AI
+
+mobile/
+  src/app/       Expo Router routes
+  src/features/  Product screens and feature logic
+  src/api/       API client, uploads and realtime connection
+  src/store/     Application state
+  src/theme/     Colours, type and shared styles
+
+.github/workflows/   CI/CD workflows
+docker-compose.yml   Local backend stack
+docker-compose.prod.yml  VPS stack
+```
+
+## Mobile quick start
+
+```bash
+cd mobile
+npm install --legacy-peer-deps
+npx expo start
+```
+
+Scan the QR code with Expo Go. To use a locally running API from a physical phone, start Expo with
+`EXPO_PUBLIC_API_URL=http://<your-computer-lan-ip>:8080`; the phone cannot reach the computer through
+`localhost`.
 
 ## Hosted API (for the mobile app)
 
@@ -194,15 +327,16 @@ Draw one card a day to meet a random fellow student. All of these need a login t
   account can draw straight away.
 - "Send a message to {nick}" is `POST /api/chats { drawId, text }` (see Chats).
 
-### Photo analysis (Claude)
+### AI photo analysis and visual search
 
 The server asks a vision model what a photo shows: a local model on Ollama when `OLLAMA_BASE_URL` is set
-(`qwen3-vl:8b-instruct` by default, `OLLAMA_MODEL`), otherwise Claude (`claude-opus-5`, `Anthropic:Model`)
-when `ANTHROPIC_API_KEY` is. Send the photo in
-the JSON body as `image`: base64 JPEG, PNG, GIF or WebP, up to 3.75 MB (the app sends a JPEG with its longest
-side at 640 px). It's only sent to Claude, never stored, so still upload listing photos to R2 as usual.
-With neither, these return 503 with `code: "ai_not_configured"`; if the model is busy, down or unreachable,
-503 or 502; for a photo Claude won't describe, 422.
+(`qwen3-vl:8b-instruct` by default, configurable with `OLLAMA_MODEL`), otherwise Claude
+(`claude-opus-5`, `Anthropic:Model`) when `ANTHROPIC_API_KEY` is set. Send the photo in the JSON body as
+`image`: a base64 JPEG, PNG, GIF or WebP up to 3.75 MB. The app sends a JPEG with its longest side at
+640 px. The analysis photo is sent only to the configured model and is not stored; listing photos are
+uploaded separately to R2. With neither provider configured, these endpoints return 503 with
+`code: "ai_not_configured"`. A busy, down or unreachable provider returns 503 or 502, and a photo the
+provider refuses to describe returns 422.
 
 - `POST /api/ai/photo-analysis { kind, image }`:
   - `kind: "Item"` pre-fills Sell with `title`, `category`, `condition`, `colour`, `texture`,
@@ -271,25 +405,11 @@ ID and bucket are already filled in. The client calls `POST /api/uploads/avatar`
 URL, sends the image to that URL with `PUT`, then saves the returned `key` as `avatarKey` on the
 profile. If the bucket isn't public, avatar URLs are presigned GET links that last 24 hours.
 
-### Photo analysis model
+### AI model configuration
 
-Either a local vision model or Claude. Without either, the photo analysis endpoints return 503 and
-everything else works.
+The AI endpoints are optional; the rest of UCompass works without a model.
 
-- **Local (Ollama):** set `OLLAMA_BASE_URL`, e.g. `http://100.113.35.121:11434` (Book's Legion laptop over
-  Tailscale: Ollama runs in Docker in WSL with the RTX 5070). Use an instruct (non-thinking) vision model
-  that fits the GPU: `qwen3-vl:8b-instruct` takes 5.5 GB and answers in 1–5 seconds. That machine has to be
-  on and reachable from the API.
-- **Claude:** set `ANTHROPIC_API_KEY` (from platform.claude.com; a Claude subscription doesn't include API
-  access). Used only when `OLLAMA_BASE_URL` is empty.
-
-### Layout
-
-```
-backend/src/UniMap.Api/
-  Controllers/   Auth, Me (profile), Degrees (dropdowns), Flats (listings), Items (market),
-                 Events (meetups), Chats, DailyCard (Dcard), PhotoAi, Consents, Uploads, Meta
-  Domain/        Entities + tag catalog
-  Data/          DbContext + migrations
-  Services/      JWT, Redis verification codes, R2 storage, email (SMTP, or Mailpit in dev), Claude
-```
+- **Local Ollama:** set `OLLAMA_BASE_URL` to the inference machine's Tailscale URL and optionally set
+  `OLLAMA_MODEL`. The configured machine must be awake, running Ollama and reachable from the API.
+- **Claude:** set `ANTHROPIC_API_KEY`. Claude is selected only when `OLLAMA_BASE_URL` is empty; it is not
+  an automatic runtime failover for an unavailable local model.
